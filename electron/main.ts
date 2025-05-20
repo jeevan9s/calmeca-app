@@ -11,23 +11,20 @@ const RENDERER_DIST = path.join(APP_ROOT, 'dist')
 let win: BrowserWindow | null = null
 
 function createWindow() {
-  win = new BrowserWindow({
-    width: 900,
-    height: 670,
-    center: true,
-    frame: false,
-    vibrancy: 'under-window',
-    visualEffectState: 'active',
-    titleBarStyle: 'hidden',
-    trafficLightPosition: { x: 15, y: 10 },
-
-    icon: path.join(APP_ROOT, 'public', 'electron-vite.svg'), // adjust if needed
-    webPreferences: {
-      preload: path.join(__dirname, 'preload.mjs'),
-      contextIsolation: true,  // recommended security
-      nodeIntegration: false,  // recommended security
-    },
-  })
+win = new BrowserWindow({
+  width: 800,
+  height: 600,
+  center: true,
+  frame: false,
+  resizable: true,
+  autoHideMenuBar: true,
+  icon: path.join(APP_ROOT, 'public', 'electron-vite.svg'),
+  webPreferences: {
+    preload: path.join(__dirname, 'preload.mjs'),
+    contextIsolation: true,
+    nodeIntegration: false,
+  },
+});
 
   win.webContents.on('did-finish-load', () => {
     win?.webContents.send('main-process-message', new Date().toLocaleString())

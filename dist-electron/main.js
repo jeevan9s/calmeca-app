@@ -7,22 +7,17 @@ const RENDERER_DIST = path.join(APP_ROOT, "dist");
 let win = null;
 function createWindow() {
   win = new BrowserWindow({
-    width: 900,
-    height: 670,
+    width: 800,
+    height: 600,
     center: true,
     frame: false,
-    vibrancy: "under-window",
-    visualEffectState: "active",
-    titleBarStyle: "hidden",
-    trafficLightPosition: { x: 15, y: 10 },
+    resizable: true,
+    autoHideMenuBar: true,
     icon: path.join(APP_ROOT, "public", "electron-vite.svg"),
-    // adjust if needed
     webPreferences: {
       preload: path.join(__dirname, "preload.mjs"),
       contextIsolation: true,
-      // recommended security
       nodeIntegration: false
-      // recommended security
     }
   });
   win.webContents.on("did-finish-load", () => {
