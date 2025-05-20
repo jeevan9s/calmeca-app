@@ -1,10 +1,9 @@
 import './styles/App.css'
-import Hero from './pages/hero/hero'
-
+import Landing from './pages/landing/page'
 export default function App() {
   return (
     <div>
-      <Hero />
+      <Landing />
 
     </div>
   )
