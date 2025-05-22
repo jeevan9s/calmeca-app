@@ -1,6 +1,6 @@
-import { Minus, X, Square} from 'react-feather'
-import { PiCopy } from "react-icons/pi";
-import '@/renderer/rsrc/styles/abs.css'
+import { Minus, X, Square, Menu } from 'react-feather'
+import { PiCopy } from 'react-icons/pi'
+import '@/renderer/rsrc/styles/tb.css'
 import { useState, useEffect } from 'react'
 
 export default function TitleBar() {
@@ -20,26 +20,31 @@ export default function TitleBar() {
   }, [])
 
   return (
-    <div id="titlebar" className="drag flex justify-end gap-5">
-      <div className="flex gap-10 no-drag mr-8 mt-2 mb-1">
+    <div id="titlebar" className="drag relative w-full h-10 flex items-center">
+      <div id="left-bar" className="absolute left-0 flex gap-10 no-drag mt-2 mb-1 ml-2">
+        <button id="sidebar">
+          <Menu color="white" size={16} strokeWidth={2} className='ml-10' />
+        </button>
+      </div>
+
+      <div id="right-bar" className="absolute right-0 flex gap-10 no-drag mr-8 mt-2 mb-1">
         <button id="minimize" onClick={() => window.ipcRenderer.send('minimize')}>
-          <Minus color="white" size={15} strokeWidth={2} />
+          <Minus color="white" size={16} strokeWidth={2} />
         </button>
 
         <button
-  id="maximize"
-  onClick={() => window.ipcRenderer.send(isMaximized ? 'restore' : 'maximize')} 
->
-  {isMaximized ? (
-    <PiCopy color="white" size={15} strokeWidth={0} />
-  ) : (
-    <Square color="white" size={12} strokeWidth={2} />
-  )}
-</button>
-
+          id="maximize"
+          onClick={() => window.ipcRenderer.send(isMaximized ? 'restore' : 'maximize')}
+        >
+          {isMaximized ? (
+            <PiCopy color="white" size={16} strokeWidth={0} />
+          ) : (
+            <Square color="white" size={13} strokeWidth={2} />
+          )}
+        </button>
 
         <button id="close" onClick={() => window.ipcRenderer.send('close')}>
-          <X color="white" size={15} strokeWidth={2} />
+          <X color="white" size={16} strokeWidth={2} />
         </button>
       </div>
     </div>

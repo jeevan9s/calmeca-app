@@ -3,9 +3,8 @@
   background: rgba(255, 255, 255, 0.025);
   position: fixed;
   top: 0;
-  left: 0;
   width: 100vw;       
-  height: 35px;         
+  height: 40px;         
   z-index: 1000;
 }
 
@@ -16,7 +15,8 @@
 
 #titlebar button#minimize,
 #titlebar button#close,
-#titlebar button#maximize {
+#titlebar button#maximize,
+#titlebar button#sidebar {
   padding: 0 !important;
   margin: 0 !important;
   border: none !important;
