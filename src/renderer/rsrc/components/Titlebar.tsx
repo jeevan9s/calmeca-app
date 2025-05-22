@@ -48,7 +48,7 @@ export default function TitleBar() {
 >
   <button id="sidebar">
     {sidebarHovered ? (
-      <ChevronsRight className='sidebar-tog' color="white" size={18} strokeWidth={2} />
+      <ChevronsRight color="white" size={20} strokeWidth={2} />
     ) : (
       <Menu id="menu" color="white" size={16} strokeWidth={2} />
     )}
