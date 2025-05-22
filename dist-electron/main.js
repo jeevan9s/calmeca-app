@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from "electron";
+import { app, BrowserWindow, ipcMain } from "electron";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -19,6 +19,12 @@ function createWindow() {
       contextIsolation: true,
       nodeIntegration: false
     }
+  });
+  win.on("maximize", () => {
+    win == null ? void 0 : win.webContents.send("maximized");
+  });
+  win.on("unmaximize", () => {
+    win == null ? void 0 : win.webContents.send("not-maximized");
   });
   win.webContents.on("did-finish-load", () => {
     win == null ? void 0 : win.webContents.send("main-process-message", (/* @__PURE__ */ new Date()).toLocaleString());
@@ -41,3 +47,15 @@ app.on("activate", () => {
   }
 });
 app.whenReady().then(createWindow);
+ipcMain.on("minimize", () => {
+  win == null ? void 0 : win.minimize();
+});
+ipcMain.on("maximize", () => {
+  win == null ? void 0 : win.maximize();
+});
+ipcMain.on("restore", () => {
+  win == null ? void 0 : win.restore();
+});
+ipcMain.on("close", () => {
+  win == null ? void 0 : win.close();
+});

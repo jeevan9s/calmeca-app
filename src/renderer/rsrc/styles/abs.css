@@ -1,0 +1,33 @@
+.drag {
+  -webkit-app-region: drag;
+  background: rgba(255, 255, 255, 0.025);
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;       
+  height: 35px;         
+  z-index: 1000;
+}
+
+
+.no-drag {
+    -webkit-app-region: no-drag
+}
+
+#titlebar button#minimize,
+#titlebar button#close,
+#titlebar button#maximize {
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+  outline: none !important;
+  background: transparent !important;
+  appearance: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  cursor: default;
+}
+
+#maximize {
+  border-radius: 2px !important;
+}
