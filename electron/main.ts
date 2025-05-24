@@ -19,7 +19,7 @@ function createWindow() {
     frame: false,
     resizable: true,
     autoHideMenuBar: true,
-    icon: path.join(APP_ROOT, 'public', 'electron-vite.svg'),
+    icon: path.join(APP_ROOT, 'public', 'taskbar.png'),
     webPreferences: {
       preload: path.join(__dirname, 'preload.mjs'),
       contextIsolation: true,

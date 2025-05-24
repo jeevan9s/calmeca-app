@@ -46,13 +46,28 @@ export default function TitleBar() {
   onMouseEnter={handleSidebarHover}
   onMouseLeave={handleSidebarLeave}
 >
-  <button id="sidebar">
-    {sidebarHovered ? (
-      <ChevronsRight color="white" size={20} strokeWidth={2} />
-    ) : (
-      <Menu id="menu" color="white" size={16} strokeWidth={2} />
-    )}
-  </button>
+{/*  */}
+  <img
+  src="/logo-c.svg"
+  alt="Logo"
+  className="h-8 w-8 w-auto ml-2"
+/>
+
+<button id="sidebar" className="relative w-6 h-6">
+  <Menu
+    className={`sidebar-icon ${sidebarHovered ? 'icon-hidden' : 'icon-visible'}`}
+    color="white"
+    size={14}
+    strokeWidth={2}
+  />
+  <ChevronsRight
+    className={`sidebar-icon ${sidebarHovered ? 'icon-visible' : 'icon-hidden'}`}
+    color="white"
+    size={20}
+    strokeWidth={2}
+  />
+</button>
+
 </div>
 
       <div id="right-bar" className="absolute right-0 flex no-drag">
