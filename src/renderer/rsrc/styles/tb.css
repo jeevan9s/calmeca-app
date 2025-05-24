@@ -27,7 +27,7 @@
 #titlebar button#maximize,
 #titlebar button#close {
   width: 50px;
-  height: 35px;
+  height: 36px;
   cursor: default;
   border-radius: 0;
   transition: background-color 0.2s ease;
@@ -44,6 +44,13 @@
   transition: background-color 0.2s ease;
 }
 
+#titlebar button#calendar {
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+}
+
 #titlebar button#logo {
   width: 25px;
   height: 25px;
@@ -51,10 +58,17 @@
   transition: background-color 0.2s ease;
 }
 
+#cd-icon {
+  width: 18px;
+  height: 18px;
+}
+
+
 #titlebar button#minimize:hover,
 #titlebar button#maximize:hover,
 #titlebar button#sidebar:hover,
-#titlebar button#logo:hover{
+#titlebar button#logo:hover,
+#titlebar button#calendar:hover{
   background-color: rgba(255, 255, 255, 0.1);
 }
 
@@ -63,6 +77,14 @@
 }
 
 .sidebar-icon {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  width: 100%;
+  height: 100%;
+}
+.calendar-icon {
   position: absolute;
   top: 0;
   left: 0;
