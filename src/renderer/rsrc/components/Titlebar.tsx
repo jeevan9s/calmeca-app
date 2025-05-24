@@ -39,19 +39,24 @@ export default function TitleBar() {
 
 
   return (
-    <div id="titlebar" className="drag relative w-full h-10 flex items-center">
+    <div id="titlebar" className="drag relative w-full h-9 flex items-center">
 <div
   id="left-bar"
   className="absolute left-0 flex no-drag mt-2 mb-1 ml-5"
   onMouseEnter={handleSidebarHover}
   onMouseLeave={handleSidebarLeave}
 >
+  <div id = "subleft-bar" className='flex items-center gap-5'>
 {/*  */}
-  <img
-  src="/logo-c.svg"
+
+<button id = "logo">
+   <img
+  src="/taskbar.png"
   alt="Logo"
-  className="h-8 w-8 w-auto ml-2"
+  className="h-4 w-4 p-0"
 />
+</button>
+
 
 <button id="sidebar" className="relative w-6 h-6">
   <Menu
@@ -67,6 +72,7 @@ export default function TitleBar() {
     strokeWidth={2}
   />
 </button>
+</div>
 
 </div>
 

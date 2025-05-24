@@ -27,13 +27,13 @@
 #titlebar button#maximize,
 #titlebar button#close {
   width: 50px;
-  height: 40px;
+  height: 35px;
   cursor: default;
   border-radius: 0;
   transition: background-color 0.2s ease;
 }
 
-#titlebar button#sidebar {
+#titlebar button#sidebar, button#logo {
   cursor: pointer;
 }
 
@@ -44,9 +44,17 @@
   transition: background-color 0.2s ease;
 }
 
+#titlebar button#logo {
+  width: 25px;
+  height: 25px;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+}
+
 #titlebar button#minimize:hover,
 #titlebar button#maximize:hover,
-#titlebar button#sidebar:hover {
+#titlebar button#sidebar:hover,
+#titlebar button#logo:hover{
   background-color: rgba(255, 255, 255, 0.1);
 }
 
