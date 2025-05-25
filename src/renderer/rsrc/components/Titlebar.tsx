@@ -1,5 +1,5 @@
 import { PiCopy } from 'react-icons/pi'
-import { ChevronsRight, ChevronsUp, Minus, X, Square, Menu, Calendar } from 'react-feather'
+import { ChevronsRight, ChevronsUp, Minus, X, Square, Menu, Calendar, Bell, Hexagon} from 'react-feather'
 import '@/renderer/rsrc/styles/tb.css'
 import { useState, useEffect } from 'react'
 
@@ -43,67 +43,127 @@ export default function TitleBar() {
     setCalendarVisible(false)
   }
 
-  return (
-    <div id="titlebar" className="drag relative w-full h-9 flex items-center">
-      <div id="left-bar" className="absolute left-0 flex no-drag mt-2 mb-1 ml-5">
-        <div
-          id="subleft-bar"
-          className="flex items-center gap-5"
-          onMouseEnter={handleSidebarHover}
-          onMouseLeave={handleSidebarLeave}
+return (
+  <div
+    id="titlebar"
+    className="drag relative w-full h-10 flex items-center justify-between px-4 sm:px-6 bg-background"
+  >
+    
+    <div
+      id="left-bar"
+      className="flex items-center gap-3 sm:gap-5 no-drag"
+    >
+      
+      <div
+        id="subleft-bar"
+        className="flex items-center gap-3 sm:gap-4"
+        onMouseEnter={handleSidebarHover}
+        onMouseLeave={handleSidebarLeave}
+      >
+        <button id="logo">
+          <img
+            src="/taskbar.png"
+            alt="Logo"
+            className="h-5 w-5 transition-transform duration-200 hover:scale-110"
+          />
+        </button>
+
+        <button
+          id="sidebar"
+          className="relative w-6 h-6 flex items-center justify-center transition-transform duration-200 hover:scale-105"
         >
-          <button id="logo">
-            <img src="/taskbar.png" alt="Logo" className="h-4 w-4 p-0" />
-          </button>
-
-          <button id="sidebar" className="relative w-6 h-6">
-            <Menu
-              className={`sidebar-icon ${sidebarHovered ? 'icon-hidden' : 'icon-visible'}`}
-              color="white"
-              size={14}
-              strokeWidth={2}
-            />
-            <ChevronsRight
-              className={`sidebar-icon ${sidebarHovered ? 'icon-visible' : 'icon-hidden'}`}
-              color="white"
-              size={20}
-              strokeWidth={2}
-            />
-          </button>
-          </div>
-
-          <div
-            id="calendar-cntr"
-            className="flex items-center gap-5 ml-40"
-            onMouseEnter={handleCalendarHover}
-            onMouseLeave={handleCalendarLeave}
-          >
-            <button id="calendar" className="relative w-6 h-6">
-              <Calendar
-                id = "cd-icon"
-                className={`calendar-icon ${calendarHovered ? 'icon-hidden' : 'icon-visible'}`}
-                color="white"
-                size={20}
-                strokeWidth={2}
-              />
-              <ChevronsUp
-                id = "arrow-up"
-                className={`calendar-icon ${calendarHovered ? 'icon-visible' : 'icon-hidden'}`}
-                color="white"
-                size={20}
-                strokeWidth={2}
-              />
-            </button>
-          </div>
+          <Menu
+            className={`sidebar-icon ${sidebarHovered ? 'icon-hidden' : 'icon-visible'}`}
+            color="white"
+            size={20}
+            strokeWidth={2}
+          />
+          <ChevronsRight
+            className={`sidebar-icon absolute transition-transform duration-200 hover:scale-110 ${sidebarHovered ? 'icon-visible' : 'icon-hidden'}`}
+            color="white"
+            size={20}
+            strokeWidth={2}
+          />
+        </button>
       </div>
 
-      <div id="right-bar" className="absolute right-0 flex no-drag">
-        <button id="minimize" onClick={() => window.ipcRenderer.send('minimize')}>
+     
+      <div id="timestamp-cntr" className="hidden sm:flex items-center">
+        <p className="text-neutral-500 text-xs sm:text-sm leading-none">Edited X ago</p>
+      </div>
+
+      <div
+        id="calendar-cntr"
+        className="flex items-center"
+        onMouseEnter={handleCalendarHover}
+        onMouseLeave={handleCalendarLeave}
+      >
+        <button
+          id="calendar"
+          className="relative w-6 h-6 flex items-center justify-center"
+        >
+          <Calendar
+            className={`calendar-icon ${calendarHovered ? 'icon-hidden' : 'icon-visible'}`}
+            color="white"
+            size={20}
+            strokeWidth={2}
+          />
+          <ChevronsUp
+            className={`calendar-icon absolute transition-transform duration-200 hover:scale-110 ${calendarHovered ? 'icon-visible' : 'icon-hidden'}`}
+            color="white"
+            size={20}
+            strokeWidth={2}
+          />
+        </button>
+      </div>
+
+      
+      <div id="alert-cntr">
+        <button
+          id="alert"
+          className="w-6 h-6 flex items-center justify-center transition-transform duration-200 hover:scale-105"
+        >
+          <Bell
+            color="white"
+            size={18}
+            strokeWidth={2}
+          />
+        </button>
+      </div>
+    </div>
+
+    
+    <div
+      id="right-bar"
+      className="flex items-center no-drag"
+    >
+      <button
+        id="nav-tog"
+        className="w-6 h-6 flex items-center justify-center transition-transform duration-200 hover:scale-105"
+      >
+        <Hexagon
+          color="white"
+          size={18}
+          strokeWidth={2}
+        />
+      </button>
+
+     
+      <div className="flex items-center pl-3 border-l border-neutral-700 ml-2">
+        <button
+          id="minimize"
+          onClick={() => window.ipcRenderer.send('minimize')}
+          className="w-6 h-6 flex items-center justify-center hover:bg-neutral-800 rounded transition"
+        >
           <Minus color="white" size={16} strokeWidth={2} />
         </button>
+
         <button
           id="maximize"
-          onClick={() => window.ipcRenderer.send(isMaximized ? 'restore' : 'maximize')}
+          onClick={() =>
+            window.ipcRenderer.send(isMaximized ? 'restore' : 'maximize')
+          }
+          className="w-6 h-6 flex items-center justify-center hover:bg-neutral-800 rounded transition"
         >
           {isMaximized ? (
             <PiCopy color="white" size={16} strokeWidth={0} />
@@ -111,10 +171,16 @@ export default function TitleBar() {
             <Square color="white" size={13} strokeWidth={2} />
           )}
         </button>
-        <button id="close" onClick={() => window.ipcRenderer.send('close')}>
+
+        <button
+          id="close"
+          onClick={() => window.ipcRenderer.send('close')}
+          className="w-6 h-6 flex items-center justify-center"
+        >
           <X color="white" size={16} strokeWidth={2} />
         </button>
       </div>
     </div>
-  )
+  </div>
+)
 }
