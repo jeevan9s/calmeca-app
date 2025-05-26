@@ -1,5 +1,5 @@
 import { PiCopy } from 'react-icons/pi'
-import { ChevronsRight, ChevronsUp, Minus, X, Square, Menu, Calendar, Bell, Hexagon} from 'react-feather'
+import { ChevronsRight, ChevronsDown, Minus, X, Square, Menu, Calendar, Bell, Hexagon} from 'react-feather'
 import '@/renderer/rsrc/styles/tb.css'
 import { useState, useEffect } from 'react'
 
@@ -112,7 +112,7 @@ return (
     size={17}
     strokeWidth={1}
   />
-  <ChevronsUp
+  <ChevronsDown
     className={`calendar-icon absolute transition-transform duration-300 ease-out hover:scale-105 ${calendarHovered ? 'icon-visible' : 'icon-hidden'}`}
     color="white"
     size={18}
