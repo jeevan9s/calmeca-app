@@ -56,7 +56,7 @@ export default function TitleBar() {
   return (
     <div
       id="titlebar"
-      className="drag relative w-full h-8 flex items-center justify-between bg-background"
+      className="drag relative w-full h-8 flex items-center justify-between"
     >
       <div id="left-bar" className="flex items-center ml-3 no-drag">
         <div id="subleft-bar" className="flex items-center gap-3 sm:gap-4">

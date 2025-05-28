@@ -1,7 +1,7 @@
 #landing-page {
     overflow-x: hidden;
     overflow-y: hidden;
-    background-color: black;
+    background:transparent !important;
     
 }
 
@@ -12,4 +12,7 @@ html, body {
   overflow-y: hidden;
   width: 100vw;
   height: 100vh;
+  background:transparent;
 }
+
+
