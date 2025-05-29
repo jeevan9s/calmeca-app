@@ -80,5 +80,4 @@ ipcMain.on('restore', () => {
     win?.restore(); 
   }
 });
-
 ipcMain.on('close', () => win?.close());
