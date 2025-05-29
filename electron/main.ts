@@ -71,7 +71,6 @@ app.on('activate', () => {
 
 app.whenReady().then(createWindow);
 
-// IPC controls
 ipcMain.on('minimize', () => win?.minimize());
 ipcMain.on('maximize', () => win?.maximize());
 ipcMain.on('restore', () => {
