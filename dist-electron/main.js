@@ -61,5 +61,11 @@ app.on("activate", () => {
 app.whenReady().then(createWindow);
 ipcMain.on("minimize", () => win == null ? void 0 : win.minimize());
 ipcMain.on("maximize", () => win == null ? void 0 : win.maximize());
-ipcMain.on("restore", () => win == null ? void 0 : win.restore());
+ipcMain.on("restore", () => {
+  if (win == null ? void 0 : win.isMaximized()) {
+    win.unmaximize();
+  } else {
+    win == null ? void 0 : win.restore();
+  }
+});
 ipcMain.on("close", () => win == null ? void 0 : win.close());

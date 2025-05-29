@@ -74,5 +74,12 @@ app.whenReady().then(createWindow);
 // IPC controls
 ipcMain.on('minimize', () => win?.minimize());
 ipcMain.on('maximize', () => win?.maximize());
-ipcMain.on('restore', () => win?.restore());
+ipcMain.on('restore', () => {
+  if (win?.isMaximized()) {
+    win.unmaximize();
+  } else {
+    win?.restore(); 
+  }
+});
+
 ipcMain.on('close', () => win?.close());
