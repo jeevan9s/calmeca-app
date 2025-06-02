@@ -8,7 +8,7 @@ export default function Landing() {
       <div className="flex items-center justify-center">
         <div id="central-text-cntr" className="flex flex-col items-center gap-y-2">
           <div id="title-cntr">
-            <h1 id="title">Calmeca</h1>
+            <h1 id="title"  className='text-lg'>Calmeca</h1>
           </div>
           <div id="subtitle-cntr">
             <h2 id="subtitle">Click anywhere to launch.</h2>

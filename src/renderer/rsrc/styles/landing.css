@@ -14,3 +14,19 @@ html, body {
   height: 100vh;
   background:transparent;
 }
+
+* {
+  user-select: none;
+}
+
+#title {
+  font-family: "Raleway";
+  font-size: 4rem;
+  color: white;
+}
+
+#subtitle {
+  font-family: "Montserrat";
+  color: rgb(201, 201, 201);
+  font-weight: lighter;
+}
