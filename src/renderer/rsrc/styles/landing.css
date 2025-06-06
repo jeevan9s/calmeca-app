@@ -13,8 +13,10 @@ html, body {
   width: 100vw;
   height: 100vh;
   background:transparent;
+  user-select: none;
 }
 
+<<<<<<< Updated upstream
 * {
   user-select: none;
 }
@@ -29,4 +31,10 @@ html, body {
   font-family: "Montserrat";
   color: rgb(201, 201, 201);
   font-weight: lighter;
+=======
+
+
+*, *::before, *::after {
+  box-sizing: border-box;
+>>>>>>> Stashed changes
 }
