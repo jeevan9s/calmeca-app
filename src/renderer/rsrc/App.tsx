@@ -1,10 +1,12 @@
-import './styles/App.css'
-import Landing from './pages/landing/page'
+import { Routes, Route } from 'react-router-dom';
+import Landing from './pages/landing/page';
+import Dashboard from './pages/dashboard/page';
+
 export default function App() {
   return (
-    <div>
-      <Landing />
-    </div>
-  )
+    <Routes>
+      <Route path="/" element={<Landing />} />
+      <Route path="/dashboard" element={<Dashboard />} />
+    </Routes>
+  );
 }
-
