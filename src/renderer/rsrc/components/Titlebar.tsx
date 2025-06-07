@@ -89,7 +89,7 @@ export default function TitleBar() {
           </button>
 
           <div id="timestamp-cntr" className="hidden sm:flex items-center">
-            <p className="text-neutral-500 text-xs sm:text-sm leading-none">Edited X ago</p>
+            <p className="text-neutral-500 text-xs sm:text-sm leading-none font-raleway">Edited X ago</p>
           </div>
         </div>
 
