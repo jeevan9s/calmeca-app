@@ -37,7 +37,7 @@ export default function Landing() {
           transition={{ duration: 0.15 }}
         >
           <div ref={titlebarRef}>
-            <Titlebar />
+            <Titlebar  />
           </div>
 
           <div className="flex items-center justify-center">

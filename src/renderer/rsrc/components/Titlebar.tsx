@@ -12,6 +12,8 @@ import {
 } from 'react-feather'
 import '@/renderer/rsrc/styles/tb.css'
 import { useState, useEffect } from 'react'
+import { motion } from 'framer-motion'
+
 
 type TitleBarProps = {
   solidBackground?: boolean
@@ -58,11 +60,16 @@ export default function TitleBar({ solidBackground = false }: TitleBarProps) {
   }
 
   return (
-  <div
+<motion.div
   id="titlebar"
   className="drag relative w-full h-8 flex items-center justify-between"
-  style={ solidBackground ? { backgroundColor: '#191919' } : { backgroundColor: 'transparent' } }
+  initial={{ backgroundColor: 'rgba(25, 25, 25, 0)' }}
+  animate={{ backgroundColor: solidBackground ? 'rgba(25, 25, 25, 1)' : 'rgba(25, 25, 25, 0)' }}
+  transition={{ duration: 0.3, ease: 'easeIn' }}
 >
+
+
+
 
       <div id="left-bar" className="flex items-center ml-3 no-drag">
         <div id="subleft-bar" className="flex items-center gap-3 sm:gap-4">
@@ -184,6 +191,6 @@ export default function TitleBar({ solidBackground = false }: TitleBarProps) {
           </button>
         </div>
       </div>
-    </div>
+    </motion.div>
   )
 }
