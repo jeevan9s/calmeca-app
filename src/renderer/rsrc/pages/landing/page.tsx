@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom'; 
 import { motion, AnimatePresence } from 'framer-motion';
 import Titlebar from '../../components/Titlebar';
 
 export default function Landing() {
-  const navigate = useNavigate();
+  const navigate = useNavigate(); 
   const [isExiting, setIsExiting] = useState(false);
   const titlebarRef = useRef<HTMLDivElement>(null);
   const landingRef = useRef<HTMLDivElement>(null);
@@ -42,7 +42,7 @@ export default function Landing() {
 
           <div className="flex items-center justify-center">
             <div className="flex flex-col items-center gap-y-2">
-              <h1 className="text-lg font-montserrat">Calmeca</h1>
+              <h1 className="text-lg font-mp">Calmeca</h1>
               <h2 className="text-sm font-scp font-light text-neutral-400">
                 Click anywhere or press a key to launch.
               </h2>

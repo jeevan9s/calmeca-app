@@ -61,7 +61,7 @@ export default function TitleBar({ solidBackground = false }: TitleBarProps) {
   <div
   id="titlebar"
   className="drag relative w-full h-8 flex items-center justify-between"
-  style={ solidBackground ? { backgroundColor: '#181818' } : { backgroundColor: 'transparent' } }
+  style={ solidBackground ? { backgroundColor: '#191919' } : { backgroundColor: 'transparent' } }
 >
 
       <div id="left-bar" className="flex items-center ml-3 no-drag">
@@ -141,7 +141,7 @@ export default function TitleBar({ solidBackground = false }: TitleBarProps) {
 
           <div id="alert-cntr" className="flex items-center">
             <button id="alert" className="flex items-center justify-center">
-              <Bell id="bell" color="white" size={18} strokeWidth={1.75} />
+              <Bell id="bell" color="white" size={18} strokeWidth={1.25} />
             </button>
           </div>
         </div>
