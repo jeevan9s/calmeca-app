@@ -1,12 +1,12 @@
-import TitleBar from "../../components/Titlebar"
+import TitleBar from '../../components/Titlebar'
 
 export default function Dashboard() {
-    return(
-        <div id= "dashboard">
-            <div>
-                <TitleBar />
-            </div>
-            <h1>Hey</h1>
-        </div>
-    )
+  console.log('Dashboard Page Loaded')
+  return (
+    <div id="dashboard-page" className="min-h-screen">
+      <div id="titlebar-cntr">
+        <TitleBar solidBackground={true} />
+      </div>
+    </div>
+  )
 }

@@ -21,4 +21,8 @@ export default defineConfig({
       '@': path.resolve(__dirname, 'src'),
     },
   },
+  build: {
+    outDir: 'dist',       // ✅ where electron loads index.html from
+    emptyOutDir: true,    // ✅ cleans before each build
+  },
 })

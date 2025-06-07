@@ -1,6 +1,5 @@
 .drag {
   -webkit-app-region: drag;
-  background:transparent;
   position: fixed;
   top: 0;
   left: 0;

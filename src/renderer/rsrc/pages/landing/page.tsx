@@ -15,18 +15,15 @@ export default function Landing() {
 
   const handleStart = (e: React.MouseEvent | React.KeyboardEvent) => {
     if ('target' in e && titlebarRef.current?.contains(e.target as Node)) return;
-
     setIsExiting(true);
   };
 
-  const onAnimationComplete = () => {
-    if (isExiting) {
-      navigate('/dashboard');
-    }
-  };
-
   return (
-    <AnimatePresence>
+    <AnimatePresence
+      onExitComplete={() => {
+        if (isExiting) navigate('/dashboard');
+      }}
+    >
       {!isExiting && (
         <motion.div
           className="flex flex-col h-screen items-center justify-center cursor-pointer outline-none"
@@ -38,7 +35,6 @@ export default function Landing() {
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
           transition={{ duration: 0.15 }}
-          onAnimationComplete={onAnimationComplete}
         >
           <div ref={titlebarRef}>
             <Titlebar />

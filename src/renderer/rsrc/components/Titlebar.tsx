@@ -13,7 +13,11 @@ import {
 import '@/renderer/rsrc/styles/tb.css'
 import { useState, useEffect } from 'react'
 
-export default function TitleBar() {
+type TitleBarProps = {
+  solidBackground?: boolean
+}
+
+export default function TitleBar({ solidBackground = false }: TitleBarProps) {
   const [isMaximized, setisMaximized] = useState(false)
   const [sidebarHovered, setSidebarHovered] = useState(false)
   const [sidebarVisible, setSidebarVisible] = useState(false)
@@ -54,13 +58,19 @@ export default function TitleBar() {
   }
 
   return (
-    <div
-      id="titlebar"
-      className="drag relative w-full h-8 flex items-center justify-between"
-    >
+  <div
+  id="titlebar"
+  className="drag relative w-full h-8 flex items-center justify-between"
+  style={ solidBackground ? { backgroundColor: '#181818' } : { backgroundColor: 'transparent' } }
+>
+
       <div id="left-bar" className="flex items-center ml-3 no-drag">
         <div id="subleft-bar" className="flex items-center gap-3 sm:gap-4">
-          <button id="logo" onMouseEnter={handleSidebarHover} onMouseLeave={handleSidebarLeave}>
+          <button
+            id="logo"
+            onMouseEnter={handleSidebarHover}
+            onMouseLeave={handleSidebarLeave}
+          >
             <img
               src="/taskbar.png"
               alt="Logo"
@@ -75,13 +85,17 @@ export default function TitleBar() {
             onMouseLeave={handleSidebarLeave}
           >
             <Menu
-              className={`sidebar-icon ${sidebarHovered ? 'icon-hidden' : 'icon-visible'}`}
+              className={`sidebar-icon ${
+                sidebarHovered ? 'icon-hidden' : 'icon-visible'
+              }`}
               color="white"
               size={18}
               strokeWidth={1}
             />
             <ChevronsRight
-              className={`sidebar-icon absolute transition-transform duration-200 hover:scale-110 ${sidebarHovered ? 'icon-visible' : 'icon-hidden'}`}
+              className={`sidebar-icon absolute transition-transform duration-200 hover:scale-110 ${
+                sidebarHovered ? 'icon-visible' : 'icon-hidden'
+              }`}
               color="white"
               size={18}
               strokeWidth={2}
@@ -89,7 +103,9 @@ export default function TitleBar() {
           </button>
 
           <div id="timestamp-cntr" className="hidden sm:flex items-center">
-            <p className="text-neutral-500 text-xs sm:text-sm leading-none font-raleway">Edited X ago</p>
+            <p className="text-neutral-500 text-xs sm:text-sm leading-none font-raleway">
+              Edited X ago
+            </p>
           </div>
         </div>
 
@@ -105,13 +121,17 @@ export default function TitleBar() {
               className="relative flex items-center justify-center transition-transform duration-300 ease-out origin-center hover:scale-105"
             >
               <Calendar
-                className={`calendar-icon ${calendarHovered ? 'icon-hidden' : 'icon-visible'}`}
+                className={`calendar-icon ${
+                  calendarHovered ? 'icon-hidden' : 'icon-visible'
+                }`}
                 color="white"
                 size={17}
                 strokeWidth={1}
               />
               <ChevronsDown
-                className={`calendar-icon absolute transition-transform duration-300 ease-out hover:scale-105 ${calendarHovered ? 'icon-visible' : 'icon-hidden'}`}
+                className={`calendar-icon absolute transition-transform duration-300 ease-out hover:scale-105 ${
+                  calendarHovered ? 'icon-visible' : 'icon-hidden'
+                }`}
                 color="white"
                 size={18}
                 strokeWidth={2}
@@ -120,7 +140,7 @@ export default function TitleBar() {
           </div>
 
           <div id="alert-cntr" className="flex items-center">
-            <button id="alert" className=" flex items-center justify-center ">
+            <button id="alert" className="flex items-center justify-center">
               <Bell id="bell" color="white" size={18} strokeWidth={1.75} />
             </button>
           </div>
@@ -128,7 +148,7 @@ export default function TitleBar() {
       </div>
 
       <div id="right-bar" className="flex items-center no-drag">
-        <button id="nav-tog" className="w-5 h-5 flex items-center justify-center ">
+        <button id="nav-tog" className="w-5 h-5 flex items-center justify-center">
           <Hexagon color="white" size={16} strokeWidth={2} />
         </button>
 
@@ -143,7 +163,9 @@ export default function TitleBar() {
 
           <button
             id="maximize"
-            onClick={() => window.ipcRenderer.send(isMaximized ? 'restore' : 'maximize')}
+            onClick={() =>
+              window.ipcRenderer.send(isMaximized ? 'restore' : 'maximize')
+            }
             className="w-5 h-5 flex items-center justify-center hover:bg-neutral-800 rounded transition"
           >
             {isMaximized ? (
