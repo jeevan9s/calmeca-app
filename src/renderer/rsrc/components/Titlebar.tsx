@@ -65,7 +65,7 @@ export default function TitleBar({ solidBackground = false }: TitleBarProps) {
   className="drag relative w-full h-8 flex items-center justify-between"
   initial={{ backgroundColor: 'rgba(28,28,28,0)' }}
   animate={{ backgroundColor: solidBackground ? 'rgba(28,28,28,1)' : 'rgba(28,28,28,0)' }}
-  transition={{ duration: 0.8, ease: 'easeInOut' }}
+  transition={{ duration: 0.6, ease: 'easeInOut' }}
 >
 
 

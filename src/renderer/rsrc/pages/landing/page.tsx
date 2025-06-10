@@ -33,7 +33,7 @@ export default function Landing() {
           <div 
             onMouseDown={handleStart}
             onKeyDown={handleStart}
-            tabIndex={0}className="flex flex-col h-screen items-center justify-center cursor-pointer outline-none shadow-lg bg-black/40">
+            tabIndex={0}className="flex flex-col h-screen items-center justify-center cursor-pointer outline-none shadow-lg bg-black/30">
           <motion.div
             className="flex flex-col items-center outline-none"
             initial={{ opacity: 1, scale: 1 }}
