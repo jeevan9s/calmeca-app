@@ -6,7 +6,7 @@ export default function Dashboard() {
   return (
     <div id="dashboard-page" className="min-h-screen bg-black/30">
       <div id="titlebar-cntr">
-        <TitleBar solidBackground={true} />
+        <TitleBar solidBackground={true} outline = {true}/>
         <Sidebar />
       </div>
     </div>

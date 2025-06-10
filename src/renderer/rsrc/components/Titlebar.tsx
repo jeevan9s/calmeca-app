@@ -17,9 +17,10 @@ import { motion } from 'framer-motion'
 
 type TitleBarProps = {
   solidBackground?: boolean
+  outline?: boolean 
 }
 
-export default function TitleBar({ solidBackground = false }: TitleBarProps) {
+export default function TitleBar({ solidBackground = false , outline = false}: TitleBarProps) {
   const [isMaximized, setisMaximized] = useState(false)
   const [sidebarHovered, setSidebarHovered] = useState(false)
   const [sidebarVisible, setSidebarVisible] = useState(false)
@@ -62,7 +63,9 @@ export default function TitleBar({ solidBackground = false }: TitleBarProps) {
   return (
 <motion.div
   id="titlebar"
-  className="drag relative w-full h-8 flex items-center justify-between outline-solid outline-neutral-800 outline-1"
+ className={`drag relative w-full h-8 flex items-center justify-between ${
+  outline ? 'outline outline-1 outline-solid outline-neutral-800' : ''
+}`}
   initial={{ backgroundColor: 'rgba(28,28,28,0)' }}
   animate={{ backgroundColor: solidBackground ? 'rgba(26,26,26,1)' : 'rgba(28,28,28,0)' }}
   transition={{ duration: 0.6, ease: 'easeInOut' }}
