@@ -1,0 +1,30 @@
+.sidebar-icon,
+.calendar-icon {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
+}
+
+#sb-panel button {
+  border: none;
+  outline: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  cursor: default;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+  cursor:pointer;
+}
+
+#sb-panel button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}

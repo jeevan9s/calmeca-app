@@ -62,9 +62,9 @@ export default function TitleBar({ solidBackground = false }: TitleBarProps) {
   return (
 <motion.div
   id="titlebar"
-  className="drag relative w-full h-8 flex items-center justify-between"
+  className="drag relative w-full h-8 flex items-center justify-between outline-solid outline-neutral-800 outline-1"
   initial={{ backgroundColor: 'rgba(28,28,28,0)' }}
-  animate={{ backgroundColor: solidBackground ? 'rgba(28,28,28,1)' : 'rgba(28,28,28,0)' }}
+  animate={{ backgroundColor: solidBackground ? 'rgba(26,26,26,1)' : 'rgba(28,28,28,0)' }}
   transition={{ duration: 0.6, ease: 'easeInOut' }}
 >
 

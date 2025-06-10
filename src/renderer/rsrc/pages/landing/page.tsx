@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import Titlebar from '../../components/Titlebar'
+import '@/renderer/rsrc/styles/landing.css'
 
 export default function Landing() {
   const navigate = useNavigate()
