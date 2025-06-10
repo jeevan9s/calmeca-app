@@ -30,13 +30,12 @@ export default function Landing() {
         }}
       >
         {!isExiting && (
-          <div className="flex flex-col h-screen items-center justify-center cursor-pointer outline-none shadow-lg bg-black/40">
-          <motion.div
-            className="flex flex-col items-center outline-none"
-            ref={landingRef}
+          <div 
             onMouseDown={handleStart}
             onKeyDown={handleStart}
-            tabIndex={0}
+            tabIndex={0}className="flex flex-col h-screen items-center justify-center cursor-pointer outline-none shadow-lg bg-black/40">
+          <motion.div
+            className="flex flex-col items-center outline-none"
             initial={{ opacity: 1, scale: 1 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.7, borderRadius: '1rem' }}
