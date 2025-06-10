@@ -30,16 +30,17 @@ export default function Landing() {
         }}
       >
         {!isExiting && (
+          <div className="flex flex-col h-screen items-center justify-center cursor-pointer outline-none shadow-lg bg-black/40">
           <motion.div
-            className="flex flex-col h-screen items-center justify-center cursor-pointer outline-none"
+            className="flex flex-col items-center outline-none"
             ref={landingRef}
             onMouseDown={handleStart}
             onKeyDown={handleStart}
             tabIndex={0}
             initial={{ opacity: 1, scale: 1 }}
             animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.7 }}
-            transition={{ duration: 0.6, ease: [0.6, -0.05, 0.01, 0.99] }} // custom bezier
+            exit={{ opacity: 0, scale: 0.7, borderRadius: '1rem' }}
+            transition={{ duration: 0.6, ease: [0.6, -0.05, 0.01, 0.99] }}
           >
             <div className="flex items-center justify-center">
               <div className="flex flex-col items-center gap-y-2">
@@ -50,6 +51,7 @@ export default function Landing() {
               </div>
             </div>
           </motion.div>
+          </div>
         )}
       </AnimatePresence>
     </>
