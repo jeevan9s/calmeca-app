@@ -4,6 +4,10 @@ import { motion } from 'framer-motion'
 import '@/renderer/rsrc/styles/sb.css'
 
 export default function Sidebar() {
+  
+const [isHovered, setIsHovered] = useState(false)
+const [isLocked, setIsLocked] = useState(false)
+
   return (
     <motion.aside id="sb-panel" className="flex flex-col w-50 h-screen outline-solid outline-neutral-800 outline-1" style={{ backgroundColor: 'rgba(26,26,26,1)' }}>
       <header id="sb-header" className=''>
