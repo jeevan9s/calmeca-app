@@ -34,6 +34,8 @@ export default function TitleBar({
   const [isMaximized, setisMaximized] = useState(false)
   const [calendarHovered, setCalendarHovered] = useState(false)
 
+   console.log('solidBackground', solidBackground)
+
   useEffect(() => {
     const onMax = () => setisMaximized(true)
     const onUnmax = () => setisMaximized(false)
@@ -46,20 +48,27 @@ export default function TitleBar({
   }, [])
 
   return (
-    <motion.div
-      id="titlebar"
-      className={`relative z-30 w-full h-8 flex items-center justify-between ${
-        outline ? 'outline outline-1 outline-solid outline-neutral-800' : ''
-      }`}
-      initial={{ backgroundColor: 'rgba(0,0,0,0)' }}
-      animate={{
-        backgroundColor: solidBackground ? 'rgba(20,20,20,1)' : 'rgba(0,0,0,0)',
-        paddingLeft: isLocked ? 224 : 0
-      }}
-      
-      transition={{ duration: 0.3, ease: 'easeInOut' }}
-    >
-      <div className="absolute inset-0 -z-10 drag pointer-events-none" />
+<motion.div
+  id="titlebar"
+  className={`relative z-10 w-full h-8 flex items-center justify-between ${
+    outline ? 'outline outline-1 outline-solid outline-neutral-800' : ''
+  }`}
+  initial={{ backgroundColor: 'rgba(0,0,0,0)', paddingLeft: 0 }}
+  animate={{
+    backgroundColor: isLocked ? 'rgba(0,0,0,0.4)' : 'rgba(0,0,0,0)',
+    paddingLeft: isLocked ? 224 : 0,
+  }}
+>
+ {solidBackground && (
+  <motion.div
+    className="absolute inset-0 pointer-events-none -z-10"
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    transition={{ duration: 0.4, ease: 'easeInOut' }}
+    style={{ backgroundColor: '#141414' }}
+  />
+)}
+  <div className="absolute inset-0 z-10 drag pointer-events-none" />
 
       <div id="left-bar" className="flex items-center m-3 drag-exclude">
         <div className="flex items-center gap-2 sm:gap-3 drag-exclude">

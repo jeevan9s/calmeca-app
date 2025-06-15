@@ -1,7 +1,11 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
 #landing-page {
-    overflow-x: hidden;
-    overflow-y: hidden;
-    background:transparent ;
+  overflow-x: hidden;
+  overflow-y: hidden;
+  background: transparent;
 }
 
 html, body {
@@ -11,10 +15,9 @@ html, body {
   overflow-y: hidden;
   width: 100vw;
   height: 100vh;
-  background:transparent;
+  background: transparent;
   user-select: none;
 }
-
 
 * {
   user-select: none;
@@ -27,16 +30,5 @@ html, body {
 
 #subtitle {
   font-weight: lighter;
-
-
-
-*, *::before, *::after {
-  box-sizing: border-box;
-}}
-
-#titlebar {
-  background-color: transparent !important;
-  background: transparent !important;
-  box-shadow: none !important;
-  outline: none !important;
 }
+

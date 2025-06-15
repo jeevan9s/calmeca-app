@@ -23,7 +23,9 @@ export default function Landing() {
 
   return (
     <>
-      <div ref={titlebarRef}>
+      <div className="bg-black/30" ref={titlebarRef}>
+
+
 
 
 <Titlebar
