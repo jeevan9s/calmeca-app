@@ -39,23 +39,14 @@ export default function Sidebar( {isLocked, isHovered, setIsLocked, setIsHovered
       : 'top-12 left-0 bottom-6 shadow-lg rounded-2xl max-h-[600px]'
     }
   `}
-  style={{ backgroundColor: 'rgba(26,26,26,1)', overflowY: 'auto' }}
+  style={{ backgroundColor: 'rgba(20,20,20,1)', overflowY: 'auto' }}
 >
-  <header
-    id="sb-header"
-    className="relative w-full flex items-center justify-between mt-10 px-3"
-  >
-    <div id="title-cntr" className="flex flex-col">
-      {/* Title content */}
-      <h3 id="sb-subtitl" className="text-neutral-500"></h3>
-    </div>
-
-    {isLocked && (
+   {isLocked && (
       <button
         onClick={() => setIsLocked(false)}
         id="close-sb"
-        className="absolute top-0 right-1.5 w-5  flex items-center justify-center
-                   transition-transform duration-200 hover:scale-105 z-50 bg-transparent"
+        className="absolute top-1.5 right-1.5 w-5  flex items-center justify-center
+                   transition-transform duration-200 hover:scale-105 z-50 "
         style={{ pointerEvents: 'auto' }}
       >
         <ChevronsLeft
@@ -66,6 +57,14 @@ export default function Sidebar( {isLocked, isHovered, setIsLocked, setIsHovered
         />
       </button>
     )}
+  <header
+    id="sb-header"
+    className="relative w-full flex items-center justify-between mt-10 px-3"
+  >
+    <div id="title-cntr" className="flex flex-col">
+      <h3 id="sb-subtitl" className="text-neutral-500"></h3>
+    </div>
+
   </header>
 
 </motion.aside>

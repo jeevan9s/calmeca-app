@@ -7,6 +7,8 @@ import '@/renderer/rsrc/styles/landing.css'
 export default function Landing() {
   const navigate = useNavigate()
   const [isExiting, setIsExiting] = useState(false)
+  const [isHovered, setIsHovered] = useState(false);
+  const [isLocked, setIsLocked] = useState(false);
   const titlebarRef = useRef<HTMLDivElement>(null)
   const landingRef = useRef<HTMLDivElement>(null)
 
@@ -22,7 +24,15 @@ export default function Landing() {
   return (
     <>
       <div ref={titlebarRef}>
-        <Titlebar />
+
+
+<Titlebar
+  solidBackground={false}
+  isHovered={isHovered}
+  isLocked={isLocked}
+  setIsHovered={setIsHovered}
+  setIsLocked={setIsLocked}
+/>
       </div>
 
       <AnimatePresence

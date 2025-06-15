@@ -94,3 +94,14 @@ button:focus-visible {
   font-family: 'Source Code Pro', sans-serif;
 }
 
+
+html, body, #root {
+  background: transparent !important;
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  -webkit-backdrop-filter: blur(30px);
+  backdrop-filter: blur(30px);
+}

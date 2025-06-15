@@ -2,7 +2,6 @@
     overflow-x: hidden;
     overflow-y: hidden;
     background:transparent ;
-    
 }
 
 html, body {
@@ -34,3 +33,10 @@ html, body {
 *, *::before, *::after {
   box-sizing: border-box;
 }}
+
+#titlebar {
+  background-color: transparent !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+}

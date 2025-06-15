@@ -1,14 +1,13 @@
 .drag {
   -webkit-app-region: drag;
-  position: fixed;
+  position: absolute;
   top: 0;
   left: 0;
   width: 100vw;
+  background: transparent;
+  z-index: -1;
 }
 
-.no-drag {
-  -webkit-app-region: no-drag;
-}
 
 #titlebar button {
   border: none;
@@ -123,6 +122,10 @@ p {
   transition:
     opacity 0.3s ease,
     transform 0.3s ease;
+}
+
+.drag-exclude, *{
+  -webkit-app-region: no-drag;
 }
 
 .icon-hidden {
