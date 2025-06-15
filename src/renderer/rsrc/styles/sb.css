@@ -10,6 +10,10 @@
     transform 0.3s ease;
 }
 
+.sidebar-icon {
+  pointer-events: none;
+}
+
 #sb-panel button {
   border: none;
   outline: none;
@@ -19,7 +23,6 @@
   background: transparent;
   padding: 0;
   margin: 0;
-  cursor: default;
   border-radius: 6px;
   transition: background-color 0.2s ease;
   cursor:pointer;
@@ -27,4 +30,8 @@
 
 #sb-panel button:hover {
   background-color: rgba(255, 255, 255, 0.1);
+}
+
+#close-sb:hover {
+  background-color: rgba(255, 255, 255, 0.15);
 }

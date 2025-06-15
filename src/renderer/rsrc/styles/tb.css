@@ -4,7 +4,6 @@
   top: 0;
   left: 0;
   width: 100vw;
-  z-index: 1000;
 }
 
 .no-drag {
@@ -51,12 +50,20 @@ p {
 }
 
 
-#titlebar button#sidebar,
+
 #titlebar button#calendar {
   cursor: pointer;
   width: 18px;
   height: 18px;
   border-radius: 6px;
+  transition: background-color 0.2s ease;
+}
+
+#titlebar button#sidebar {
+  cursor: pointer;
+  width: 19px;
+  height: 19px;
+  border-radius: 4.5px;
   transition: background-color 0.2s ease;
 
 }
@@ -121,7 +128,7 @@ p {
 .icon-hidden {
   opacity: 0;
   transform: scale(0.8);
-  pointer-events: none;
+  /* pointer-events: none; */
 }
 
 .icon-visible {

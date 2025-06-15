@@ -1,14 +1,11 @@
-import TitleBar from '../../components/Titlebar'
-import Sidebar from '../../components/Sidebar'
+import Layout from '../../components/Layout'
+
 
 export default function Dashboard() {
   console.log('Dashboard Page Loaded')
   return (
     <div id="dashboard-page" className="min-h-screen bg-black/30">
-      <div id="titlebar-cntr">
-        <TitleBar solidBackground={true} outline = {true}/>
-        <Sidebar />
-      </div>
+     <Layout />
     </div>
   )
 }
