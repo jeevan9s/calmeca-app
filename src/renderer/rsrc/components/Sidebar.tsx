@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import {  useEffect } from 'react'
 import { ChevronsLeft } from 'react-feather'
 import { motion } from 'framer-motion'
 import '@/renderer/rsrc/styles/sb.css'
@@ -39,7 +39,7 @@ export default function Sidebar( {isLocked, isHovered, setIsLocked, setIsHovered
       : 'top-12 left-0 bottom-6 shadow-lg rounded-2xl max-h-[600px]'
     }
   `}
-  style={{ backgroundColor: 'rgba(20,20,20,1)', overflowY: 'auto' }}
+  style={{ backgroundColor: 'rgba(20,20,20,1)', overflowY: 'hidden' }}
 >
    {isLocked && (
       <button

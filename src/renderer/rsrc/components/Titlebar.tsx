@@ -19,6 +19,8 @@ type TitleBarProps = {
   outline?: boolean
   isHovered: boolean
   isLocked: boolean
+  ontoggleQuickNav?: () => void
+  ontoggleAlerts?: () => void
   setIsLocked: (locked: boolean) => void
   setIsHovered: (hovering: boolean) => void
 }
@@ -28,13 +30,15 @@ export default function TitleBar({
   isHovered,
   setIsHovered,
   setIsLocked,
+  ontoggleQuickNav,
+  ontoggleAlerts,
   solidBackground = false,
   outline = false
 }: TitleBarProps) {
   const [isMaximized, setisMaximized] = useState(false)
   const [calendarHovered, setCalendarHovered] = useState(false)
 
-   console.log('solidBackground', solidBackground)
+  console.log('solidBackground', solidBackground)
 
   useEffect(() => {
     const onMax = () => setisMaximized(true)
@@ -48,30 +52,30 @@ export default function TitleBar({
   }, [])
 
   return (
-<motion.div
-  id="titlebar"
-  className={`relative z-10 w-full h-8 flex items-center justify-between ${
-    outline ? 'outline outline-1 outline-solid outline-neutral-800' : ''
-  }`}
-  initial={{ backgroundColor: 'rgba(0,0,0,0)', paddingLeft: 0 }}
-  animate={{
-    backgroundColor: isLocked ? 'rgba(0,0,0,0.4)' : 'rgba(0,0,0,0)',
-    paddingLeft: isLocked ? 224 : 0,
-  }}
->
- {solidBackground && (
-  <motion.div
-    className="absolute inset-0 pointer-events-none -z-10"
-    initial={{ opacity: 0 }}
-    animate={{ opacity: 1 }}
-    transition={{ duration: 0.4, ease: 'easeInOut' }}
-    style={{ backgroundColor: '#141414' }}
-  />
-)}
-  <div className="absolute inset-0 z-10 drag pointer-events-none" />
+    <motion.div
+      id="titlebar"
+      className={`relative z-10 w-full h-8 flex items-center justify-between ${
+        outline ? 'outline outline-1 outline-solid outline-neutral-800' : ''
+      }`}
+      initial={{ backgroundColor: 'rgba(0,0,0,0)', paddingLeft: 0 }}
+      animate={{
+        backgroundColor: isLocked ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0)',
+        paddingLeft: isLocked ? 224 : 0
+      }}
+    >
+      {solidBackground && (
+        <motion.div
+          className="absolute inset-0 pointer-events-none -z-10"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.4, ease: 'easeInOut' }}
+          style={{ backgroundColor: '#141414' }}
+        />
+      )}
+      <div className="absolute inset-0 z-10 drag pointer-events-none" />
 
       <div id="left-bar" className="flex items-center m-3 drag-exclude">
-        <div className="flex items-center gap-2 sm:gap-3 drag-exclude">
+        <div className="flex items-center gap-2  drag-exclude">
           <button
             id="logo"
             className="drag-exclude"
@@ -111,7 +115,7 @@ export default function TitleBar({
             </button>
           )}
 
-          <div id="timestamp-cntr" className="hidden sm:flex items-center">
+          <div id="timestamp-cntr" className="flex items-center">
             <p className="text-neutral-500 text-xs sm:text-sm leading-none font-raleway">
               Edited X ago
             </p>
@@ -150,7 +154,13 @@ export default function TitleBar({
             </button>
           </div>
           <div id="alert-cntr" className="flex items-center drag-exclude">
-            <button id="alert" className="flex items-center justify-center drag-exclude">
+            <button
+              id="alert"
+              className="flex items-center justify-center drag-exclude"
+              onClick={() => {
+                if (ontoggleAlerts) ontoggleAlerts()
+              }}
+            >
               <Bell color="white" size={18} strokeWidth={1.25} />
             </button>
           </div>
@@ -158,7 +168,13 @@ export default function TitleBar({
       </div>
 
       <div id="right-bar" className="flex items-center drag-exclude">
-        <button id="nav-tog" className="w-5 h-5 flex items-center justify-center drag-exclude">
+        <button
+          id="nav-tog"
+          className="w-5 h-5 flex items-center justify-center drag-exclude"
+          onClick={() => {
+            if (ontoggleQuickNav) ontoggleQuickNav()
+          }}
+        >
           <Hexagon color="white" size={16} strokeWidth={2} />
         </button>
         <div className="flex items-center border-l border-neutral-700 ml-5">
