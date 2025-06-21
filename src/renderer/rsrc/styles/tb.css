@@ -3,8 +3,10 @@
   position: absolute;
   top: 0;
   left: 0;
-  width: 100vw;
+  width: 100%;
   z-index: -1;
+  cursor: user-select;
+  pointer-events: none;
 }
 
 
@@ -131,7 +133,7 @@ p {
 .icon-hidden {
   opacity: 0;
   transform: scale(0.8);
-  /* pointer-events: none; */
+  pointer-events: none;
 }
 
 .icon-visible {

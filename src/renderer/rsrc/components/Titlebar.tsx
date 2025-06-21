@@ -19,15 +19,23 @@ type TitleBarProps = {
   outline?: boolean
   isHovered: boolean
   isLocked: boolean
+  isCalendarHovered: boolean
+  isCalendarLocked: boolean
   ontoggleQuickNav?: () => void
   ontoggleAlerts?: () => void
   setIsLocked: (locked: boolean) => void
   setIsHovered: (hovering: boolean) => void
+  setIsCalendarLocked: (calendarLocked: boolean) => void
+  setIsCalendarHovered: (calendarHovered: boolean) => void
 }
 
 export default function TitleBar({
   isLocked,
   isHovered,
+  isCalendarHovered,
+  isCalendarLocked,
+  setIsCalendarHovered,
+  setIsCalendarLocked,
   setIsHovered,
   setIsLocked,
   ontoggleQuickNav,
@@ -36,7 +44,6 @@ export default function TitleBar({
   outline = false
 }: TitleBarProps) {
   const [isMaximized, setisMaximized] = useState(false)
-  const [calendarHovered, setCalendarHovered] = useState(false)
 
   console.log('solidBackground', solidBackground)
 
@@ -72,7 +79,18 @@ export default function TitleBar({
           style={{ backgroundColor: '#141414' }}
         />
       )}
-      <div className="absolute inset-0 z-10 drag pointer-events-none" />
+      <div className="absolute inset-0 drag" />
+      <div
+        id="calendar-hover-zone"
+        className="absolute top-0 h-full pointer-events-auto drag-exclude"
+        style={{
+          left: '35%',
+          width: '30%',
+          backgroundColor: 'transparent'
+        }}
+        onMouseEnter={() => setIsCalendarHovered(true)}
+        onMouseLeave={() => setIsCalendarHovered(false)}
+      />
 
       <div id="left-bar" className="flex items-center m-3 drag-exclude">
         <div className="flex items-center gap-2  drag-exclude">
@@ -126,32 +144,32 @@ export default function TitleBar({
           <div
             id="calendar-cntr"
             className="flex items-center drag-exclude"
-            onMouseEnter={() => {
-              setCalendarHovered(true)
-            }}
-            onMouseLeave={() => {
-              setCalendarHovered(false)
-            }}
           >
-            <button
-              id="calendar"
-              className="relative flex items-center justify-center transition-transform duration-300 ease-out origin-center hover:scale-105 drag-exclude"
-            >
-              <Calendar
-                className={`calendar-icon ${calendarHovered ? 'icon-hidden' : 'icon-visible'}`}
-                color="white"
-                size={17}
-                strokeWidth={1}
-              />
-              <ChevronsDown
-                className={`calendar-icon absolute transition-transform duration-300 ease-out hover:scale-105 ${
-                  calendarHovered ? 'icon-visible' : 'icon-hidden'
-                }`}
-                color="white"
-                size={18}
-                strokeWidth={2}
-              />
-            </button>
+           {!isCalendarLocked && (
+  <button
+    id="calendar"
+    className="relative flex items-center justify-center transition-transform duration-300 ease-out origin-center hover:scale-105 drag-exclude"
+    onMouseEnter={() => setIsCalendarHovered(true)}
+    onMouseLeave={() => setIsCalendarHovered(false)}
+    onClick={() => setIsCalendarHovered(true)}
+  >
+    <Calendar
+      className={`calendar-icon ${isCalendarHovered ? 'icon-hidden' : 'icon-visible'}`}
+      color="white"
+      size={17}
+      strokeWidth={1}
+    />
+    <ChevronsDown
+      className={`calendar-icon absolute transition-transform duration-300 ease-out hover:scale-105 ${
+        isCalendarHovered ? 'icon-visible' : 'icon-hidden'
+      }`}
+      color="white"
+                 size={20}
+                strokeWidth={2.75}
+    />
+  </button>
+)}
+
           </div>
           <div id="alert-cntr" className="flex items-center drag-exclude">
             <button

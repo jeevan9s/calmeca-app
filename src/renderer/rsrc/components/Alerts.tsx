@@ -25,7 +25,7 @@ export default function Alerts({ isAlertsOpen, setIsAlertsOpen }: alertProps) {
 
 if (windowWidth >= 1400) {
   width = '26rem'
-  height = '7rem'
+  height = '6.55rem'
 } else if (windowWidth >= 1200) {
   width = '24rem'
   height = '6.5rem'
