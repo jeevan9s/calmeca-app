@@ -44,32 +44,42 @@ export default function TitleBar({
   outline = false
 }: TitleBarProps) {
   const [isMaximized, setisMaximized] = useState(false)
-
-  console.log('solidBackground', solidBackground)
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth)
 
   useEffect(() => {
     const onMax = () => setisMaximized(true)
     const onUnmax = () => setisMaximized(false)
     window.ipcRenderer.on('maximized', onMax)
     window.ipcRenderer.on('not-maximized', onUnmax)
+
+    const handleResize = () => setWindowWidth(window.innerWidth)
+    window.addEventListener('resize', handleResize)
+
     return () => {
       window.ipcRenderer.off('maximized', onMax)
       window.ipcRenderer.off('not-maximized', onUnmax)
+      window.removeEventListener('resize', handleResize)
     }
   }, [])
 
+  let paddingLeft = 0
+  if (isLocked) {
+    if (windowWidth < 640) paddingLeft = 170
+    else if (windowWidth < 1024) paddingLeft = 210
+    else paddingLeft = 224
+  }
+
   return (
     <motion.div
-      id="titlebar"
-      className={`relative z-10 w-full h-8 flex items-center justify-between ${
-        outline ? 'outline outline-1 outline-solid outline-neutral-800' : ''
-      }`}
-      initial={{ backgroundColor: 'rgba(0,0,0,0)', paddingLeft: 0 }}
-      animate={{
-        backgroundColor: isLocked ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0)',
-        paddingLeft: isLocked ? 224 : 0
-      }}
-    >
+  id="titlebar"
+  className={`relative z-10 w-full h-8 flex items-center justify-between ${outline ? 'outline outline-1 outline-solid outline-neutral-800' : ''}`}
+  initial={{ backgroundColor: 'rgba(0,0,0,0)', paddingLeft: 0 }}
+  animate={{
+    backgroundColor: isLocked ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0)',
+    paddingLeft 
+  }}
+  transition={{ type: 'tween', duration: 0.3 }}
+>
       {solidBackground && (
         <motion.div
           className="absolute inset-0 pointer-events-none -z-10"
@@ -92,8 +102,8 @@ export default function TitleBar({
         onMouseLeave={() => setIsCalendarHovered(false)}
       />
 
-      <div id="left-bar" className="flex items-center m-3 drag-exclude">
-        <div className="flex items-center gap-2  drag-exclude">
+      <div id="left-bar" className="flex items-center m-3 drag-exclude min-w-0">
+        <div className="flex items-center gap-2 drag-exclude min-w-0">
           <button
             id="logo"
             className="drag-exclude"
@@ -133,43 +143,39 @@ export default function TitleBar({
             </button>
           )}
 
-          <div id="timestamp-cntr" className="flex items-center">
-            <p className="text-neutral-500 text-xs sm:text-sm leading-none font-raleway">
-              Edited X ago
-            </p>
-          </div>
+          {(!isLocked || windowWidth >= 640) && (
+  <p className="text-neutral-500 text-xs sm:text-sm leading-none font-raleway">
+    Edited X ago
+  </p>
+)}
         </div>
 
         <div id="c-b-cntr" className="flex items-center gap-3 ml-6">
-          <div
-            id="calendar-cntr"
-            className="flex items-center drag-exclude"
-          >
-           {!isCalendarLocked && (
-  <button
-    id="calendar"
-    className="relative flex items-center justify-center transition-transform duration-300 ease-out origin-center hover:scale-105 drag-exclude"
-    onMouseEnter={() => setIsCalendarHovered(true)}
-    onMouseLeave={() => setIsCalendarHovered(false)}
-    onClick={() => setIsCalendarHovered(true)}
-  >
-    <Calendar
-      className={`calendar-icon ${isCalendarHovered ? 'icon-hidden' : 'icon-visible'}`}
-      color="white"
-      size={17}
-      strokeWidth={1}
-    />
-    <ChevronsDown
-      className={`calendar-icon absolute transition-transform duration-300 ease-out hover:scale-105 ${
-        isCalendarHovered ? 'icon-visible' : 'icon-hidden'
-      }`}
-      color="white"
-                 size={20}
-                strokeWidth={2.75}
-    />
-  </button>
-)}
-
+          <div id="calendar-cntr" className="flex items-center drag-exclude">
+            {!isCalendarLocked && (
+              <button
+                id="calendar"
+                className="relative flex items-center justify-center transition-transform duration-300 ease-out origin-center hover:scale-105 drag-exclude"
+                onMouseEnter={() => setIsCalendarHovered(true)}
+                onMouseLeave={() => setIsCalendarHovered(false)}
+                onClick={() => setIsCalendarHovered(true)}
+              >
+                <Calendar
+                  className={`calendar-icon ${isCalendarHovered ? 'icon-hidden' : 'icon-visible'}`}
+                  color="white"
+                  size={17}
+                  strokeWidth={1}
+                />
+                <ChevronsDown
+                  className={`calendar-icon absolute transition-transform duration-300 ease-out hover:scale-105 ${
+                    isCalendarHovered ? 'icon-visible' : 'icon-hidden'
+                  }`}
+                  color="white"
+                  size={20}
+                  strokeWidth={2.75}
+                />
+              </button>
+            )}
           </div>
           <div id="alert-cntr" className="flex items-center drag-exclude">
             <button
