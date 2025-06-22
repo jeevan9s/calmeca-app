@@ -5,9 +5,10 @@ import '@/renderer/rsrc/styles/alerts.css'
 type alertProps = {
   isAlertsOpen: boolean
   setIsAlertsOpen: (open: boolean) => void
+  isLocked: boolean
 }
 
-export default function Alerts({ isAlertsOpen, setIsAlertsOpen }: alertProps) {
+export default function Alerts({ isAlertsOpen, setIsAlertsOpen, isLocked }: alertProps) {
   const [windowWidth, setWindowWidth] = useState(window.innerWidth)
   const [windowHeight, setWindowHeight] = useState(window.innerHeight)
 
@@ -56,6 +57,11 @@ if (windowHeight <= 600) {
   height = '3rem'
 }
 
+let leftPos = 'left-[15rem]'
+if (isLocked) {
+  leftPos = 'left-[25rem]'
+}
+
 
 
   return (
@@ -71,7 +77,7 @@ if (windowHeight <= 600) {
       }}
       exit={{ opacity: 0, scale: 0.95, y: -12, x: 0 }}
       transition={{ duration: 0.3, ease: easeInOut }}
-      className="fixed top-12 shadow-lg z-50 left-55 rounded-xl bg-[rgba(20,20,20,1)]"
+      className={`fixed top-12 shadow-lg z-50 rounded-xl bg-[rgba(20,20,20,1)] ${leftPos}`}
     >
     </motion.div>
   )

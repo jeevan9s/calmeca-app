@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import Sidebar from './Sidebar';
 import Titlebar from './Titlebar';
 import QuickNav from './QuickNav';
@@ -58,17 +58,17 @@ export default function Layout() {
   }, [isLocked, calendarLocked, calendarHoveredMouse, isHoveredMouse, windowWidth, isCalendarVisible]);
 
   const toggleQuickNav = () => {
-    if (windowWidth <= 600 && isAlertsOpen) setIsAlertsOpen(false);
+    if (windowWidth <= 800 && isAlertsOpen) setIsAlertsOpen(false);
     setIsQuickNavOpen((prev) => !prev);
   };
 
   const toggleAlerts = () => {
-    if (windowWidth <= 600 && isQuickNavOpen) setIsQuickNavOpen(false);
+    if (windowWidth <= 800 && isQuickNavOpen) setIsQuickNavOpen(false);
     setIsAlertsOpen((prev) => !prev);
   };
 
   const sidebarVisible = windowWidth <= 600 ? isHovered && !isCalendarVisible : isHovered;
-  const calendarVisible = windowWidth <= 600 ? isCalendarVisible && !isHovered : isCalendarVisible;
+  const calendarVisible = (calendarLocked || isCalendarHovered) && !isAlertsOpen && !isQuickNavOpen && (windowWidth > 600 && !isHovered)
   const isSidebarHovered = isHoveredButton || isHoveredMouse;
 
   return (
@@ -100,11 +100,17 @@ export default function Layout() {
         )}
       </AnimatePresence>
 
-      <AnimatePresence>
-        {isAlertsOpen && (
-          <Alerts isAlertsOpen={isAlertsOpen} setIsAlertsOpen={setIsAlertsOpen} />
-        )}
-      </AnimatePresence>
+   <AnimatePresence>
+  {isAlertsOpen && (
+    <motion.div className='z-80'>
+      <Alerts
+        isAlertsOpen={isAlertsOpen}
+        setIsAlertsOpen={setIsAlertsOpen}
+        isLocked={isLocked}  
+      />
+    </motion.div>
+  )}
+</AnimatePresence>
 
       <AnimatePresence>
         {calendarVisible && (
