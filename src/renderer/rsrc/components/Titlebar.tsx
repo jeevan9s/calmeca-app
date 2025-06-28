@@ -72,7 +72,8 @@ export default function TitleBar({
   let paddingLeft = 0
   if (isLocked) {
     if (windowWidth < 640) paddingLeft = 170
-    else if (windowWidth < 1024) paddingLeft = 210
+    else if (windowWidth < 850) paddingLeft = 210
+    else if (windowWidth < 1024) paddingLeft = 220
     else paddingLeft = 224
   }
 
@@ -181,20 +182,26 @@ export default function TitleBar({
   }}
   disabled={windowWidth < 600}
 >
+ <>
   <Calendar
-    className={`calendar-icon ${isCalendarHovered ? 'icon-hidden' : 'icon-visible'}`}
+    className={`calendar-icon ${
+      isCalendarHovered && !isQuickNavOpen && !isAlertsOpen ? 'icon-hidden' : 'icon-visible'
+    }`}
     color="white"
     size={17}
     strokeWidth={1}
   />
   <ChevronsDown
     className={`calendar-icon absolute transition-transform duration-300 ease-out ${
-      isCalendarHovered ? 'icon-visible' : 'icon-hidden'
+      isCalendarHovered && !isQuickNavOpen && !isAlertsOpen ? 'icon-visible' : 'icon-hidden'
     }`}
     color="white"
     size={20}
     strokeWidth={2.75}
   />
+</>
+
+
 </button>
 
             )}
