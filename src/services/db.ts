@@ -3,12 +3,13 @@ import Dexie, { Table } from 'dexie'
 // TYPES
 export interface Course {
     id: string;
+    courseId: string;
     name: string;
     color: string;
     type: string; // lecture-based, project-based, tutorial, etc. 
     createdOn: Date;
     endsOn: Date;
-    archived?: boolean;
+    archived: boolean;
 }
 
 export interface Assignment {
@@ -102,7 +103,7 @@ export class CalmecaDB extends Dexie {
     constructor() {
         super('CalmecaDB')
         this.version(1).stores({
-            courses: 'id, name, type, color,  archived',
+            courses: 'id, name, type, color, archived',
             assignments: 'id, title, courseId, type, deadline, completed',
             calendarEvents: 'id, title, date, source',
             notes: 'id, courseId, createdOn, updatedOn',
