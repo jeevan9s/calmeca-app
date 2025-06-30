@@ -19,6 +19,7 @@ export interface Assignment {
     type: 'Homework' | 'Lab' | 'Exam' | 'Project' | 'Report';
     deadline: Date;
     completed: boolean;
+    color: string;
 }
 
 export interface CalendarEvent {
@@ -26,8 +27,9 @@ export interface CalendarEvent {
     title: string;
     date: Date;
     source: "assignment" | "custom";
-    sourceId?: string;
+    sourceId: string
     tags?: string[];
+    color: string;
 }
 
 export interface Note {
@@ -38,6 +40,7 @@ export interface Note {
     createdOn: Date;
     updatedOn: Date;
     tags?: string[];
+    color: string;
 }
 
 // AI TOOL INTERFACEs
@@ -49,6 +52,7 @@ export interface FlashcardDeck {
     description: string;
     tags?: string[];
     completed?: boolean;
+    color: string;
 }
 
 export interface Flashcard {
@@ -66,6 +70,7 @@ export interface Summary {
     summaryText: string;
     createdOn: Date;
     model?: string;
+    color: string;
 }
 
 export interface Quiz {
@@ -75,6 +80,7 @@ export interface Quiz {
     createdOn: Date;
     questions: quizQuestion[]
     completed?: boolean;
+    color: string;
 }
 
 export interface quizQuestion {
@@ -104,8 +110,8 @@ export class CalmecaDB extends Dexie {
         super('CalmecaDB')
         this.version(1).stores({
             courses: 'id, name, type, color, archived',
-            assignments: 'id, title, courseId, type, deadline, completed',
-            calendarEvents: 'id, title, date, source',
+            assignments: 'id, title, courseId, type, deadline, completed, color',
+            calendarEvents: 'id, title, date, source, sourceId, color',
             notes: 'id, courseId, createdOn, updatedOn',
             flashcardDecks: 'id, courseId, completed',
             flashcards: 'id, deckId, origin',

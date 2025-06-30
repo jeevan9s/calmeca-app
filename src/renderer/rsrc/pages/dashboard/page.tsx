@@ -1,13 +1,15 @@
 import Layout from '../../components/Layout'
 import { useEffect } from 'react'
-import { seedDummyCourses } from '../../../../test/seedCourses'
+// import { seedDummyCourses } from '../../../../test/seedCourses'
+// import { seedDummyAssignments } from '../../../../test/seedAssignments'
 
 
 export default function Dashboard() {
   console.log('Dashboard Page Loaded')
 
   useEffect(()=> {
-    seedDummyCourses()
+    // seedDummyCourses()
+    // seedDummyAssignments()
   }, [])
 
   return (

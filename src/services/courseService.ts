@@ -3,7 +3,7 @@ import { db } from "./db";
 import { Course } from "./db";
 import { v4 as uuid} from 'uuid'
 
-// implement CRUD, some archive stuff, return functions 
+// implementin CRUD, some archive stuff, return functions 
 
 export const addCourse = async (course: Omit<Course, 'id' | 'createdOn' | 'archived'>) => {
     const newCourse: Course = {
@@ -17,19 +17,19 @@ export const addCourse = async (course: Omit<Course, 'id' | 'createdOn' | 'archi
 }
 
 export const deleteCourse = async (id: string) => {
-    return await db.courses.delete(id)
+    return  db.courses.delete(id)
 }
 
 export const updateCourse = async (id: string, updates: Partial<Course> ) => {
-    return await db.courses.update(id, updates)
+    return  db.courses.update(id, updates)
 }
 
 export const archiveCourse = async (id: string) => {
-    return await db.courses.update(id, {archived: true})
+    return  db.courses.update(id, {archived: true})
 }
 
 export const unarchiveCourse = async (id:string) => {
-    return await db.courses.update(id, {archived: false})
+    return  db.courses.update(id, {archived: false})
     
 }
 
@@ -45,5 +45,5 @@ export const getActiveCourses = async () => {
 };
 
 export const getAllCourses = async (): Promise<Course[]> => {
-  return await db.courses.toArray()
+  return  db.courses.toArray()
 }
