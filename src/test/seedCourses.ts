@@ -1,4 +1,4 @@
-import { addCourse, getAllCourses, getActiveCourses, getArchivedCourses, archiveCourse } from "../services/courseService";
+import { addCourse, getAllCourses, getActiveCourses, getArchivedCourses, archiveCourse } from "../services/core services/courseService";
 import { db } from "../services/db";
 
 export const seedDummyCourses = async () => {

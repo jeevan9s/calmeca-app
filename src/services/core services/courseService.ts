@@ -1,6 +1,6 @@
 // Course Service File
-import { db } from "./db";
-import { Course } from "./db";
+import { db } from "../db";
+import { Course } from "../db";
 import { v4 as uuid} from 'uuid'
 
 // implementin CRUD, some archive stuff, return functions 
@@ -47,3 +47,5 @@ export const getActiveCourses = async () => {
 export const getAllCourses = async (): Promise<Course[]> => {
   return  db.courses.toArray()
 }
+
+

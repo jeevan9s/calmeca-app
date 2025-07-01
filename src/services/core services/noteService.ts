@@ -1,5 +1,5 @@
 // Calendar Service File
-import { db, Note, Course } from "./db";
+import { db, Note, Course } from "../db";
 import { v4 as uuid} from 'uuid'
 
 // impl crud, fetching notes by course, most recent 
@@ -48,5 +48,4 @@ export const getNotesByTag = async (tag: string): Promise<Note[]> => {
 
 export const getMostRecentNotes = async (limit = 10): Promise<Note[]> => {
     return db.notes.orderBy('updatedOn').reverse().limit(limit).toArray()
-    
 }

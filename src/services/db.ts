@@ -49,10 +49,12 @@ export interface FlashcardDeck {
     name: string;
     courseId: string;
     createdOn: Date;
+    updatedOn: Date
     description: string;
     tags?: string[];
     completed?: boolean;
     color: string;
+    origin: 'note' | 'pdf'
 }
 
 export interface Flashcard {
@@ -60,8 +62,8 @@ export interface Flashcard {
     front: string; // question/term
     back: string; // answer/definition
     deckId?: string;
-    origin: 'note' | 'pdf'
     createdOn: Date;
+    score?: number
 }
 
 export interface Summary {
@@ -71,6 +73,7 @@ export interface Summary {
     createdOn: Date;
     model?: string;
     color: string;
+    courseId: string;
 }
 
 export interface Quiz {
@@ -81,6 +84,8 @@ export interface Quiz {
     questions: quizQuestion[]
     completed?: boolean;
     color: string;
+    timeSpent?: number
+    score?: number;
 }
 
 export interface quizQuestion {
@@ -92,6 +97,28 @@ export interface quizQuestion {
     type: 'multiple-choice' | 'short-answer' | 'true-false'
     explanation: string
 }
+
+export interface userAnswer{
+    id: string;
+    quizId: string;
+    questionId: string;
+    answer: string | number | boolean 
+    isCorrect: boolean
+    answeredOn: Date;
+}
+
+export interface userAnswerInput {
+    questionId: string;
+    answer: string | number | boolean 
+}
+
+export interface evaluatedResult {
+    questionId: string
+    isCorrect: boolean
+    explanation?: string
+    correctAnswer: string | number | boolean
+}
+
 
 // class declartin & dexie 
 
@@ -105,6 +132,9 @@ export class CalmecaDB extends Dexie {
     summaries!: Table<Summary, string>
     quizzes!: Table<Quiz, string>
     quizQuestions!: Table<quizQuestion, string>
+    userAnswers!: Table<userAnswer, string>
+    userAnswerInputs!: Table<userAnswerInput, string>
+    evaluatedResults!: Table<evaluatedResult, string>
 
     constructor() {
         super('CalmecaDB')
@@ -113,11 +143,14 @@ export class CalmecaDB extends Dexie {
             assignments: 'id, title, courseId, type, deadline, completed, color',
             calendarEvents: 'id, title, date, source, sourceId, color',
             notes: 'id, courseId, createdOn, updatedOn',
-            flashcardDecks: 'id, courseId, completed',
-            flashcards: 'id, deckId, origin',
-            summaries: 'id, noteId',
-            quizzes: 'id, title, courseId, completed',
-            quizQuestions: 'id, quizId, type'
+            flashcardDecks: 'id, courseId, completed, updatedOn, origin, score',
+            flashcards: 'id, deckId',
+            summaries: 'id, noteId, courseId, color, createdOn',
+            quizzes: 'id, title, courseId, completed, timeSpent, score',
+            quizQuestions: 'id, quizId, type',
+            userAnswers: 'id, quizId, questionId, answer, isCorrect, answeredOn',
+            userAnswerInputs: 'questionId, answer',
+            evaluatedResults: 'questionId, isCorrect, explanation, correctAnswer'
         })
     }
 }

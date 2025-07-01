@@ -1,5 +1,5 @@
 // Assignment Service File
-import { Assignment, db } from "./db";
+import { Assignment, db } from '../db';
 import { v4 as uuid} from 'uuid'
 import { addEvent } from "./calendarService";
 

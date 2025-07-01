@@ -7,7 +7,7 @@ import {
 } from "../services/assignmentService";
 
 import { db } from "../services/db";
-import { getAllCourses } from "../services/courseService";
+import { getAllCourses } from "../services/core services/courseService";
 
 export const seedDummyAssignments = async () => {
   await db.assignments.clear();
