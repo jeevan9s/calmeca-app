@@ -1,10 +1,8 @@
-import {
-  createAssignment,
+import  { createAssignment,
   getUpcomingAssignments,
   getOverdueAssignments,
   getCompletedAssignments,
-  markAsCompleted
-} from "../services/assignmentService";
+  markAsCompleted} from "../services/core services/assignmentService"
 
 import { db } from "../services/db";
 import { getAllCourses } from "../services/core services/courseService";
@@ -50,3 +48,4 @@ export const seedDummyAssignments = async () => {
   const completedAssignments = await getCompletedAssignments();
   console.log("Completed Assignments:", completedAssignments);
 };
+

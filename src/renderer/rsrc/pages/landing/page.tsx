@@ -40,6 +40,7 @@ export default function Landing() {
           isLocked={isLocked}
           setIsHovered={setIsHovered}
           setIsLocked={setIsLocked}
+          disableButton = {true}
         />
       </div>
 

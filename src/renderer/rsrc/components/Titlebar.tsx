@@ -13,6 +13,7 @@ import {
 import '@/renderer/rsrc/styles/tb.css'
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
+import { getLastEditedTime, getRelativeTimeStamp } from '../../../services/utils & integrations/utilityServicies'
 
 type TitleBarProps = {
   solidBackground?: boolean
@@ -29,7 +30,9 @@ type TitleBarProps = {
   setIsCalendarHovered: (calendarHovered: boolean) => void
   isAlertsOpen: boolean
   isQuickNavOpen: boolean
+  disableButton: boolean
 }
+
 
 export default function TitleBar({
   isLocked,
@@ -44,11 +47,30 @@ export default function TitleBar({
   setIsLocked,
   ontoggleQuickNav,
   ontoggleAlerts,
+  disableButton,
   solidBackground = false,
   outline = false
 }: TitleBarProps) {
   const [isMaximized, setisMaximized] = useState(false)
   const [windowWidth, setWindowWidth] = useState(window.innerWidth)
+
+  
+const [lastEdited, setLastEdited] = useState<Date | null>(null)
+const [relativeTime, setRelativeTime] = useState('')
+
+useEffect(() => {
+  const fetchAndUpdate = async () => {
+    const timestamp = await getLastEditedTime()
+    setLastEdited(timestamp)
+    setRelativeTime(getRelativeTimeStamp(timestamp))
+  }
+
+  fetchAndUpdate()
+
+  const interval = setInterval(fetchAndUpdate, 60000) // every 60 seconds
+
+  return () => clearInterval(interval)
+}, [])
 
   useEffect(() => {
     const onMax = () => setisMaximized(true)
@@ -131,34 +153,39 @@ export default function TitleBar({
             />
           </button>
 
-          {!isLocked && (
-            <button
-              id="sidebar"
-              className="relative w-5 h-5 flex items-center justify-center transition-transform duration-200 hover:scale-105 drag-exclude"
-              onMouseEnter={() => setIsHovered(true)}
-              onMouseLeave={() => setIsHovered(false)}
-              onClick={() => setIsLocked(true)}
-            >
-              <Menu
-                className={`sidebar-icon ${isHovered ? 'icon-hidden' : 'icon-visible'}`}
-                color="white"
-                size={18}
-                strokeWidth={0.9}
-              />
-              <ChevronsRight
-                className={`sidebar-icon absolute transition-transform duration-200 hover:scale-110 ${
-                  isHovered ? 'icon-visible' : 'icon-hidden'
-                }`}
-                color="white"
-                size={18}
-                strokeWidth={2.25}
-              />
-            </button>
-          )}
+{!isLocked && (
+  <button
+    id="sidebar"
+    className={`relative w-5 h-5 flex items-center justify-center drag-exclude transition-transform duration-200 ${
+      disableButton ? 'cursor-not-allowed opacity-60' : 'hover:scale-105'
+    }`}
+    onMouseEnter={() => !disableButton && setIsHovered(true)}
+    onMouseLeave={() => !disableButton && setIsHovered(false)}
+    onClick={() => {
+      if (!disableButton) setIsLocked(true)
+    }}
+    disabled={disableButton}
+  >
+    <Menu
+      className={`sidebar-icon ${isHovered ? 'icon-hidden' : 'icon-visible'}`}
+      color="white"
+      size={18}
+      strokeWidth={0.9}
+    />
+    <ChevronsRight
+      className={`sidebar-icon absolute transition-transform duration-200 hover:scale-110 ${
+        isHovered ? 'icon-visible' : 'icon-hidden'
+      }`}
+      color="white"
+      size={18}
+      strokeWidth={2.25}
+    />
+  </button>
+)}
 
           {(!isLocked || windowWidth >= 640) && (
             <p className="text-neutral-500 text-xs sm:text-sm leading-none font-raleway">
-              Edited X ago
+              {relativeTime} 
             </p>
           )}
         </div>

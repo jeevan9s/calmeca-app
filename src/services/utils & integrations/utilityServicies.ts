@@ -78,14 +78,14 @@ export const getRelativeTimeStamp = (timestamp: Date | null): string => {
     const now = new Date()
     const diffSeconds = Math.floor((now.getTime() - timestamp.getTime()) / 1000)
 
-    if (diffSeconds < 60) return "just now"
+    if (diffSeconds < 60) return "Edited just now"
     
     const diffMinutes = Math.floor(diffSeconds / 60) 
-    if (diffMinutes < 60) return `last edited ${diffMinutes} minute${diffMinutes !== 1 ? "s" : ""} ago`
+    if (diffMinutes < 60) return `Last edited ${diffMinutes} minute${diffMinutes !== 1 ? "s" : ""} ago`
 
     const diffHours = Math.floor(diffMinutes / 60) 
-    if (diffHours < 24 ) return `last edited ${diffHours} hour${diffHours!== 1 ? "s" : ""} ago`
+    if (diffHours < 24 ) return `Last edited ${diffHours} hour${diffHours!== 1 ? "s" : ""} ago`
 
     const diffDays = Math.floor(diffHours / 24) 
-    return `last edited ${diffDays} day${diffDays !== 1 ? "s" : " "} ago`
+    return `Last edited ${diffDays} day${diffDays !== 1 ? "s" : " "}`
 }
