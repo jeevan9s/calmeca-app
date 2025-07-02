@@ -1,19 +1,20 @@
 // Quiz Service File
-import { db, Course, Quiz, quizQuestion, userAnswerInput, evaluatedResult, userAnswer } from "../db";
-import { v4 as uuid} from 'uuid'
+import { db, Quiz, quizQuestion, userAnswerInput, evaluatedResult, userAnswer } from "../db";
+import { generateId } from "../utils & integrations/utilityServicies";
+import { getCourseColor } from "../utils & integrations/utilityServicies";
 
 // impl crud, evaluation (score, marking, feedback), time spent, return functions
 
 // quiz creation + colour inheritance 
 export const addQuiz = async (quiz: Omit<Quiz, 'id' | 'color' | 'createdOn'| 'questions'>): Promise<Quiz> => {
-    const course: Course | undefined = quiz.courseId ? await db.courses.get(quiz.courseId): undefined
+    if (!quiz.courseId) throw new Error("Quiz must have a courseId")
 
     const newQuiz: Quiz = {
         ...quiz,
-        id: uuid(),
+        id: generateId(),
         createdOn: new Date(),
         questions: [],
-        color: course?.color ?? '#000000',
+        color: await getCourseColor(quiz.courseId),
         completed: false,
     }
     await db.quizzes.add(newQuiz)
@@ -23,7 +24,7 @@ export const addQuiz = async (quiz: Omit<Quiz, 'id' | 'color' | 'createdOn'| 'qu
 export const addQuizQuestion = async (question: Omit<quizQuestion, 'id'>): Promise<quizQuestion> => {
     const newQuestion: quizQuestion = {
         ...question,
-        id: uuid(),
+        id: generateId(),
     }
     await db.quizQuestions.add(newQuestion)
     return newQuestion
@@ -69,7 +70,7 @@ export const evaluateAnswers = async (quizId:string, answers: userAnswerInput[])
             isCorrect = correct === given
         }
         const userResponse: userAnswer = {
-        id: uuid(),
+        id: generateId(),
         quizId,
         questionId,
         answer,

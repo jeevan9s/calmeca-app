@@ -1,14 +1,14 @@
 // Course Service File
 import { db } from "../db";
 import { Course } from "../db";
-import { v4 as uuid} from 'uuid'
+import { generateId } from "../utils & integrations/utilityServicies";
 
 // implementin CRUD, some archive stuff, return functions 
 
 export const addCourse = async (course: Omit<Course, 'id' | 'createdOn' | 'archived'>) => {
     const newCourse: Course = {
         ...course,
-        id: uuid(),
+        id: generateId(),
         createdOn: new Date(),
         archived: false,
     }

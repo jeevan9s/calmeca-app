@@ -1,16 +1,15 @@
 // Summary Service File
 import { Summary, db } from '../db';
-import { v4 as uuid} from 'uuid'
+import { generateId } from '../utils & integrations/utilityServicies';
+import { getCourseColor } from '../utils & integrations/utilityServicies';
 
 // implementing CRUD,  return functions 
 export const createSummary = async (summary:Omit<Summary, 'id' | 'color' | 'createdOn'>) => {
-    const course = await db.courses.get(summary.courseId)
-    if (!course) throw new Error("Course not found")
     
     const newSummary: Summary = {
         ...summary,
-        id: uuid(),
-        color: course.color,
+        id: generateId(),
+        color: await getCourseColor(summary.courseId),
         createdOn: new Date()
     }
     await db.summaries.add(newSummary)

@@ -1,20 +1,19 @@
 // Assignment Service File
 import { Assignment, db } from '../db';
-import { v4 as uuid} from 'uuid'
+import { generateId } from '../utils & integrations/utilityServicies';
 import { addEvent } from "./calendarService";
+import { getCourseColor } from '../utils & integrations/utilityServicies';
 
 // implementin CRUD, some completion stuff, return functions 
 
 // added calendar linkage
 export const createAssignment = async (assignment:Omit<Assignment, 'id' | 'completed' | 'color'>) => {
 
-    const course = await db.courses.get(assignment.courseId)
-    if (!course) throw new Error("Course not found");
     const newAssignment: Assignment = {
         ...assignment,
-        id: uuid(),
+        id: generateId(),
         completed: false,
-        color: course.color
+        color: await getCourseColor(assignment.courseId)
     }
     await db.assignments.add(newAssignment)
 

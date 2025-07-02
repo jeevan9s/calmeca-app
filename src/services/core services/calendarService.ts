@@ -1,7 +1,8 @@
 // Calendar Service File
-import { db } from "./db";
-import { CalendarEvent } from "./db";
-import { v4 as uuid} from 'uuid'
+import { db } from "../db";
+import { CalendarEvent } from "../db";
+import { generateId } from "../utils & integrations/utilityServicies";
+import { getCourseColor } from "../utils & integrations/utilityServicies";
 
 // impl crud, fetching events by date, source 
 
@@ -18,7 +19,7 @@ export const addEvent = async (
   }
 
   const newEvent: CalendarEvent = {
-    id: uuid(),
+    id: generateId(),
     ...event,
     color: color ?? '#000000',
   };

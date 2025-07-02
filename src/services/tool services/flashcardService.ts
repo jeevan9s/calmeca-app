@@ -1,18 +1,17 @@
 // Flashcard Service File
-import { db, Course, Flashcard, FlashcardDeck } from "../db";
-import { v4 as uuid} from 'uuid'
+import { db,  Flashcard, FlashcardDeck } from "../db";
+import { generateId } from "../utils & integrations/utilityServicies";
+import { getCourseColor } from "../utils & integrations/utilityServicies";
 
 // impl crud, retyrb functions 
 
 export const addDeck = async (deck: Omit<FlashcardDeck, 'id' | 'createdOn' | 'updatedOn' | 'color'>): Promise<FlashcardDeck>  => {
-    const course: Course | undefined = await db.courses.get(deck.courseId)
-    if (!course) throw new Error('Course not found')
 
     const newDeck: FlashcardDeck = {
         ...deck,
-        id: uuid(),
+        id: generateId(),
         createdOn: new Date(),
-        color: course.color,
+        color: await getCourseColor(deck.courseId),
         completed: false,
         updatedOn: new Date()
     }
@@ -23,7 +22,7 @@ export const addDeck = async (deck: Omit<FlashcardDeck, 'id' | 'createdOn' | 'up
 export const addCard = async (card: Omit<Flashcard, 'id' | 'createdOn'>): Promise<Flashcard> => {
     const newCard: Flashcard = {
         ...card,
-        id: uuid(),
+        id: generateId(),
         createdOn: new Date()
     }
     await db.flashcards.add(newCard)

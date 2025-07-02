@@ -1,20 +1,19 @@
 // Calendar Service File
-import { db, Note, Course } from "../db";
-import { v4 as uuid} from 'uuid'
+import { db, Note } from "../db";
+import { generateId } from "../utils & integrations/utilityServicies";
+import { getCourseColor } from "../utils & integrations/utilityServicies";
 
 // impl crud, fetching notes by course, most recent 
 
 export const addNote = async (note: Omit<Note, 'id' | 'createdOn' | 'updatedOn' | 'color'>): Promise<Note> => {
-    const course: Course | undefined = await db.courses.get(note.courseId)
-    if (!course) throw new Error("Course not found")
     
         const now = new Date()
         const newNote: Note = {
             ...note,
-            id: uuid(),
+            id: generateId(),
             createdOn: now,
             updatedOn: now, // later on implement
-            color: course.color
+            color: await getCourseColor(note.courseId)
         }
         await db.notes.add(newNote)
         return newNote
