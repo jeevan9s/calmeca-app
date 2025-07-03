@@ -1,8 +1,7 @@
 // Calendar Service File
 import { db, Note } from "../db";
 import { generateId } from "../utils & integrations/utilityServicies";
-import { getCourseColor } from "../utils & integrations/utilityServicies";
-import { updateTimestamp } from "../utils & integrations/utilityServicies";
+import { getCourseColor, updateTimestamp, updateCourseFromChild } from "../utils & integrations/utilityServicies";
 
 // impl crud, fetching notes by course, most recent 
 
@@ -17,16 +16,26 @@ export const addNote = async (note: Omit<Note, 'id' | 'createdOn' | 'updatedOn' 
             color: await getCourseColor(note.courseId)
         }
         await db.notes.add(newNote)
+        await updateCourseFromChild(newNote.courseId, 'note')
         return newNote
 }
 
 export const deleteNote = async (id: string) => {
-    return db.notes.delete(id)
+    const note = await db.notes.get(id)
+    if (note) {
+        await db.notes.delete(id)
+        await updateCourseFromChild(note.courseId, 'note')
+    }
 }
 
 export const updateNote = async (id:string, updates: Partial<Omit<Note, 'id' | 'createdOn'>>): Promise<void> => {
     await db.notes.update(id, updates)
     await updateTimestamp('notes', id)
+
+    const updatedNote = await db.notes.get(id)
+    if (updatedNote?.courseId) {
+        await updateCourseFromChild(updatedNote.courseId, 'note')
+    }
 }
 
 export const getAllNotes = async (): Promise<Note[]> => {

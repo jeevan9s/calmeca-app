@@ -2,7 +2,7 @@
 import { db, Quiz, quizQuestion, userAnswerInput, evaluatedResult, userAnswer, reviewedQuiz, reviewedQuestion } from "../db";
 import { generateQuiz } from "../utils & integrations/aiServices";
 import { evaluateAnswer } from "../utils & integrations/aiServices";
-import { generateId } from "../utils & integrations/utilityServicies";
+import { generateId, updateCourseFromChild } from "../utils & integrations/utilityServicies";
 import { getCourseColor } from "../utils & integrations/utilityServicies";
 
 // impl crud, evaluation (score, marking, feedback), time spent, return functions
@@ -20,6 +20,10 @@ export const addQuiz = async (quiz: Omit<Quiz, 'id' | 'color' | 'createdOn'| 'qu
         completed: false,
     }
     await db.quizzes.add(newQuiz)
+    
+    if (newQuiz.courseId) {
+        await updateCourseFromChild(newQuiz.courseId, 'quiz')
+    }
     return newQuiz
 }
 
@@ -46,16 +50,23 @@ export const generateAndSaveQuiz = async (text:string, quizMeta: Omit<Quiz, 'id'
             options:q.options
         })
     }
+    if (quiz.courseId) {
+        await updateCourseFromChild(quiz.courseId, 'quiz')
+    }
     return quiz
 }
 
 
 
 export const deleteQuiz = async (quizId: string): Promise<void> => {
+    const quiz = await db.quizzes.get(quizId)
     await db.quizzes.delete(quizId)
     const questions = await db.quizQuestions.where('quizId').equals(quizId).toArray()
     for (const i of questions) {
         await db.quizQuestions.delete(i.id)
+    }
+    if (quiz?.courseId) {
+        await updateCourseFromChild(quiz.courseId, 'quiz')
     }
 }
 
@@ -65,6 +76,10 @@ export const deleteQuizQuestion = async(id: string): Promise<void> => {
 
 export const updateQuiz = async (id:string, updates: Partial<Omit<Quiz, 'id'>>): Promise<void> => {
     await db.quizzes.update(id, updates)
+    const updatedQuiz = await db.quizzes.get(id)
+    if (updatedQuiz?.courseId) {
+        await updateCourseFromChild(updatedQuiz.courseId, 'quiz')
+    }
 }
 
 export const updateQuizQuestion = async (id:string, updates: Partial<Omit<quizQuestion, 'id'>>): Promise<void> => {

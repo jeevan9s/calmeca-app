@@ -1,7 +1,6 @@
 // Summary Service File
 import { Summary, db } from '../db';
-import { generateId, updateTimestamp } from '../utils & integrations/utilityServicies';
-import { getCourseColor } from '../utils & integrations/utilityServicies';
+import { generateId, updateTimestamp, getCourseColor, updateCourseFromChild} from '../utils & integrations/utilityServicies';
 import { generateSummary } from '../utils & integrations/aiServices';
 
 // implementing CRUD,  return functions 
@@ -14,6 +13,7 @@ export const createSummary = async (summary:Omit<Summary, 'id' | 'color' | 'crea
         createdOn: new Date()
     }
     await db.summaries.add(newSummary)
+    await updateCourseFromChild(newSummary.courseId, 'summary')
     return newSummary
 }
 
@@ -25,16 +25,27 @@ export const generateAndSaveSummary = async (text:string, summaryMeta: Omit<Summ
         id: generateId(), color: await getCourseColor(summaryMeta.courseId), createdOn: new Date(), content: summaryText
     }
     await db.summaries.add(newSummary)
+    await updateCourseFromChild(newSummary.courseId, 'summary')
     return newSummary
 }
 
 export const deleteSummary = async (id:string): Promise<void> => {
+    const summary = await db.summaries.get(id)
     await db.summaries.delete(id)
+
+    if (summary?.courseId) {
+        await updateCourseFromChild(summary.courseId, 'summary')
+    }
 }
 
 export const  updateSummary = async (id:string, updates: Partial<Omit<Summary, "id" | "createdOn">>): Promise<void> => {
     await db.summaries.update(id, updates)
     await updateTimestamp('summaries', id)
+
+    const updated = await db.summaries.get(id)
+    if (updated?.courseId) {
+        await updateCourseFromChild(updated.courseId, 'summary')
+    }
 }
 
 export const getAllSummaries = async (): Promise<Summary[]> => {

@@ -1,7 +1,7 @@
 // Course Service File
 import { db } from "../db";
 import { Course } from "../db";
-import { generateId, updateTimestamp} from "../utils & integrations/utilityServicies";
+import { generateId, getCourseColor } from "../utils & integrations/utilityServicies";
 
 // implementin CRUD, some archive stuff, return functions 
 
@@ -10,7 +10,10 @@ export const addCourse = async (course: Omit<Course, 'id' | 'createdOn' | 'archi
         ...course,
         id: generateId(),
         createdOn: new Date(),
+        updatedOn: new Date(),
+        updatedFrom: undefined,
         archived: false,
+        color: await getCourseColor(course.courseId)
     }
     await db.courses.add(newCourse)
     return newCourse
@@ -20,10 +23,16 @@ export const deleteCourse = async (id: string) => {
     return  db.courses.delete(id)
 }
 
-export const updateCourse = async (id: string, updates: Partial<Course> ) => {
-    return  db.courses.update(id, updates)
-    await updateTimestamp('courses', id)
-}
+export const updateCourse = async (
+    id: string,
+    updates: Partial<Omit<Course, 'id' | 'createdOn'>>
+): Promise<void> => {
+    if (updates) {
+        updates.updatedOn = new Date();  
+    }
+    await db.courses.update(id, updates);
+};
+
 
 export const archiveCourse = async (id: string) => {
     return  db.courses.update(id, {archived: true})

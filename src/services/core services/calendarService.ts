@@ -1,7 +1,7 @@
 // Calendar Service File
 import { db } from "../db";
 import { CalendarEvent } from "../db";
-import { generateId, updateTimestamp } from "../utils & integrations/utilityServicies";
+import { generateId, updateCourseFromChild, updateTimestamp } from "../utils & integrations/utilityServicies";
 
 // impl crud, fetching events by date, source 
 
@@ -24,6 +24,13 @@ export const addEvent = async (
   };
 
   await db.calendarEvents.add(newEvent);
+
+  if(newEvent.source === 'assignment' && newEvent.sourceId) {
+    const assignment = await db.assignments.get(newEvent.sourceId)
+    if(assignment?.courseId) {
+      await updateCourseFromChild(assignment.courseId, 'calendar')
+    }
+  }
   return newEvent;
 };
 
@@ -32,17 +39,23 @@ export const deleteEvent = async (id: string) => {
     await db.calendarEvents.delete(id)
 
     if (deleted?.source === 'assignment' && deleted.sourceId) {
-      await updateTimestamp('assignments', deleted.sourceId)
+      const assignment = await db.assignments.get(deleted.sourceId)
+      if (assignment?.courseId) {
+        await updateCourseFromChild(assignment.courseId, 'calendar')
+      }
     }
 }
 
 export const updateEvent = async (id: string, updates: Partial<CalendarEvent>) => {
     await db.calendarEvents.update(id, updates)
-    await updateTimestamp('assignments', id)
+    await updateTimestamp('calendarEvents', id)
 
     const updatedEvent = await db.calendarEvents.get(id)
     if (updatedEvent?.source === 'assignment' && updatedEvent.sourceId) {
-      await updateTimestamp('assignments', updatedEvent.sourceId)
+      const assignment = await db.assignments.get(updatedEvent.sourceId)
+      if (assignment?.courseId) {
+        await updateCourseFromChild(assignment.courseId, 'calendar')
+      }
     }
 }
 

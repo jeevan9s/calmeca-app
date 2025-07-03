@@ -1,6 +1,6 @@
 // Flashcard Service File
 import { db,  Flashcard, FlashcardDeck } from "../db";
-import { generateId, updateTimestamp } from "../utils & integrations/utilityServicies";
+import { generateId, updateCourseFromChild, updateTimestamp } from "../utils & integrations/utilityServicies";
 import { getCourseColor } from "../utils & integrations/utilityServicies";
 import { generateFlashcards } from "../utils & integrations/aiServices";
 
@@ -17,6 +17,7 @@ export const addDeck = async (deck: Omit<FlashcardDeck, 'id' | 'createdOn' | 'up
         updatedOn: new Date()
     }
     await db.flashcardDecks.add(newDeck)
+    await updateCourseFromChild(deck.courseId, 'flashcard')
     return newDeck
     }
 
@@ -30,6 +31,11 @@ export const addCard = async (card: Omit<Flashcard, 'id' | 'createdOn'>): Promis
     const updatedCard = await db.flashcards.get(newCard.id)
     if (updatedCard?.deckId) {
         await updateTimestamp('flashcardDecks', updatedCard.deckId)
+
+        const deck = await db.flashcardDecks.get(updatedCard.deckId)
+        if (deck?.courseId) {
+            await updateCourseFromChild(deck.courseId, 'flashcard')
+        }
     }
     return newCard
 }
@@ -45,6 +51,9 @@ export const generateAndSaveFlashcards = async (
                 deckId: deck.id, front: card.term, back: card.definition
             })
         }
+        if (deck.courseId) {
+            await updateCourseFromChild(deck.courseId, 'flashcard')
+        }
         return deck
     }
 
@@ -52,10 +61,14 @@ export const generateAndSaveFlashcards = async (
 
 // delete a deck and all its flashcards 
 export const deleteDeck = async (deckId:string): Promise<void> => {
+    const deck = await db.flashcardDecks.get(deckId)
     await db.flashcardDecks.delete(deckId)
     const cards = await db.flashcards.where('deckId').equals(deckId).toArray()
     for (const card of cards) {
         await db.flashcards.delete(card.id)
+    }
+    if (deck?.courseId) {
+        await updateCourseFromChild(deck.courseId, 'flashcard')
     }
 }
 
@@ -64,12 +77,22 @@ export const deleteCard = async (id: string): Promise<void> => {
     await db.flashcards.delete(id)
     if (cardToDelete?.deckId) {
         await updateTimestamp('flashcardDecks', cardToDelete.deckId)
+        const deck = await db.flashcardDecks.get(cardToDelete.deckId)
+        if (deck?.courseId) {
+            await updateCourseFromChild(deck.courseId, 'flashcard')
+        }
     }
 }
+
 export const updateDeck = async(id: string, updates: Partial<Omit<FlashcardDeck, 'id' | 'createdOn'>>): Promise<void> => {
     updates.updatedOn = new Date()
     await db.flashcardDecks.update(id, updates)
-    // implement timestamp util here 
+    await updateTimestamp('flashcardDecks', id)
+
+    const deck = await db.flashcardDecks.get(id)
+    if (deck?.courseId) {
+        await updateCourseFromChild(deck.courseId, 'flashcard')
+    }
 }
 
 export const updateCard = async(id:string, updates: Partial<Omit<Flashcard, 'id' | 'createdOn'>>): Promise<void> => {
@@ -77,6 +100,10 @@ export const updateCard = async(id:string, updates: Partial<Omit<Flashcard, 'id'
     const updatedCard = await db.flashcards.get(id)
     if (updatedCard?.deckId) {
         await updateTimestamp('flashcardDecks', updatedCard.deckId)
+        const deck = await db.flashcardDecks.get(id)
+        if (deck?.courseId) {
+            await updateCourseFromChild(deck.courseId, 'flashcard')
+    }
     }
 }
 

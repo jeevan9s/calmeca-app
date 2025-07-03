@@ -1,7 +1,7 @@
 // Utility Service File
 // general utils to use across other service files / architecture 
 import { v4 as uuid} from 'uuid'
-import { db } from '../db'
+import { db, UpdateInfo } from '../db'
 import { Table } from 'dexie'
 
 type DBTable = keyof typeof db
@@ -30,9 +30,15 @@ export const getCourseColor = async (courseId:string): Promise<string> => {
     return course.color
 }
 
-export const updateTimestamp = async (table:keyof typeof db, id: string): Promise<void> => {
+export const updateTimestamp = async (table:keyof typeof db, id: string, updatedFrom?: UpdateInfo['updatedFrom']): Promise<void> => {
     const tableRef = db[table] as Table<any, string>
-    await tableRef.update(id, {updatedOn: new Date()})
+    const updateData: Partial<{updatedOn: Date; updatedFrom?: string}> = {
+        updatedOn: new Date()
+    }
+    if (updatedFrom) {
+        updateData.updatedFrom = updatedFrom
+    }
+    await tableRef.update(id, updateData)
 }
 
 export const sleep = (ms: number): Promise<void> => {
@@ -88,4 +94,8 @@ export const getRelativeTimeStamp = (timestamp: Date | null): string => {
 
     const diffDays = Math.floor(diffHours / 24) 
     return `Last edited ${diffDays} day${diffDays !== 1 ? "s" : " "}`
+}
+
+export const updateCourseFromChild = async (courseId:string, updatedFrom: 'note' | 'assignment' | 'summary' | 'flashcard' | 'calendar' | 'quiz' | 'other') => {
+    await updateTimestamp('courses', courseId, updatedFrom)
 }
