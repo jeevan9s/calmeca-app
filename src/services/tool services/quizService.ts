@@ -1,5 +1,7 @@
 // Quiz Service File
-import { db, Quiz, quizQuestion, userAnswerInput, evaluatedResult, userAnswer } from "../db";
+import { db, Quiz, quizQuestion, userAnswerInput, evaluatedResult, userAnswer, reviewedQuiz, reviewedQuestion } from "../db";
+import { generateQuiz } from "../utils & integrations/aiServices";
+import { evaluateAnswer } from "../utils & integrations/aiServices";
 import { generateId } from "../utils & integrations/utilityServicies";
 import { getCourseColor } from "../utils & integrations/utilityServicies";
 
@@ -30,6 +32,25 @@ export const addQuizQuestion = async (question: Omit<quizQuestion, 'id'>): Promi
     return newQuestion
 }
 
+export const generateAndSaveQuiz = async (text:string, quizMeta: Omit<Quiz, 'id' | 'color' | 'createdOn' | 'questions' | 'completed'>, 
+    quizType: "multiple-choice" | "true-false" | "short-answer" | "mixed",
+    length?:number): Promise<Quiz> => {
+        const quiz = await addQuiz(quizMeta)
+        const generatedQuestions = await generateQuiz(text, quizType, length)
+    for (const q of generatedQuestions) {
+        await addQuizQuestion({
+            quizId: quiz.id,
+            questionText: q.question,
+            type: q.type,
+            correctAnswer: q.correctAnswer,
+            options:q.options
+        })
+    }
+    return quiz
+}
+
+
+
 export const deleteQuiz = async (quizId: string): Promise<void> => {
     await db.quizzes.delete(quizId)
     const questions = await db.quizQuestions.where('quizId').equals(quizId).toArray()
@@ -54,47 +75,69 @@ export const markQuizCompleted = async (quizId: string): Promise<void> => {
     await db.quizzes.update(quizId, {completed: true})
 }
 
-// evaluation
-export const evaluateAnswers = async (quizId:string, answers: userAnswerInput[]): Promise<evaluatedResult[]> => {
-    const results: evaluatedResult[] = []
-    let correctCount = 0
-    
-    for (const {questionId, answer} of answers) {
-        const question: quizQuestion | undefined = await db.quizQuestions.get(questionId)
-        if (!question) continue 
-
-        let isCorrect = false
-        if (question.type === "short-answer") {
-            const correct = String(question.correctAnswer).trim().toLowerCase()
-            const given = String(answer).trim().toLowerCase()
-            isCorrect = correct === given
-        }
-        const userResponse: userAnswer = {
-        id: generateId(),
-        quizId,
-        questionId,
-        answer,
-        isCorrect,
-        answeredOn: new Date()
+export const saveUserAnswers = async (quizId:string, answers: userAnswer[]): Promise<void> => {
+    for (const answer of answers) {
+        await db.userAnswers.add({...answer, quizId})
     }
-    await db.userAnswers.add(userResponse)
-    if (isCorrect) correctCount++
+}
 
-    results.push({
-        questionId,
-        isCorrect,
-        correctAnswer: question.correctAnswer,
-        explanation: isCorrect ? undefined : question.explanation
-    })
-    }
-    const scorePercent = results.length > 0
-    ? Math.round((correctCount / results.length) * 100): 0
-
+export const markQuiz = async (quizId:string, evaluatedResults: evaluatedResult[]): Promise<void> => {
+    const correctCount = evaluatedResults.filter(q => q.isCorrect).length
+    const scorePercent = evaluatedResults.length > 0 ? Math.round((correctCount / evaluatedResults.length) * 100) : 0
     await db.quizzes.update(quizId, {
         score: scorePercent,
         completed: true
-    })
-    return results
+    }
+    )
+}
+
+export const evaluateQuiz = async (quizId:string, answers: userAnswerInput[],): Promise<evaluatedResult[]> => {
+    const results: evaluatedResult[] = []
+
+    for (const input of answers) {
+        const question = await db.quizQuestions.get(input.questionId)
+        if (!question) continue
+
+        const result = await evaluateAnswer({ questionId: question.id, question: question.questionText, type: question.type, options: question.options}, input)
+        results.push(result)
+
+        await db.userAnswers.add({
+            id: generateId(),
+            quizId,
+            questionId: question.id,
+            answer: input.answer,
+            isCorrect: result.isCorrect,
+            answeredOn: new Date()
+        })
+        if (!result.isCorrect && result.explanation) {
+            await updateQuizQuestion(question.id, {
+                explanation: result.explanation
+            })
+        }
+    }
+        await markQuiz(quizId, results)
+        return results
+
+}
+
+export const reviewQuiz = async (quizId:string): Promise<reviewedQuiz | null> => {
+    const quiz = await db.quizzes.get(quizId)
+    if (!quiz) return null
+
+    const questions = await db.quizQuestions.where('quizId').equals(quizId).toArray()
+    const answers = await db.userAnswers.where('quizId').equals(quizId).toArray()
+
+    const reviewedQuestions = questions.map((q): reviewedQuestion => {
+        const userAnswer = answers.find(a => a.questionId === q.id)
+        return {
+            questionId: q.id, questionText: q.questionText, type: q.type, options: q.options, correctAnswer: q.correctAnswer, userAnswer: userAnswer?.answer, isCorrect: userAnswer?.isCorrect, explanation: q.explanation
+        }
+    }) 
+
+    return {
+        quizId: quiz.id,
+        title: quiz.title, courseId: quiz.courseId ?? "No Course ID" , questions: reviewedQuestions, score: quiz.score, completed: quiz.completed
+    }
 }
 
 // time spent 

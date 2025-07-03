@@ -1,7 +1,8 @@
 // Flashcard Service File
 import { db,  Flashcard, FlashcardDeck } from "../db";
-import { generateId } from "../utils & integrations/utilityServicies";
+import { generateId, updateTimestamp } from "../utils & integrations/utilityServicies";
 import { getCourseColor } from "../utils & integrations/utilityServicies";
+import { generateFlashcards } from "../utils & integrations/aiServices";
 
 // impl crud, retyrb functions 
 
@@ -26,8 +27,28 @@ export const addCard = async (card: Omit<Flashcard, 'id' | 'createdOn'>): Promis
         createdOn: new Date()
     }
     await db.flashcards.add(newCard)
+    const updatedCard = await db.flashcards.get(newCard.id)
+    if (updatedCard?.deckId) {
+        await updateTimestamp('flashcardDecks', updatedCard.deckId)
+    }
     return newCard
 }
+
+export const generateAndSaveFlashcards = async (
+    text:string, deckMeta: Omit<FlashcardDeck, 'id' | 'createdOn' | 'updatedOn' | 'color' | 'completed'>): Promise<FlashcardDeck> => {
+        const deck = await addDeck(deckMeta)
+
+        const flashcards = await generateFlashcards(text)
+
+        for (const card of flashcards) {
+            await addCard({
+                deckId: deck.id, front: card.term, back: card.definition
+            })
+        }
+        return deck
+    }
+
+
 
 // delete a deck and all its flashcards 
 export const deleteDeck = async (deckId:string): Promise<void> => {
@@ -39,9 +60,12 @@ export const deleteDeck = async (deckId:string): Promise<void> => {
 }
 
 export const deleteCard = async (id: string): Promise<void> => {
+    const cardToDelete = await db.flashcards.get(id)
     await db.flashcards.delete(id)
+    if (cardToDelete?.deckId) {
+        await updateTimestamp('flashcardDecks', cardToDelete.deckId)
+    }
 }
-
 export const updateDeck = async(id: string, updates: Partial<Omit<FlashcardDeck, 'id' | 'createdOn'>>): Promise<void> => {
     updates.updatedOn = new Date()
     await db.flashcardDecks.update(id, updates)
@@ -50,6 +74,10 @@ export const updateDeck = async(id: string, updates: Partial<Omit<FlashcardDeck,
 
 export const updateCard = async(id:string, updates: Partial<Omit<Flashcard, 'id' | 'createdOn'>>): Promise<void> => {
     await db.flashcards.update(id, updates)
+    const updatedCard = await db.flashcards.get(id)
+    if (updatedCard?.deckId) {
+        await updateTimestamp('flashcardDecks', updatedCard.deckId)
+    }
 }
 
 export const getAllDecks = async(): Promise<FlashcardDeck[]> => {

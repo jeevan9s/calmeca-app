@@ -1,7 +1,8 @@
 // Summary Service File
 import { Summary, db } from '../db';
-import { generateId } from '../utils & integrations/utilityServicies';
+import { generateId, updateTimestamp } from '../utils & integrations/utilityServicies';
 import { getCourseColor } from '../utils & integrations/utilityServicies';
+import { generateSummary } from '../utils & integrations/aiServices';
 
 // implementing CRUD,  return functions 
 export const createSummary = async (summary:Omit<Summary, 'id' | 'color' | 'createdOn'>) => {
@@ -16,19 +17,31 @@ export const createSummary = async (summary:Omit<Summary, 'id' | 'color' | 'crea
     return newSummary
 }
 
+export const generateAndSaveSummary = async (text:string, summaryMeta: Omit<Summary, 'id' | 'color' | 'createdOn'>): Promise<Summary> => {
+    const summaryText = await generateSummary(text)
+
+    const newSummary: Summary = {
+        ...summaryMeta,
+        id: generateId(), color: await getCourseColor(summaryMeta.courseId), createdOn: new Date(), content: summaryText
+    }
+    await db.summaries.add(newSummary)
+    return newSummary
+}
+
 export const deleteSummary = async (id:string): Promise<void> => {
     await db.summaries.delete(id)
 }
 
 export const  updateSummary = async (id:string, updates: Partial<Omit<Summary, "id" | "createdOn">>): Promise<void> => {
     await db.summaries.update(id, updates)
+    await updateTimestamp('summaries', id)
 }
 
 export const getAllSummaries = async (): Promise<Summary[]> => {
     return db.summaries.toArray()
 }
 
-export const getSummariesById = async (id:string)=> {
+export const getSummaryById = async (id:string): Promise<Summary | undefined>=> {
     return db.summaries.get(id)
 }
 

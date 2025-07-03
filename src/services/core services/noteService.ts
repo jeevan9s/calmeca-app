@@ -2,6 +2,7 @@
 import { db, Note } from "../db";
 import { generateId } from "../utils & integrations/utilityServicies";
 import { getCourseColor } from "../utils & integrations/utilityServicies";
+import { updateTimestamp } from "../utils & integrations/utilityServicies";
 
 // impl crud, fetching notes by course, most recent 
 
@@ -24,8 +25,8 @@ export const deleteNote = async (id: string) => {
 }
 
 export const updateNote = async (id:string, updates: Partial<Omit<Note, 'id' | 'createdOn'>>): Promise<void> => {
-    updates.updatedOn = new Date()
     await db.notes.update(id, updates)
+    await updateTimestamp('notes', id)
 }
 
 export const getAllNotes = async (): Promise<Note[]> => {

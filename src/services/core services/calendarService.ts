@@ -1,8 +1,7 @@
 // Calendar Service File
 import { db } from "../db";
 import { CalendarEvent } from "../db";
-import { generateId } from "../utils & integrations/utilityServicies";
-import { getCourseColor } from "../utils & integrations/utilityServicies";
+import { generateId, updateTimestamp } from "../utils & integrations/utilityServicies";
 
 // impl crud, fetching events by date, source 
 
@@ -29,11 +28,22 @@ export const addEvent = async (
 };
 
 export const deleteEvent = async (id: string) => {
-    return db.calendarEvents.delete(id)
+    const deleted = await db.calendarEvents.get(id)
+    await db.calendarEvents.delete(id)
+
+    if (deleted?.source === 'assignment' && deleted.sourceId) {
+      await updateTimestamp('assignments', deleted.sourceId)
+    }
 }
 
 export const updateEvent = async (id: string, updates: Partial<CalendarEvent>) => {
-    return db.calendarEvents.update(id, updates)
+    await db.calendarEvents.update(id, updates)
+    await updateTimestamp('assignments', id)
+
+    const updatedEvent = await db.calendarEvents.get(id)
+    if (updatedEvent?.source === 'assignment' && updatedEvent.sourceId) {
+      await updateTimestamp('assignments', updatedEvent.sourceId)
+    }
 }
 
 export const getAllEvents = async (): Promise<CalendarEvent[]> => {

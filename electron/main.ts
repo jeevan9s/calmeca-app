@@ -81,3 +81,6 @@ ipcMain.on('restore', () => {
   }
 });
 ipcMain.on('close', () => win?.close());
+
+import dotenv from "dotenv"
+dotenv.config()

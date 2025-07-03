@@ -69,7 +69,7 @@ export interface Flashcard {
 export interface Summary {
     id: string;
     noteId: string;
-    summaryText: string;
+    content: string;
     createdOn: Date;
     model?: string;
     color: string;
@@ -95,7 +95,7 @@ export interface quizQuestion {
     options?: string[] // ie multiple choice 
     correctAnswer: string | number;
     type: 'multiple-choice' | 'short-answer' | 'true-false'
-    explanation: string
+    explanation?: string
 }
 
 export interface userAnswer{
@@ -119,6 +119,26 @@ export interface evaluatedResult {
     correctAnswer: string | number | boolean
 }
 
+export interface reviewedQuestion {
+    questionId: string
+    questionText:string
+    type: "multiple-choice" | "true-false" | "short-answer"
+    options?: string[]
+    correctAnswer: string | number | boolean
+    userAnswer?: string | number | boolean
+    isCorrect?: boolean
+    explanation?: string
+}
+
+export interface reviewedQuiz {
+    quizId: string
+    title: string
+    courseId: string
+    questions: reviewedQuestion[]
+    score?: number
+    completed?: boolean
+}
+
 
 // class declartin & dexie 
 
@@ -135,6 +155,8 @@ export class CalmecaDB extends Dexie {
     userAnswers!: Table<userAnswer, string>
     userAnswerInputs!: Table<userAnswerInput, string>
     evaluatedResults!: Table<evaluatedResult, string>
+    reviewedQuestions !: Table<reviewedQuestion, string>
+    reviewedQuizzes !: Table<reviewedQuiz, string>
 
     constructor() {
         super('CalmecaDB')
@@ -145,12 +167,15 @@ export class CalmecaDB extends Dexie {
             notes: 'id, courseId, createdOn, updatedOn',
             flashcardDecks: 'id, courseId, completed, updatedOn, origin, score',
             flashcards: 'id, deckId',
-            summaries: 'id, noteId, courseId, color, createdOn',
+            summaries: 'id, noteId, courseId, content, color, createdOn',
             quizzes: 'id, title, courseId, completed, timeSpent, score',
             quizQuestions: 'id, quizId, type',
             userAnswers: 'id, quizId, questionId, answer, isCorrect, answeredOn',
             userAnswerInputs: 'questionId, answer',
-            evaluatedResults: 'questionId, isCorrect, explanation, correctAnswer'
+            evaluatedResults: 'questionId, isCorrect, explanation, correctAnswer',
+            reviewedQuestions: 'questionId, questionText, type, isCorrect, explanation, userAnswer, correctAnswer, options',
+            reviewedQuizzes: 'quizId, title, courseId, questions, score, completed'
+
         })
     }
 }

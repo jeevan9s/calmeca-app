@@ -1,6 +1,6 @@
 // Assignment Service File
 import { Assignment, db } from '../db';
-import { generateId } from '../utils & integrations/utilityServicies';
+import { generateId, updateTimestamp} from '../utils & integrations/utilityServicies';
 import { addEvent } from "./calendarService";
 import { getCourseColor } from '../utils & integrations/utilityServicies';
 
@@ -32,8 +32,14 @@ export const deleteAssignment = async (id: string) => {
     return await db.assignments.delete(id)
 }
 
-export const updateAssignment = async (id: string, updates:Partial<Assignment>) => {
-    return await db.assignments.update(id, updates)
+export const updateAssignment = async (id: string, updates: Partial<Assignment>): Promise<void> => {
+  await db.assignments.update(id, updates)
+  await updateTimestamp('assignments', id)
+
+  const updatedAssignment = await db.assignments.get(id)
+  if (updatedAssignment?.courseId) {
+    await updateTimestamp('courses', updatedAssignment.courseId)
+  }
 }
 
 export const getAssignmentById = async (id:string) => {

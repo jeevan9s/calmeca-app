@@ -20,8 +20,8 @@ export const formatDate = (date: Date, locale = 'en-CA' , options?: Intl.DateTim
     }).format(date)
 }
 
-export const normalize = (input : string): string => {
-    return input.trim().toLowerCase()
+export const normalize = (input : string | number | boolean): string => {
+    return String(input).trim().toLowerCase()
 }
 
 export const getCourseColor = async (courseId:string): Promise<string> => {

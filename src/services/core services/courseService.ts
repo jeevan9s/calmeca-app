@@ -1,7 +1,7 @@
 // Course Service File
 import { db } from "../db";
 import { Course } from "../db";
-import { generateId } from "../utils & integrations/utilityServicies";
+import { generateId, updateTimestamp} from "../utils & integrations/utilityServicies";
 
 // implementin CRUD, some archive stuff, return functions 
 
@@ -22,6 +22,7 @@ export const deleteCourse = async (id: string) => {
 
 export const updateCourse = async (id: string, updates: Partial<Course> ) => {
     return  db.courses.update(id, updates)
+    await updateTimestamp('courses', id)
 }
 
 export const archiveCourse = async (id: string) => {
