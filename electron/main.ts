@@ -101,7 +101,33 @@ ipcMain.handle('google-login', async () => {
     } else if (typeof err === 'string') {
       message = err
     }
-    console.error('Google loginfailed: ', message)
+    console.error('Google login failed: ', message)
     return { success: false, error: message} 
   }
 })
+
+import type { IpcMainInvokeEvent } from 'electron'
+import { exportTextFeatureGDrive } from "../src/services/utils & integrations/googleService";
+import { exportType } from "../src/services/db";
+
+interface ExportTextArgs {
+  content: string
+  filename: string
+  exportType: exportType
+}
+
+ipcMain.handle('google-export-text', async (_event: IpcMainInvokeEvent, args: ExportTextArgs) => {
+  const { content, filename, exportType } = args
+
+  try {
+    const result = await exportTextFeatureGDrive(content, filename, exportType)
+    return { success: true, ...result }
+  } catch (err: unknown) {
+    console.error('Export failed:', err)
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : String(err),
+    }
+  }
+})
+

@@ -4,12 +4,13 @@ import { google } from "googleapis";
 import { getAuthClient } from "./googleAuth";
 import {Readable} from 'stream'
 import { Buffer } from "buffer";
-import pdfParse from 'pdf-parse';
+const pdfParse = require('pdf-parse')
 import mammoth from 'mammoth'
 import { PDFDocument, StandardFonts } from "pdf-lib";
 import { Document, Packer, Paragraph, TextRun } from "docx";
 import stream from "stream"
 import { importedFile , exportType, Flashcard, quizQuestion} from "../db";
+import path from "path";
 
 
 const SUPPORTED_MIME_TYPES: Record<string, string> = {
@@ -81,6 +82,8 @@ export async function exportTextFeatureGDrive(content:string, filename: string, 
 
     let buffer: Buffer
     let mimeType: string
+    filename = path.basename(filename, path.extname(filename))
+
 
     switch(exportType) {
         case 'md':
@@ -211,7 +214,6 @@ export async function exportStructFeatureGDrive(content:Flashcard[] | quizQuesti
 
         buffer = Buffer.from(csv, "utf-8")
         mimeType = "text/csv"
-        filename += '.csv'
     } else {
         throw new Error("Unsupported export type")
     }

@@ -7,13 +7,15 @@ import path from 'path'
 import express from 'express'
 import open from 'open'
 import crypto from 'crypto'
+import { app } from 'electron'
 
 dotenv.config()
 const env = process.env
 
 const client_id = env.G_CLIENT_ID
 const redirect_uri = env.G_REDIRECT_URI
-const token_path = path.join(process.cwd(), 'tokens.json')
+const client_secret = env.G_CLIENT_SECRET
+const token_path = path.join(app.getPath('userData'), 'tokens.json')
 const scopes = ['https://www.googleapis.com/auth/drive.file'];
 
 if (!client_id || !redirect_uri) {
@@ -46,7 +48,8 @@ function loadSavedTokens(): Auth.Credentials | null {
 export async function getAuthClient(): Promise <Auth.OAuth2Client> {
     const oauth2Client = new google.auth.OAuth2({
         clientId: client_id,
-        redirectUri: redirect_uri
+        redirectUri: redirect_uri,
+        clientSecret: client_secret
     })
 
     const savedTokens = loadSavedTokens()
@@ -57,8 +60,12 @@ export async function getAuthClient(): Promise <Auth.OAuth2Client> {
             await oauth2Client.getAccessToken()
             console.log('Using saved tokens; refreshed access token silently')
             return oauth2Client
-        } catch (err) {
+        } catch (err: any) {
             console.log('Failed to refresh token silently', err)
+            if (err.response.status === 401 || err.message.includes('invalid_grant')) {
+                console.log('Refresh token invalid, forcing re-authenticaiton')
+                return authenticateWithGoogle()
+            }
         }
     }
 
@@ -74,7 +81,8 @@ export async function authenticateWithGoogle(): Promise<Auth.OAuth2Client>{
         
         const oauth2Client = new google.auth.OAuth2({
             clientId: client_id,
-            redirectUri: redirect_uri
+            redirectUri: redirect_uri,
+            clientSecret: client_secret
         })
 
         const authUrl = oauth2Client.generateAuthUrl({
@@ -84,12 +92,16 @@ export async function authenticateWithGoogle(): Promise<Auth.OAuth2Client>{
             code_challenge: challenge,
         } as Auth.GenerateAuthUrlOpts)
 
-        open(authUrl) // open url in default browser (scope, login)
 
         // small server to catch google's redirect (auth code after user login)
-        const app = express()
-        const server = app.listen(3000, () => {
+        const expressApp = express()
+        const server = expressApp.listen(3000, () => {
             console.log('Listening on port 3000 for OAuth callback')
+            open(authUrl) // open url in default browser (scope, login)
+        server.on('error', (err) => {
+            console.error('Express server failed to start: ', err)
+        })
+            
         })
 
         const timeoutId = setTimeout(() => {
@@ -97,7 +109,7 @@ export async function authenticateWithGoogle(): Promise<Auth.OAuth2Client>{
             reject(new Error('OAuth login timed out after 3 minutes'))
         }, 3 * 60 * 1000)
 
-        app.get('/oauth2callback', async (req,res) => {
+        expressApp.get('/oauth2callback', async (req,res) => {
             const code = req.query.code?.toString() // extract the auth code
 
             if (!code) {
