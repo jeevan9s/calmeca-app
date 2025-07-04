@@ -146,6 +146,26 @@ export interface UpdateInfo {
     updatedFrom: 'calendar' | 'assignment' | 'note' | 'summary' | 'flashcard' | 'quiz' | 'other' 
 }
 
+export interface importedFile {
+    id: string
+    name: string
+    size?: number
+    driveUrl?: string
+    createdOn: Date
+    usedFor: 'summary' | 'quiz' | 'flashcards' | 'other'
+    mimeType: string
+    content: string
+}
+
+export type generationType = 'summary' | 'flashcards' | 'quiz'
+export type exportType = 'md' | 'pdf' | 'txt' | 'docx' | 'json';
+
+
+export interface generationOptions {
+    quizType: 'multiple-choice' | 'short-answer' | 'true-false'
+    length?: number
+}
+
 // class declartin & dexie 
 
 export class CalmecaDB extends Dexie {
@@ -163,6 +183,8 @@ export class CalmecaDB extends Dexie {
     evaluatedResults!: Table<evaluatedResult, string>
     reviewedQuestions !: Table<reviewedQuestion, string>
     reviewedQuizzes !: Table<reviewedQuiz, string>
+    importedFiles !: Table<importedFile, string>
+
 
     constructor() {
         super('CalmecaDB')
@@ -180,10 +202,10 @@ export class CalmecaDB extends Dexie {
             userAnswerInputs: 'questionId, answer',
             evaluatedResults: 'questionId, isCorrect, explanation, correctAnswer',
             reviewedQuestions: 'questionId, questionText, type, isCorrect, explanation, userAnswer, correctAnswer, options',
-            reviewedQuizzes: 'quizId, title, courseId, questions, score, completed'
-
+            reviewedQuizzes: 'quizId, title, courseId, questions, score, completed',
+            importedFiles: 'id, name, createdOn, size, driveUrl, usedFor, mimeType, content'
         })
     }
-}
+} 
 
 export const db = new CalmecaDB();
