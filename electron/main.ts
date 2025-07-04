@@ -84,3 +84,24 @@ ipcMain.on('close', () => win?.close());
 
 import dotenv from "dotenv"
 dotenv.config()
+
+
+// google auth
+import { getAuthClient } from "../src/services/utils & integrations/googleAuth";
+
+// listener for login request
+ipcMain.handle('google-login', async () => {
+  try {
+    const authClient = await getAuthClient()
+    return { success: true, tokens: authClient.credentials}
+  } catch (err:unknown) {
+    let message = 'Unkown error'
+    if (err instanceof Error) {
+      message = err.message
+    } else if (typeof err === 'string') {
+      message = err
+    }
+    console.error('Google loginfailed: ', message)
+    return { success: false, error: message} 
+  }
+})
