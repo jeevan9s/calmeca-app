@@ -1,5 +1,5 @@
 // Contains servicing to function to generate based on cloud import 
-import { importDriveFile } from "./googleService";
+import { importDriveFile } from "./google/googleService";
 import {generateQuiz, generateSummary, generateFlashcards} from "./aiServices"
 import { generationOptions, generationType } from "../db";
 

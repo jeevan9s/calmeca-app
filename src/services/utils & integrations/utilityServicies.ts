@@ -3,6 +3,8 @@
 import { v4 as uuid} from 'uuid'
 import { db, UpdateInfo } from '../db'
 import { Table } from 'dexie'
+import { clsx, type ClassValue } from "clsx"
+import { twMerge } from "tailwind-merge"
 
 type DBTable = keyof typeof db
 
@@ -98,4 +100,8 @@ export const getRelativeTimeStamp = (timestamp: Date | null): string => {
 
 export const updateCourseFromChild = async (courseId:string, updatedFrom: 'note' | 'assignment' | 'summary' | 'flashcard' | 'calendar' | 'quiz' | 'other') => {
     await updateTimestamp('courses', courseId, updatedFrom)
+}
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs))
 }
