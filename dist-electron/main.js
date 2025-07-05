@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-"use strict";
-require("./main-BeBzN5mE.js");
-=======
 import { app, BrowserWindow, ipcMain } from "electron";
 import { fileURLToPath } from "url";
 import path from "path";
@@ -76,4 +72,3 @@ ipcMain.on("restore", () => {
   win == null ? void 0 : win.restore();
 });
 ipcMain.on("close", () => win == null ? void 0 : win.close());
->>>>>>> b900bd11b6a438a38da29cdce13353f6e2138afe
