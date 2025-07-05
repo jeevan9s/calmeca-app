@@ -1,14 +1,12 @@
-import dotenv from 'dotenv';
-dotenv.config();
+const { app, ipcMain } = require('electron');
+const { BrowserWindow, setVibrancy } = require('electron-acrylic-window');
 
-const { app, ipcMain, BrowserWindow } = require('electron');
-const { setVibrancy } = require('electron-acrylic-window');
-const path = require('path'); 
-import { clearSavedTokens, getAuthClient } from '../src/services/utils & integrations/googleAuth';
-import { google } from 'googleapis';
-import type { IpcMainInvokeEvent } from 'electron';
-import { exportTextFeatureGDrive } from '../src/services/utils & integrations/googleService';
-import { exportType } from '../src/services/db'
+
+import dotenv from "dotenv"
+dotenv.config()
+
+
+const path = require('path');
 
 const APP_ROOT = path.join(__dirname, '..');
 const RENDERER_DIST = path.join(APP_ROOT, 'dist');
@@ -91,8 +89,10 @@ ipcMain.on('restore', () => {
 ipcMain.on('close', () => win?.close());
 
 
-
 // google auth
+import { clearSavedTokens, getAuthClient } from "../src/services/utils & integrations/googleAuth";
+import { google } from "googleapis";
+
 // listeners for login & logut requests
 ipcMain.handle('google-login', async () => {
   try {
@@ -132,6 +132,11 @@ ipcMain.handle('google-logout', async () => {
      return {success: false, error: message}
   }
 })
+
+
+import type { IpcMainInvokeEvent } from 'electron'
+import { exportTextFeatureGDrive } from "../src/services/utils & integrations/googleService";
+import { exportType } from "../src/services/db";
 
 interface ExportTextArgs {
   content: string
