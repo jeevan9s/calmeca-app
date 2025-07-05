@@ -1,10 +1,5 @@
 import { ipcRenderer, contextBridge } from 'electron'
 
-contextBridge.exposeInMainWorld('api' , {
-  google: {
-    login: () => ipcRenderer.invoke('google-login'),
-    logou: () => ipcRenderer.invoke('google-logout')
-  }})
 
 contextBridge.exposeInMainWorld('ipcRenderer', {
   on(...args: Parameters<typeof ipcRenderer.on>) {
@@ -23,5 +18,10 @@ contextBridge.exposeInMainWorld('ipcRenderer', {
     const [channel, ...omit] = args
     return ipcRenderer.invoke(channel, ...omit)
   },
-
 })
+
+contextBridge.exposeInMainWorld('api' , {
+  google: {
+    login: () => ipcRenderer.invoke('google-login'),
+    logout: () => ipcRenderer.invoke('google-logout')
+  }})

@@ -111,7 +111,7 @@ useEffect(() => {
         paddingLeft
       }}
       transition={{ type: 'tween', duration: 0.3 }}
-    >
+    > 
       {solidBackground && (
         <motion.div
           className="absolute inset-0 pointer-events-none -z-10"

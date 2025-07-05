@@ -1,11 +1,5 @@
 "use strict";
 const electron = require("electron");
-electron.contextBridge.exposeInMainWorld("api", {
-  google: {
-    login: () => electron.ipcRenderer.invoke("google-login"),
-    logou: () => electron.ipcRenderer.invoke("google-logout")
-  }
-});
 electron.contextBridge.exposeInMainWorld("ipcRenderer", {
   on(...args) {
     const [channel, listener] = args;
@@ -22,5 +16,11 @@ electron.contextBridge.exposeInMainWorld("ipcRenderer", {
   invoke(...args) {
     const [channel, ...omit] = args;
     return electron.ipcRenderer.invoke(channel, ...omit);
+  }
+});
+electron.contextBridge.exposeInMainWorld("api", {
+  google: {
+    login: () => electron.ipcRenderer.invoke("google-login"),
+    logout: () => electron.ipcRenderer.invoke("google-logout")
   }
 });
