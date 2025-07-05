@@ -156,5 +156,18 @@ export async function authenticateWithGoogle(): Promise<Auth.OAuth2Client>{
 
 
     })
+}
 
+export function clearSavedTokens() {
+  if (fs.existsSync(token_path)) {
+    try {
+      fs.unlinkSync(token_path);
+      console.log('Saved tokens cleared.');
+    } catch (err) {
+      console.error('Failed to delete token file:', err);
+      throw err;
+    }
+  } else {
+    console.log('No token file to delete.');
+  }
 }

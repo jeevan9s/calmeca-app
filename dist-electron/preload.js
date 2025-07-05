@@ -1,5 +1,11 @@
 "use strict";
 const electron = require("electron");
+electron.contextBridge.exposeInMainWorld("api", {
+  google: {
+    login: () => electron.ipcRenderer.invoke("google-login"),
+    logou: () => electron.ipcRenderer.invoke("google-logout")
+  }
+});
 electron.contextBridge.exposeInMainWorld("ipcRenderer", {
   on(...args) {
     const [channel, listener] = args;

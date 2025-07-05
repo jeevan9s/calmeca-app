@@ -69,6 +69,7 @@ export default function Landing() {
                   <h2 className="text-sm font-scp font-light text-neutral-400">
                     Click anywhere or press a key to launch.
                   </h2>
+                  
                 </div>
               </div>
             </motion.div>

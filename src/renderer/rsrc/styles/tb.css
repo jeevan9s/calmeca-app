@@ -24,6 +24,7 @@
   border-radius: 0;
   transition: background-color 0.2s ease;
 }
+
 p {
   cursor: context-menu;
   user-select: none;

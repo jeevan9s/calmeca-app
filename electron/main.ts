@@ -87,13 +87,21 @@ dotenv.config()
 
 
 // google auth
-import { getAuthClient } from "../src/services/utils & integrations/googleAuth";
+import { clearSavedTokens, getAuthClient } from "../src/services/utils & integrations/googleAuth";
+import { google } from "googleapis";
 
-// listener for login request
+// listeners for login & logut requests
 ipcMain.handle('google-login', async () => {
   try {
     const authClient = await getAuthClient()
-    return { success: true, tokens: authClient.credentials}
+
+    const oauth2 = google.oauth2({version: 'v2', auth: authClient})
+    const {data} = await oauth2.userinfo.get()
+    return { success:true, tokens: authClient.credentials, user: {
+      name: data.name,
+      email: data.email,
+      picture: data.picture
+    }}
   } catch (err:unknown) {
     let message = 'Unkown error'
     if (err instanceof Error) {
@@ -105,6 +113,23 @@ ipcMain.handle('google-login', async () => {
     return { success: false, error: message} 
   }
 })
+
+ipcMain.handle('google-logout', async () => {
+  try {
+    clearSavedTokens()
+    return { success: true}
+  } catch (err: unknown) {
+    let message = 'Unknown error'
+    if (err instanceof Error) {
+      message = err.message
+     } else if (typeof err === 'string') {
+      message = err
+     }
+     console.log('Google logout failed: ', message)
+     return {success: false, error: message}
+  }
+})
+
 
 import type { IpcMainInvokeEvent } from 'electron'
 import { exportTextFeatureGDrive } from "../src/services/utils & integrations/googleService";
