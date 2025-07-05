@@ -24,6 +24,6 @@
 		"noUnusedParameters": true,
 		"noFallthroughCasesInSwitch": true
 	},
-	"include": ["src", "electron", "./test.global.d.ts"],
+	"include": ["src", "electron", "./test.global.d.ts", "../Calmeca/src/renderer/rsrc/components"],
 	"references": [{ "path": "./tsconfig.node.json" }]
 }

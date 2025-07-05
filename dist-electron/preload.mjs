@@ -17,6 +17,10 @@ electron.contextBridge.exposeInMainWorld("ipcRenderer", {
     const [channel, ...omit] = args;
     return electron.ipcRenderer.invoke(channel, ...omit);
   }
-  // You can expose other APTs you need here.
-  // ...
+});
+electron.contextBridge.exposeInMainWorld("api", {
+  google: {
+    login: () => electron.ipcRenderer.invoke("google-login"),
+    logout: () => electron.ipcRenderer.invoke("google-logout")
+  }
 });

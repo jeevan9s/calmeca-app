@@ -1,0 +1,49 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+#landing-page {
+  overflow-x: hidden;
+  overflow-y: hidden;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  overflow-y: hidden;
+  width: 100vw;
+  height: 100vh;
+  background: transparent;
+  user-select: none;
+}
+
+
+button {
+  border: none;
+  outline: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  cursor: default;
+  border-radius: 0;
+
+}
+
+* {
+  user-select: none;
+}
+
+
+
+#subtitle {
+  font-weight: lighter;
+}
+
+#title {
+  font-size: 4rem;
+}
+
