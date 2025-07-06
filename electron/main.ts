@@ -3,7 +3,7 @@ import { fileURLToPath } from 'url'
 import path from 'path'
 import { createRequire } from 'module'
 import { google } from 'googleapis';
-import { getAuthClient, clearSavedTokens } from 'src/services/integrations-utils/google/googleAuth'
+import { getAuthClient, clearSavedTokens } from '../src/services/integrations-utils/google/googleAuth'
 
 
 const require = createRequire(import.meta.url)
