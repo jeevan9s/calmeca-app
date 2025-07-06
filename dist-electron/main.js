@@ -28,11 +28,7 @@ function createWindow() {
   });
   setVibrancy(win, {
     theme: "dark",
-    effect: "acrylic",
-    useCustomWindowRefreshMethod: true,
-    maximumRefreshRate: 60,
-    disableOnBlur: true,
-    debug: true
+    effect: "acrylic"
   });
   if (process.env.VITE_DEV_SERVER_URL) {
     win.loadURL(process.env.VITE_DEV_SERVER_URL);
@@ -58,7 +54,6 @@ app.on("window-all-closed", () => {
 app.on("activate", () => {
   if (BrowserWindow.getAllWindows().length === 0) createWindow();
 });
-app.disableHardwareAcceleration();
 app.whenReady().then(createWindow);
 ipcMain.on("minimize", () => win == null ? void 0 : win.minimize());
 ipcMain.on("maximize", () => {
