@@ -1,9 +1,9 @@
 // Quiz Service File
 import { db, Quiz, quizQuestion, userAnswerInput, evaluatedResult, userAnswer, reviewedQuiz, reviewedQuestion } from "../db";
-import { generateQuiz } from "../utils & integrations/aiServices";
-import { evaluateAnswer } from "../utils & integrations/aiServices";
-import { generateId, updateCourseFromChild } from "../utils & integrations/utilityServicies";
-import { getCourseColor } from "../utils & integrations/utilityServicies";
+import { generateQuiz } from "../integrations-utils/aiServices";
+import { evaluateAnswer } from "../integrations-utils/aiServices";
+import { generateId, updateCourseFromChild } from "../integrations-utils/utilityServicies";
+import { getCourseColor } from "../integrations-utils/utilityServicies";
 
 // impl crud, evaluation (score, marking, feedback), time spent, return functions
 

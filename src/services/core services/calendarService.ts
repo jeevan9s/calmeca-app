@@ -1,7 +1,7 @@
 // Calendar Service File
 import { db } from "../db";
 import { CalendarEvent } from "../db";
-import { generateId, updateCourseFromChild, updateTimestamp } from "../utils & integrations/utilityServicies";
+import { generateId, updateCourseFromChild, updateTimestamp } from "../integrations-utils/utilityServicies";
 
 // impl crud, fetching events by date, source 
 

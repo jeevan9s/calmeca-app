@@ -1,7 +1,7 @@
 // Course Service File
 import { db } from "../db";
 import { Course } from "../db";
-import { generateId, getCourseColor } from "../utils & integrations/utilityServicies";
+import { generateId, getCourseColor } from "../integrations-utils/utilityServicies";
 
 // implementin CRUD, some archive stuff, return functions 
 

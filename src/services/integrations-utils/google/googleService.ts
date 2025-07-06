@@ -46,7 +46,6 @@ export async function importDriveFile(fileId:string): Promise<importedFile> {
 
     const mimeType = fileMeta.mimeType || ''
     const name = fileMeta.name || 'Unnamed file'
-
     if (!(mimeType in SUPPORTED_MIME_TYPES)) {
   throw new Error(`Unsupported file type: ${mimeType}`);
 }

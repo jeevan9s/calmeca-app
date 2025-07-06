@@ -178,6 +178,6 @@ export function clearSavedTokens() {
       throw err
     }
   } else {
-    console.log('No token file to delete.')
+    console.error('No token file to delete.')
   }
 }

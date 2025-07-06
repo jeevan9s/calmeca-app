@@ -23,10 +23,12 @@
 		"dotenv": "^17.0.1",
 		"electron-acrylic-window": "^0.5.11",
 		"googleapis": "^150.0.1",
+		"grep": "^0.1.0",
 		"happy-dom": "^15.7.4",
 		"lucide-react": "^0.441.0",
 		"mammoth": "^1.9.1",
 		"motion": "^12.23.0",
+		"openai": "^5.8.2",
 		"pdf-lib": "^1.17.1",
 		"pdf-parse": "^1.1.1",
 		"react": "^18.2.0",
@@ -63,6 +65,9 @@
 		"wait-on": "^8.0.3"
 	},
 	"main": "dist-electron/main.js",
+	"resolutions": {
+		"open": "^8.0.0"
+	},
 	"build": {
 		"appId": "com.electron.react.tailwind",
 		"mac": {

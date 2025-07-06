@@ -1,8 +1,8 @@
 // Assignment Service File
 import { Assignment, db } from '../db';
-import { generateId, updateTimestamp, updateCourseFromChild} from '../utils & integrations/utilityServicies';
+import { generateId, updateTimestamp, updateCourseFromChild} from '../integrations-utils/utilityServicies';
 import { addEvent } from "./calendarService";
-import { getCourseColor } from '../utils & integrations/utilityServicies';
+import { getCourseColor } from '../integrations-utils/utilityServicies';
 
 // implementin CRUD, some completion stuff, return functions 
 

@@ -13,7 +13,7 @@ import {
 import '@/renderer/styles/tb.css'
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { getLastEditedTime, getRelativeTimeStamp } from '@/services/utils & integrations/utilityServicies'
+import { getLastEditedTime, getRelativeTimeStamp } from '../../services/integrations-utils/utilityServicies'
 
 type TitleBarProps = {
   solidBackground?: boolean
