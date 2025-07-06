@@ -1,7 +1,12 @@
 // Summary Service File
 import { Summary, db } from '../db';
+<<<<<<< HEAD
 import { generateId, updateTimestamp, getCourseColor, updateCourseFromChild} from '../utils & integrations/utilityServicies';
 import { generateSummary } from '../utils & integrations/aiServices';
+=======
+import { generateId, updateTimestamp, getCourseColor, updateCourseFromChild} from '../integrations-utils/utilityServicies';
+import { generateSummary } from '../integrations-utils/aiServices';
+>>>>>>> fdb54f8cff2dcddd1dbe8dacc74bcbed1d1445e8
 
 // implementing CRUD,  return functions 
 export const createSummary = async (summary:Omit<Summary, 'id' | 'color' | 'createdOn'>) => {

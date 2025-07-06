@@ -28,6 +28,7 @@ export default defineConfig({
                 "events",
                 "net",
                 "tls",
+                "electron-acrylic-window",
 
                 // Large external libs used in main process
                 "googleapis",
