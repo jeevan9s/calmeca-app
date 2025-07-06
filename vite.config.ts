@@ -15,6 +15,7 @@ export default defineConfig({
             outDir: "dist-electron",
             rollupOptions: {
               external: [
+                 '@/services/integrations-utils/google/googleAuth',
                 "electron",
                 "fs",
                 "os",
@@ -58,7 +59,7 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
+      '@': path.resolve(__dirname, './src'),
     },
   },
   build: {
