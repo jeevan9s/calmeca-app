@@ -1,20 +1,22 @@
-import { app, BrowserWindow , ipcMain} from 'electron'
+import { app, BrowserWindow, ipcMain } from 'electron'
 import { fileURLToPath } from 'url'
-import 'tsconfig-paths/register'
 import path from 'path'
 import { createRequire } from 'module'
-import { google } from 'googleapis';
-import { getAuthClient, clearSavedTokens } from '../src/services/integrations-utils/google/googleAuth'
+import { google } from 'googleapis'
+import { getAuthClient, clearSavedTokens, initializeTokenPath } from '../src/services/integrations-utils/google/googleAuth'
 
-
+// Create require function for CommonJS modules
 const require = createRequire(import.meta.url)
-const { setVibrancy } = require('electron-acrylic-window')
 
+// Fix __dirname for ES modules
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
-let win: BrowserWindow | null = null
+// Import CommonJS modules using require
+const { setVibrancy } = require('electron-acrylic-window')
 
+let win: BrowserWindow | null = null
+initializeTokenPath()
 
 // window init
 function createWindow() {
@@ -31,7 +33,7 @@ function createWindow() {
     autoHideMenuBar: true,
     icon: path.join(__dirname, '..', 'assets', 'taskbar.png'),
     webPreferences: {
-      preload: path.join(__dirname, 'preload.mjs'),
+      preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
       nodeIntegration: false,
     },
@@ -48,6 +50,7 @@ function createWindow() {
 
   if (process.env.VITE_DEV_SERVER_URL) {
     win.loadURL(process.env.VITE_DEV_SERVER_URL)
+    win.webContents.openDevTools()
   } else {
     win.loadFile(path.join(__dirname, './index.html'))
   }
@@ -61,14 +64,13 @@ function createWindow() {
   })
 
   win.on('maximize', () => {
-  win!.webContents.send('maximized');
-});
+    win!.webContents.send('maximized')
+  })
 
-win.on('unmaximize', () => {
-  win!.webContents.send('not-maximized');
-});
+  win.on('unmaximize', () => {
+    win!.webContents.send('not-maximized')
+  })
 }
-
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit()
@@ -78,32 +80,32 @@ app.on('activate', () => {
   if (BrowserWindow.getAllWindows().length === 0) createWindow()
 })
 
-app.disableHardwareAcceleration();
+app.disableHardwareAcceleration()
 app.whenReady().then(createWindow)
 
 // IPC controls
-ipcMain.on('minimize', () => win?.minimize());
+ipcMain.on('minimize', () => win?.minimize())
 
 ipcMain.on('maximize', () => {
   if (win?.isMaximized()) {
-    win.unmaximize();
+    win.unmaximize()
   } else {
-    win?.maximize();
+    win?.maximize()
   }
-});
+})
 
 ipcMain.on('restore', () => {
-  win?.restore();
-});
+  win?.restore()
+})
 
-ipcMain.on('close', () => win?.close());
+ipcMain.on('close', () => win?.close())
 
 ipcMain.handle('google-login', async () => {
   try {
-    const authClient = await getAuthClient();
+    const authClient = await getAuthClient()
 
-    const oauth2 = google.oauth2({ version: 'v2', auth: authClient });
-    const { data } = await oauth2.userinfo.get();
+    const oauth2 = google.oauth2({ version: 'v2', auth: authClient })
+    const { data } = await oauth2.userinfo.get()
 
     return {
       success: true,
@@ -113,31 +115,31 @@ ipcMain.handle('google-login', async () => {
         email: data.email,
         picture: data.picture,
       },
-    };
-  } catch (err: unknown) {
-    let message = 'Unknown error';
-    if (err instanceof Error) {
-      message = err.message;
-    } else if (typeof err === 'string') {
-      message = err;
     }
-    console.error('Google login failed: ', message);
-    return { success: false, error: message };
-  }
-});
-
-ipcMain.handle('google-logout', async () => {
-  try {
-    clearSavedTokens()
-    return { success: true}
   } catch (err: unknown) {
     let message = 'Unknown error'
     if (err instanceof Error) {
       message = err.message
-     } else if (typeof err === 'string') {
+    } else if (typeof err === 'string') {
       message = err
-     }
-     console.log('Google logout failed: ', message)
-     return {success: false, error: message}
+    }
+    console.error('Google login failed: ', message)
+    return { success: false, error: message }
+  }
+})
+
+ipcMain.handle('google-logout', async () => {
+  try {
+    clearSavedTokens()
+    return { success: true }
+  } catch (err: unknown) {
+    let message = 'Unknown error'
+    if (err instanceof Error) {
+      message = err.message
+    } else if (typeof err === 'string') {
+      message = err
+    }
+    console.log('Google logout failed: ', message)
+    return { success: false, error: message }
   }
 })

@@ -72,21 +72,23 @@ useEffect(() => {
   return () => clearInterval(interval)
 }, [])
 
-  useEffect(() => {
-    const onMax = () => setisMaximized(true)
-    const onUnmax = () => setisMaximized(false)
-    window.ipcRenderer.on('maximized', onMax)
-    window.ipcRenderer.on('not-maximized', onUnmax)
+useEffect(() => {
+  const onMax = () => setisMaximized(true)
+  const onUnmax = () => setisMaximized(false)
 
-    const handleResize = () => setWindowWidth(window.innerWidth)
-    window.addEventListener('resize', handleResize)
+  window.electronAPI.onMaximized(onMax)
+  window.electronAPI.onNotMaximized(onUnmax)
 
-    return () => {
-      window.ipcRenderer.off('maximized', onMax)
-      window.ipcRenderer.off('not-maximized', onUnmax)
-      window.removeEventListener('resize', handleResize)
-    }
-  }, [])
+  const handleResize = () => setWindowWidth(window.innerWidth)
+  window.addEventListener('resize', handleResize)
+
+  return () => {
+    window.electronAPI.offMaximized(onMax)
+    window.electronAPI.offNotMaximized(onUnmax)
+    window.removeEventListener('resize', handleResize)
+  }
+}, [])
+
 
   const shouldShowHoverZone =
     windowWidth >= 640 && !isCalendarLocked && !isCalendarHovered && !isAlertsOpen && !isQuickNavOpen
@@ -248,7 +250,7 @@ useEffect(() => {
         </div>
       </div>
 
-      <div id="right-bar" className="flex items-center drag-exclude">
+ <div id="right-bar" className="flex items-center drag-exclude">
         <button
           id="nav-tog"
           className="w-5 h-5 flex items-center justify-center drag-exclude"
@@ -261,14 +263,14 @@ useEffect(() => {
         <div className="flex items-center border-l border-neutral-700 ml-5">
           <button
             id="minimize"
-            onClick={() => window.ipcRenderer.send('minimize')}
+            onClick={() => window.electronAPI.minimize()}
             className="w-5 h-5 flex items-center justify-center hover:bg-neutral-800 rounded transition drag-exclude"
           >
             <Minus color="white" size={16} strokeWidth={2} />
           </button>
           <button
             id="maximize"
-            onClick={() => window.ipcRenderer.send(isMaximized ? 'restore' : 'maximize')}
+            onClick={() => (isMaximized ? window.electronAPI.restore() : window.electronAPI.maximize())}
             className="w-5 h-5 flex items-center justify-center hover:bg-neutral-800 rounded transition drag-exclude"
           >
             {isMaximized ? (
@@ -279,7 +281,7 @@ useEffect(() => {
           </button>
           <button
             id="close"
-            onClick={() => window.ipcRenderer.send('close')}
+            onClick={() => window.electronAPI.close()}
             className="w-5 h-5 flex items-center justify-center drag-exclude"
           >
             <X color="white" size={16} strokeWidth={2} />

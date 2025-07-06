@@ -1,26 +1,34 @@
 "use strict";
 const electron = require("electron");
-electron.contextBridge.exposeInMainWorld("ipcRenderer", {
-  on(...args) {
-    const [channel, listener] = args;
-    return electron.ipcRenderer.on(channel, (event, ...args2) => listener(event, ...args2));
+const maximizedListeners = /* @__PURE__ */ new Map();
+const notMaximizedListeners = /* @__PURE__ */ new Map();
+electron.contextBridge.exposeInMainWorld("electronAPI", {
+  minimize: () => electron.ipcRenderer.send("minimize"),
+  maximize: () => electron.ipcRenderer.send("maximize"),
+  restore: () => electron.ipcRenderer.send("restore"),
+  close: () => electron.ipcRenderer.send("close"),
+  onMaximized: (callback) => {
+    const wrapped = (_event) => callback();
+    maximizedListeners.set(callback, wrapped);
+    electron.ipcRenderer.on("maximized", wrapped);
   },
-  off(...args) {
-    const [channel, ...omit] = args;
-    return electron.ipcRenderer.off(channel, ...omit);
+  offMaximized: (callback) => {
+    const wrapped = maximizedListeners.get(callback);
+    if (wrapped) {
+      electron.ipcRenderer.removeListener("maximized", wrapped);
+      maximizedListeners.delete(callback);
+    }
   },
-  send(...args) {
-    const [channel, ...omit] = args;
-    return electron.ipcRenderer.send(channel, ...omit);
+  onNotMaximized: (callback) => {
+    const wrapped = (_event) => callback();
+    notMaximizedListeners.set(callback, wrapped);
+    electron.ipcRenderer.on("not-maximized", wrapped);
   },
-  invoke(...args) {
-    const [channel, ...omit] = args;
-    return electron.ipcRenderer.invoke(channel, ...omit);
-  }
-});
-electron.contextBridge.exposeInMainWorld("api", {
-  google: {
-    login: () => electron.ipcRenderer.invoke("google-login"),
-    logout: () => electron.ipcRenderer.invoke("google-logout")
+  offNotMaximized: (callback) => {
+    const wrapped = notMaximizedListeners.get(callback);
+    if (wrapped) {
+      electron.ipcRenderer.removeListener("not-maximized", wrapped);
+      notMaximizedListeners.delete(callback);
+    }
   }
 });

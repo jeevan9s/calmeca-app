@@ -1,44 +1,42 @@
-import { defineConfig } from "vite";
-import path from "node:path";
-import electron from "vite-plugin-electron/simple";
-import react from "@vitejs/plugin-react";
+import { defineConfig } from 'vite'
+import path from 'node:path'
+import electron from 'vite-plugin-electron/simple'
+import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [
     react(),
     electron({
       main: {
-        entry: "electron/main.ts",
+        entry: 'electron/main.ts',
         vite: {
           build: {
-            target: "node16", // target Node version for Electron
-            outDir: "dist-electron",
+            target: 'node16',
+            outDir: 'dist-electron',
             rollupOptions: {
               external: [
-                 '@/services/integrations-utils/google/googleAuth',
-                "electron",
-                "fs",
-                "os",
-                "crypto",
-                "buffer",
-                "stream",
-                "http",
-                "https",
-                "child_process",
-                "util",
-                "events",
-                "net",
-                "tls",
-                "electron-acrylic-window",
-
-                // Large external libs used in main process
-                "googleapis",
-                "openai",
-                "pdf-lib",
-                "docx",
-                "dotenv",
-                "mammoth",
-                "win32-displayconfig",
+                'electron',
+                'json5',
+                'fs',
+                'os',
+                'crypto',
+                'buffer',
+                'stream',
+                'http',
+                'https',
+                'child_process',
+                'util',
+                'events',
+                'net',
+                'tls',
+                'electron-acrylic-window',
+                'googleapis',
+                'openai',
+                'pdf-lib',
+                'docx',
+                'dotenv',
+                'mammoth',
+                'win32-displayconfig',
               ],
             },
             commonjsOptions: {
@@ -46,17 +44,27 @@ export default defineConfig({
             },
           },
           define: {
-            __dirname: "undefined", // prevent Vite replacing __dirname so your runtime code works
-            __filename: "undefined",
+            // This helps with __dirname in ES modules
+            __dirname: 'import.meta.dirname',
           },
         },
       },
       preload: {
-        input: path.resolve(__dirname, "electron/preload.ts"),
-      },
-      renderer: process.env.NODE_ENV === "test" ? undefined : {},
-    }),
-  ],
+        input: path.resolve(__dirname, 'electron/preload.ts'),
+        vite: {
+          build: {
+            target: 'node16',
+            outDir: 'dist-electron',
+            rollupOptions: {
+              output: {
+                entryFileNames: 'preload.js',  // force output filename
+              },
+            },
+          },
+        },
+      },  // <-- Close preload here
+    }),  // <-- Close electron() plugin call here
+  ],  // <-- Close plugins array here
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
@@ -64,7 +72,7 @@ export default defineConfig({
   },
   build: {
     rollupOptions: {
-      external: ["electron"], // externalize electron in renderer build
+      external: ['electron'],
     },
   },
-});
+})

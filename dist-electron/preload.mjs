@@ -1,26 +1,18 @@
 "use strict";
 const electron = require("electron");
-electron.contextBridge.exposeInMainWorld("ipcRenderer", {
-  on(...args) {
-    const [channel, listener] = args;
-    return electron.ipcRenderer.on(channel, (event, ...args2) => listener(event, ...args2));
-  },
-  off(...args) {
-    const [channel, ...omit] = args;
-    return electron.ipcRenderer.off(channel, ...omit);
-  },
-  send(...args) {
-    const [channel, ...omit] = args;
-    return electron.ipcRenderer.send(channel, ...omit);
-  },
-  invoke(...args) {
-    const [channel, ...omit] = args;
-    return electron.ipcRenderer.invoke(channel, ...omit);
-  }
-});
-electron.contextBridge.exposeInMainWorld("api", {
-  google: {
-    login: () => electron.ipcRenderer.invoke("google-login"),
-    logout: () => electron.ipcRenderer.invoke("google-logout")
+electron.contextBridge.exposeInMainWorld("electronAPI", {
+  minimize: () => electron.ipcRenderer.send("minimize"),
+  maximize: () => electron.ipcRenderer.send("maximize"),
+  restore: () => electron.ipcRenderer.send("restore"),
+  close: () => electron.ipcRenderer.send("close"),
+  // Listen for maximize/unmaximize events
+  onMaximized: (callback) => electron.ipcRenderer.on("maximized", callback),
+  onNotMaximized: (callback) => electron.ipcRenderer.on("not-maximized", callback),
+  // Google authentication
+  googleLogin: () => electron.ipcRenderer.invoke("google-login"),
+  googleLogout: () => electron.ipcRenderer.invoke("google-logout"),
+  // Listen for main process messages
+  onMainProcessMessage: (callback) => {
+    electron.ipcRenderer.on("main-process-message", (_event, message) => callback(message));
   }
 });
