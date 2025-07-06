@@ -1,7 +1,12 @@
 // Calendar Service File
 import { db, Note } from "../db";
+<<<<<<< HEAD
+import { generateId } from "../utils & integrations/utilityServicies";
+import { getCourseColor, updateTimestamp, updateCourseFromChild } from "../utils & integrations/utilityServicies";
+=======
 import { generateId } from "../integrations-utils/utilityServicies";
 import { getCourseColor, updateTimestamp, updateCourseFromChild } from "../integrations-utils/utilityServicies";
+>>>>>>> fdb54f8cff2dcddd1dbe8dacc74bcbed1d1445e8
 
 // impl crud, fetching notes by course, most recent 
 

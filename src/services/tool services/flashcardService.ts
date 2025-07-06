@@ -1,8 +1,14 @@
 // Flashcard Service File
 import { db,  Flashcard, FlashcardDeck } from "../db";
+<<<<<<< HEAD
+import { generateId, updateCourseFromChild, updateTimestamp } from "../utils & integrations/utilityServicies";
+import { getCourseColor } from "../utils & integrations/utilityServicies";
+import { generateFlashcards } from "../utils & integrations/aiServices";
+=======
 import { generateId, updateCourseFromChild, updateTimestamp } from "../integrations-utils/utilityServicies";
 import { getCourseColor } from "../integrations-utils/utilityServicies";
 import { generateFlashcards } from "../integrations-utils/aiServices";
+>>>>>>> fdb54f8cff2dcddd1dbe8dacc74bcbed1d1445e8
 
 // impl crud, retyrb functions 
 
