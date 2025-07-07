@@ -8,6 +8,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   maximize: () => ipcRenderer.send('maximize'),
   restore: () => ipcRenderer.send('restore'),
   close: () => ipcRenderer.send('close'),
+  googleLogin: async () => ipcRenderer.invoke('google-login'),
+  googleLogout: async () => ipcRenderer.invoke('google-logout'),
+
 
   onMaximized: (callback: () => void) => {
     const wrapped = (_event: IpcRendererEvent) => callback()

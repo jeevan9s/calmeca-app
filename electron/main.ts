@@ -103,9 +103,9 @@ ipcMain.on('close', () => win?.close())
 ipcMain.handle('google-login', async () => {
   try {
     const authClient = await getAuthClient()
-
     const oauth2 = google.oauth2({ version: 'v2', auth: authClient })
     const { data } = await oauth2.userinfo.get()
+    
 
     return {
       success: true,

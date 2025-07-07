@@ -7,6 +7,8 @@ electron.contextBridge.exposeInMainWorld("electronAPI", {
   maximize: () => electron.ipcRenderer.send("maximize"),
   restore: () => electron.ipcRenderer.send("restore"),
   close: () => electron.ipcRenderer.send("close"),
+  googleLogin: async () => electron.ipcRenderer.invoke("google-login"),
+  googleLogout: async () => electron.ipcRenderer.invoke("google-logout"),
   onMaximized: (callback) => {
     const wrapped = (_event) => callback();
     maximizedListeners.set(callback, wrapped);

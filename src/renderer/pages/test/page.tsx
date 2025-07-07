@@ -1,33 +1,36 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useState } from 'react'
 import Layout from '@/renderer/components/Layout'
 
 export default function GoogleTest() {
   console.log('Google test page loaded')
 
-  useEffect(() => {
-    // ✅ Check Tailwind visually
-    const testEl = document.createElement('div')
-    testEl.className = 'bg-red-500 text-white p-2 rounded-lg mt-4'
-    testEl.innerText = 'TAILWIND CSS TEST'
-    document.body.appendChild(testEl)
+  const [user, setUser] = useState<null | { name:string; email:string; picture:string;}>(null)
+  const [error, setError] = useState<string | null>(null)
 
-    // ✅ Log button classList
-    const btn = document.querySelector('button')
-    if (btn) {
-      console.log('Button classList:', btn.classList)
-      console.log('Computed background:', getComputedStyle(btn).backgroundColor)
+  const handleLogin = async () => {
+    console.log('attempting login')
+    const res = await window.electronAPI.googleLogin()
+    if (res.success) {
+      setUser(res.user ?? null)
+      setError(null)
+      console.log("logged in !!", res.user)
     } else {
-      console.log('No <button> found')
+      setError(res.error ?? null)
+      console.log("balls", res.error)
     }
+  }
 
-    // ✅ Check loaded stylesheets
-    const loadedStyles = [...document.styleSheets]
-      .map((s) => s.href || '[inline]')
-      .filter((h) => h.includes('tailwind') || h.includes('index.css'))
-    console.log('Loaded stylesheets:', loadedStyles)
-  }, [])
+  const handleLogout = async () => {
+    const res = await window.electronAPI.googleLogout()
+    if (res.success) {
+      setUser(null)
+      setError(null)
+    } else {
+      setError(res.error ?? null)
+    }
+  }
 
   return (
     <div className="min-h-screen bg-black/30">
@@ -44,11 +47,13 @@ export default function GoogleTest() {
       </div>
 
       <div className="flex mx-5 gap-4 mt-4 items-center">
-        <button className="inline-block py-3 px-6 text-sm cursor-pointer font-semibold font-raleway text-white bg-neutral-800 rounded-lg shadow-md hover:bg-neutral-700 transition-all">
+        <button className="inline-block py-3 px-6 text-sm cursor-pointer font-semibold font-raleway text-white bg-neutral-800 rounded-lg shadow-md hover:bg-neutral-700 transition-all"
+                onClick={handleLogin}>
           Login with Google
         </button>
 
-        <button className="inline-block py-3 px-6 text-sm font-semibold font-raleway text-white bg-neutral-800 rounded-lg shadow-md hover:bg-neutral-700 transition-all">
+        <button className="inline-block py-3 px-6 text-sm font-semibold font-raleway text-white bg-neutral-800 rounded-lg shadow-md hover:bg-neutral-700 transition-all"
+                onClick={handleLogout}>
           Logout
         </button>
       </div>
