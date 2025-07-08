@@ -10,6 +10,11 @@ export default defineConfig({
       main: {
         entry: 'electron/main.ts',
         vite: {
+          resolve: {
+            alias: {
+              '@': path.resolve(__dirname, './src'),
+            },
+          },
           build: {
             target: 'node16',
             outDir: 'dist-electron',
@@ -33,6 +38,7 @@ export default defineConfig({
                 'googleapis',
                 'openai',
                 'pdf-lib',
+                
                 'docx',
                 'dotenv',
                 'mammoth',
@@ -52,6 +58,11 @@ export default defineConfig({
       preload: {
         input: path.resolve(__dirname, 'electron/preload.ts'),
         vite: {
+          resolve: {
+            alias: {
+              '@': path.resolve(__dirname, './src'),
+            },
+          },
           build: {
             target: 'node16',
             outDir: 'dist-electron',
@@ -62,9 +73,9 @@ export default defineConfig({
             },
           },
         },
-      },  // <-- Close preload here
-    }),  // <-- Close electron() plugin call here
-  ],  // <-- Close plugins array here
+      },
+    }),
+  ],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),

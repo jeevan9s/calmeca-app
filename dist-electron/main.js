@@ -1,16 +1,16 @@
-import { app, BrowserWindow, ipcMain, Notification } from 'electron';
-import { fileURLToPath } from 'url';
-import path from 'path';
-import { google } from 'googleapis';
-import dotenv from 'dotenv';
-import fs from 'fs';
-import crypto from 'crypto';
-import { Buffer } from 'buffer';
-import mammoth from 'mammoth';
-import { PDFDocument, StandardFonts } from 'pdf-lib';
-import { Document, Paragraph, TextRun, Packer } from 'docx';
-import stream from 'stream';
-
+import { app, BrowserWindow, ipcMain, Notification } from "electron";
+import { fileURLToPath } from "url";
+import path from "path";
+import { createRequire } from "module";
+import { google } from "googleapis";
+import dotenv from "dotenv";
+import fs from "fs";
+import crypto from "crypto";
+import { Buffer } from "buffer";
+import mammoth from "mammoth";
+import { PDFDocument, StandardFonts } from "pdf-lib";
+import { Document, Paragraph, TextRun, Packer } from "docx";
+import stream from "stream";
 dotenv.config();
 const env = process.env;
 const client_id = env.G_CLIENT_ID;
@@ -111,8 +111,7 @@ function clearSavedTokens() {
     }
   }
 }
-
-const googleAuth = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+const googleAuth = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   authenticateWithGoogle,
   clearSavedTokens,
@@ -120,9 +119,9 @@ const googleAuth = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty
   getTokenPath,
   initializeTokenPath,
   loadSavedTokens
-}, Symbol.toStringTag, { value: 'Module' }));
-
-const pdfParse = require("pdf-parse");
+}, Symbol.toStringTag, { value: "Module" }));
+const require$1 = createRequire(import.meta.url);
+const pdfParse = require$1("pdf-parse");
 const SUPPORTED_MIME_TYPES = {
   "text/plain": "txt",
   "text/markdown": "md",
@@ -265,24 +264,20 @@ async function exportTextFeatureGDrive(content, filename, exportType2) {
   const driveUrl = `https://drive.google.com/file/d/${res.data.id}/view`;
   return { fileId: res.data.id, name: res.data.name ?? filename, driveUrl };
 }
-
+const require2 = createRequire(import.meta.url);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 let win = null;
 let setVibrancy = null;
-async function loadElectronAcrylic() {
-  try {
-    const electronAcrylic = await import('electron-acrylic-window');
-    return electronAcrylic.setVibrancy;
-  } catch (error) {
-    console.warn("electron-acrylic-window not available:", error);
-    return null;
-  }
+try {
+  const electronAcrylic = require2("electron-acrylic-window");
+  setVibrancy = electronAcrylic.setVibrancy;
+} catch (error) {
+  console.warn("electron-acrylic-window not available:", error);
 }
 app.name = "Calmeca";
 initializeTokenPath();
-async function createWindow() {
-  setVibrancy = await loadElectronAcrylic();
+function createWindow() {
   win = new BrowserWindow({
     width: 800,
     height: 600,
@@ -387,7 +382,7 @@ ipcMain.handle("start-google-login", async () => {
       const redirectUri = process.env.G_REDIRECT_URI;
       if (!clientId || !clientSecret || !redirectUri) {
         reject(new Error("Missing OAuth configuration"));
-        authWindow?.close();
+        authWindow == null ? void 0 : authWindow.close();
         return;
       }
       const oauth2Client = new google.auth.OAuth2(clientId, clientSecret, redirectUri);
@@ -399,12 +394,12 @@ ipcMain.handle("start-google-login", async () => {
         const error = parsedUrl.searchParams.get("error");
         if (error) {
           reject(new Error(`OAuth error: ${error}`));
-          authWindow?.close();
+          authWindow == null ? void 0 : authWindow.close();
           return;
         }
         if (!code) {
           reject(new Error("No code found in redirect URL"));
-          authWindow?.close();
+          authWindow == null ? void 0 : authWindow.close();
           return;
         }
         console.log("Exchanging token with code:", code);
@@ -418,21 +413,21 @@ ipcMain.handle("start-google-login", async () => {
           });
           console.log("Received tokens:", tokens);
           oauth2Client.setCredentials(tokens);
-          const tokenPath = getTokenPath();
-          const fs = await import('fs');
-          fs.writeFileSync(tokenPath, JSON.stringify(tokens));
+          const tokenPath2 = getTokenPath();
+          const fs2 = await import("fs");
+          fs2.writeFileSync(tokenPath2, JSON.stringify(tokens));
           if (authWindow) {
             authWindow.loadFile(path.join(__dirname, "..", "assets", "oauth-redirect.html"));
           }
           setTimeout(() => {
-            authWindow?.close();
+            authWindow == null ? void 0 : authWindow.close();
             authWindow = null;
             resolve({ success: true, tokens });
           }, 1e4);
         } catch (tokenError) {
           console.error("Token exchange failed:", tokenError);
           reject(tokenError);
-          authWindow?.close();
+          authWindow == null ? void 0 : authWindow.close();
           authWindow = null;
         }
       });
@@ -499,7 +494,7 @@ ipcMain.handle("drive-export-text", async (_event, args) => {
   try {
     const { content, filename, type } = args;
     const res = await exportTextFeatureGDrive(content, filename, type);
-    console.log("File exported:", filename);
+    console.log("file exported: ", filename);
     return {
       success: true,
       fileId: res.fileId,
@@ -514,10 +509,10 @@ ipcMain.handle("drive-export-text", async (_event, args) => {
 ipcMain.handle("drive-import-file", async (_event, fileId) => {
   try {
     const res = await importDriveFile(fileId);
-    console.log("File imported:", fileId);
+    console.log("file uploaded: ", fileId);
     return { success: true };
   } catch (error) {
-    console.error("Import error:", error);
+    console.log("Import error: ", error);
     return { success: false, error: error.message };
   }
 });
@@ -551,11 +546,3 @@ ipcMain.handle("open-google-picker", async () => {
     });
   });
 });
-console.log("Registered IPC handlers:", [
-  "start-google-login",
-  "google-login",
-  "google-logout",
-  "drive-export-text",
-  "drive-import-file",
-  "open-google-picker"
-]);

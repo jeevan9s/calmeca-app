@@ -4,6 +4,8 @@ import { google } from "googleapis";
 import { getAuthClient } from "./googleAuth";
 import {Readable} from 'stream'
 import { Buffer } from "buffer";
+import { createRequire } from 'module'
+const require = createRequire(import.meta.url)
 const pdfParse = require('pdf-parse')
 import mammoth from 'mammoth'
 import { PDFDocument, StandardFonts } from "pdf-lib";
