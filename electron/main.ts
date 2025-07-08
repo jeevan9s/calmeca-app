@@ -8,7 +8,7 @@ import {
   clearSavedTokens,
   initializeTokenPath,
   getTokenPath,
-} from '../src/services/integrations-utils/google/googleAuth'
+} from '@/services/integrations-utils/google/googleAuth'
 import { exportTextFeatureGDrive, importDriveFile } from '@/services/integrations-utils/google/googleService'
 import { exportType } from '@/services/db'
 
@@ -225,8 +225,6 @@ ipcMain.handle('start-google-login', async () => {
   })
 })
 
-// GOOGLE AUTH HANDLERS
-
 ipcMain.handle('google-login', async () => {
   try {
     const authClient = await getAuthClient()
@@ -283,69 +281,70 @@ ipcMain.handle('google-logout', async () => {
   }
 })
 
-// GOOGLE IMPORT/EXPORT HANDLERS
-ipcMain.handle('drive-export-text', async (_event, args: { content: string; filename: string; type: exportType }) => {
-  try {
-    const { content, filename, type } = args
-    const res = await exportTextFeatureGDrive(content, filename, type)
-    console.log("file exported: ", filename)
-    return {
-  success: true,
-  fileId: res.fileId,
-  name: res.name,
-  driveUrl: res.driveUrl,
-}
-  } catch (error) {
-    console.error('Export error:', error)
-    return { success: false, error: (error as Error).message }
+
+  // GOOGLE IMPORT/EXPORT HANDLERS
+  ipcMain.handle('drive-export-text', async (_event, args: { content: string; filename: string; type: exportType }) => {
+    try {
+      const { content, filename, type } = args
+      const res = await exportTextFeatureGDrive(content, filename, type)
+      console.log("file exported: ", filename)
+      return {
+    success: true,
+    fileId: res.fileId,
+    name: res.name,
+    driveUrl: res.driveUrl,
   }
-})
+    } catch (error) {
+      console.error('Export error:', error)
+      return { success: false, error: (error as Error).message }
+    }
+  })
 
-ipcMain.handle('drive-import-file', async (_event, fileId:string) => {
-  try {
-    const res = await importDriveFile(fileId)
-    console.log("file uploaded: ", fileId)
-    return { success: true}
-  } catch (error) {
-    console.log("Import error: ", error)
-    return { success: false, error: (error as Error).message }
-  }
-  
-})
+  ipcMain.handle('drive-import-file', async (_event, fileId:string) => {
+    try {
+      const res = await importDriveFile(fileId)
+      console.log("file uploaded: ", fileId)
+      return { success: true}
+    } catch (error) {
+      console.log("Import error: ", error)
+      return { success: false, error: (error as Error).message }
+    }
+    
+  })
 
-// drive picka
-ipcMain.handle('open-google-picker', async () => {
-  const pickerWindow = new BrowserWindow({
-    width: 600,
-    height: 600,
-    modal: true,
-    parent: BrowserWindow.getFocusedWindow() ?? undefined,
-    show: false,
-    autoHideMenuBar: true,
-    webPreferences: {
-      preload: path.join(__dirname, 'picker-preload.js'),
-      contextIsolation: true,
-      nodeIntegration: false,
-    },
-  });
+  // drive picka
+  ipcMain.handle('open-google-picker', async () => {
+    const pickerWindow = new BrowserWindow({
+      width: 600,
+      height: 600,
+      modal: true,
+      parent: BrowserWindow.getFocusedWindow() ?? undefined,
+      show: false,
+      autoHideMenuBar: true,
+      webPreferences: {
+        preload: path.join(__dirname, 'picker-preload.js'),
+        contextIsolation: true,
+        nodeIntegration: false,
+      },
+    });
 
-  const pickerPath = path.join(__dirname, '..', 'assets', 'picker.html')
-  pickerWindow.loadFile(pickerPath)
+    const pickerPath = path.join(__dirname, '..', 'assets', 'picker.html')
+    pickerWindow.loadFile(pickerPath)
 
-  pickerWindow.once('ready-to-show', () => {
-    pickerWindow.show();
-  });
+    pickerWindow.once('ready-to-show', () => {
+      pickerWindow.show();
+    });
 
-  return new Promise((resolve, reject) => {
-    const handleMessage = (_event: any, fileId: string) => {
-      resolve(fileId);
-      pickerWindow.close();
-    };
+    return new Promise((resolve, reject) => {
+      const handleMessage = (_event: any, fileId: string) => {
+        resolve(fileId);
+        pickerWindow.close();
+      };
 
-    ipcMain.once('google-picker-file-id', handleMessage);
+      ipcMain.once('google-picker-file-id', handleMessage);
 
-    pickerWindow.on('closed', () => {
-      ipcMain.removeListener('google-picker-file-id', handleMessage);
+      pickerWindow.on('closed', () => {
+        ipcMain.removeListener('google-picker-file-id', handleMessage);
+      });
     });
   });
-});
