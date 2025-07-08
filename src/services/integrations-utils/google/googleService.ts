@@ -159,7 +159,8 @@ break;
         
     // adding to drive
     const fileMetadata = {
-        name: filename, mimeType
+        name: filename, mimeType,
+        parents: ['root'],
     }
     const media = {
         mimeType, body: stream.Readable.from(buffer)

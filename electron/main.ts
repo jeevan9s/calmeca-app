@@ -1,6 +1,7 @@
 import { app, BrowserWindow, ipcMain, Notification } from 'electron'
 import { fileURLToPath } from 'url'
 import path from 'path'
+import express from 'express'
 import { createRequire } from 'module'
 import { google } from 'googleapis'
 import {
@@ -15,7 +16,6 @@ import { exportType } from '@/services/db'
 const require = createRequire(import.meta.url)
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
-
 let win: BrowserWindow | null = null
 let setVibrancy: any = null
 
@@ -315,6 +315,11 @@ ipcMain.handle('drive-import-file', async (_event, fileId:string) => {
 
 // drive picka
 ipcMain.handle('open-google-picker', async () => {
+  const apiKey = process.env.G_API_KEY ?? ''
+  const token = (await getAuthClient())?.credentials.access_token ?? ''
+  console.log('Google Picker API Key:', apiKey);
+  console.log('Google Picker OAuth Token:', token);
+
   const pickerWindow = new BrowserWindow({
     width: 600,
     height: 600,
@@ -322,30 +327,45 @@ ipcMain.handle('open-google-picker', async () => {
     parent: BrowserWindow.getFocusedWindow() ?? undefined,
     show: false,
     autoHideMenuBar: true,
+    icon: path.join(__dirname, '..', 'assets', 'taskbar.png'),
     webPreferences: {
-      preload: path.join(__dirname, 'picker-preload.js'),
+      preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
       nodeIntegration: false,
+      webSecurity: false,
     },
-  });
+  })
 
-  const pickerPath = path.join(__dirname, '..', 'assets', 'picker.html')
-  pickerWindow.loadFile(pickerPath)
+const app = express()
+const PORT = 3000
+app.use(express.static(path.join(__dirname, '..', 'assets')))
+app.listen(PORT, () => {
+  console.log(`Static server running on http://localhost:${PORT}`)
+})
 
-  pickerWindow.once('ready-to-show', () => {
-    pickerWindow.show();
-  });
+await pickerWindow.loadURL('http://localhost:3000/picker.html')
+
+
+  await pickerWindow.webContents.executeJavaScript(`
+    window.pickerConfig = {
+      apiKey: ${JSON.stringify(apiKey)},
+      token: ${JSON.stringify(token)}
+    };
+  `)
+
+  pickerWindow.show()
 
   return new Promise((resolve, reject) => {
     const handleMessage = (_event: any, fileId: string) => {
-      resolve(fileId);
-      pickerWindow.close();
-    };
+      resolve(fileId)
+      pickerWindow.close()
+    }
 
-    ipcMain.once('google-picker-file-id', handleMessage);
+    ipcMain.once('google-picker-file-id', handleMessage)
 
     pickerWindow.on('closed', () => {
-      ipcMain.removeListener('google-picker-file-id', handleMessage);
-    });
-  });
-});
+      ipcMain.removeListener('google-picker-file-id', handleMessage)
+      reject(new Error('Picker window closed without selection'))
+    })
+  })
+})

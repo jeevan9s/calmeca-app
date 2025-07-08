@@ -13,6 +13,7 @@ electron.contextBridge.exposeInMainWorld("electronAPI", {
   gTextExport: (content, filename, type) => electron.ipcRenderer.invoke("drive-export-text", { content, filename, type }),
   gImportFile: (fileId) => electron.ipcRenderer.invoke("drive-import-file", fileId),
   openGooglePicker: async () => electron.ipcRenderer.invoke("open-google-picker"),
+  sendFileId: (fileId) => electron.ipcRenderer.send("google-picker-file-id", fileId),
   startLoginRedirect: async () => electron.ipcRenderer.invoke("start-google-login"),
   onMaximized: (callback) => {
     const wrapped = (_event) => callback();
@@ -50,3 +51,8 @@ electron.contextBridge.exposeInMainWorld("electronAPI", {
     }
   }
 });
+process.argv.reduce((acc, arg) => {
+  const match = arg.match(/^--([^=]+)=(.*)$/);
+  if (match) acc[match[1]] = match[2];
+  return acc;
+}, {});

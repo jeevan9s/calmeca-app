@@ -14,20 +14,26 @@ contextBridge.exposeInMainWorld('electronAPI', {
   googleLogout: async () => ipcRenderer.invoke('google-logout'),
 
   gTextExport: (content: string, filename: string, type: exportType): Promise<exportResponse> =>
-  ipcRenderer.invoke('drive-export-text', { content, filename, type }),
+    ipcRenderer.invoke('drive-export-text', { content, filename, type }),
 
   gImportFile: (fileId: string): Promise<importResponse> =>
-  ipcRenderer.invoke('drive-import-file', fileId),
-  openGooglePicker: async (): Promise<string> => ipcRenderer.invoke('open-google-picker'),
+    ipcRenderer.invoke('drive-import-file', fileId),
 
+  openGooglePicker: async (): Promise<string> =>
+    ipcRenderer.invoke('open-google-picker'),
 
-  startLoginRedirect: async () => ipcRenderer.invoke('start-google-login'),
+  sendFileId: (fileId: string) =>
+    ipcRenderer.send('google-picker-file-id', fileId),
+
+  startLoginRedirect: async () =>
+    ipcRenderer.invoke('start-google-login'),
 
   onMaximized: (callback: () => void) => {
     const wrapped = (_event: IpcRendererEvent) => callback()
     maximizedListeners.set(callback, wrapped)
     ipcRenderer.on('maximized', wrapped)
   },
+
   offMaximized: (callback: () => void) => {
     const wrapped = maximizedListeners.get(callback)
     if (wrapped) {
@@ -41,6 +47,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     notMaximizedListeners.set(callback, wrapped)
     ipcRenderer.on('not-maximized', wrapped)
   },
+
   offNotMaximized: (callback: () => void) => {
     const wrapped = notMaximizedListeners.get(callback)
     if (wrapped) {
@@ -62,3 +69,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
     }
   },
 })
+
+const pickerArgs = process.argv.reduce<Record<string, string>>((acc, arg) => {
+  const match = arg.match(/^--([^=]+)=(.*)$/)
+  if (match) acc[match[1]] = match[2]
+  return acc
+}, {})

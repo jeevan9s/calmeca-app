@@ -1,27 +1,77 @@
-<script type="text/javascript">
-  let oauthToken = null;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Google Picker</title>
+</head>
+<body>
+  <h1>Google Picker Loading...</h1>
+  <div id="status">Waiting for API...</div>
 
-  function onApiLoad() {
-    gapi.load('picker', { callback: createPicker });
-  }
+  <script type="text/javascript">
+    function waitForPickerConfig() {
+      return new Promise((resolve) => {
+        if (window.pickerConfig?.apiKey && window.pickerConfig?.token) {
+          resolve();
+        } else {
+          const interval = setInterval(() => {
+            if (window.pickerConfig?.apiKey && window.pickerConfig?.token) {
+              clearInterval(interval);
+              resolve();
+            }
+          }, 50);
+        }
+      });
+    }
 
-  function createPicker() {
-    if (oauthToken) {
+    async function onApiLoad() {
+      console.log('Google API script loaded');
+      document.getElementById('status').innerText = 'API loaded, waiting for config...';
+
+      await waitForPickerConfig();
+      console.log('pickerConfig available:', window.pickerConfig);
+      document.getElementById('status').innerText = 'Config received, creating picker...';
+
+      gapi.load('picker', { callback: createPicker });
+    }
+
+    function createPicker() {
+      const API_KEY = window.pickerConfig.apiKey;
+      const OAUTH_TOKEN = window.pickerConfig.token;
+
+
+
+      if (!OAUTH_TOKEN || !API_KEY) {
+        console.error("Missing OAuth token or API key.");
+        document.getElementById('status').innerText = 'Missing OAuth token or API key.';
+        return;
+      }
+
+      console.log('Creating picker with API_KEY and OAUTH_TOKEN');
+
       const picker = new google.picker.PickerBuilder()
         .addView(google.picker.ViewId.DOCS)
-        .setOAuthToken(oauthToken)
-        .setDeveloperKey(YOUR_API_KEY)
+        .setOAuthToken(OAUTH_TOKEN)
+        .setDeveloperKey(API_KEY)
         .setCallback(pickerCallback)
         .build();
-      picker.setVisible(true);
-    }
-  }
 
-  function pickerCallback(data) {
-    if (data.action === google.picker.Action.PICKED) {
-      const file = data.docs[0];
-      window.postMessage({ type: 'PICKED_FILE', fileId: file.id }, '*');
+      picker.setVisible(true);
+      document.getElementById('status').innerText = 'Picker should be visible.';
     }
-  }
-</script>
-<script src="https://apis.google.com/js/api.js?onload=onApiLoad"></script>
+
+    function pickerCallback(data) {
+      console.log('Picker callback:', data);
+      if (data.action === google.picker.Action.PICKED) {
+        const file = data.docs[0];
+        if (file && file.id) {
+          console.log('File selected:', file.id);
+          window.electronAPI?.sendFileId(file.id);
+        }
+      }
+    }
+  </script>
+
+  <script src="https://apis.google.com/js/api.js?onload=onApiLoad"></script>
+</body>
+</html>

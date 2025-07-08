@@ -19,6 +19,12 @@ declare global {
       onLoginSuccess: (callback: (event: any, data: any) => void) => void
       removeLoginSuccessListener: (callback: (event: any, data: any) => void) => void
       openGooglePicker: () => Promise<{ fileId: string; name?: string; mimeType?: string } | null>
+      sendFileIdToMain: (fileId: string) => void
+      pickerConfig: {
+      token: string
+      apiKey: string
+    }
+
     }
   }
 }
