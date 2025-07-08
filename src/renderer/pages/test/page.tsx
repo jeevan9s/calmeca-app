@@ -25,7 +25,7 @@ useEffect(() => {
   }
 }, [])
 
-
+// auth testing 
   const handleLogin = async () => {
     console.log('attempting login')
     const res = await window.electronAPI.googleLogin()
@@ -41,7 +41,6 @@ useEffect(() => {
       }
     }
   }
-
   const handleLogout = async () => {
     const res = await window.electronAPI.googleLogout()
     if (res.success) {
@@ -52,7 +51,14 @@ useEffect(() => {
     }
   }
 
+// text-export feature
 
+  function showLogoutNotification() {
+  new Notification('Logout Successful', {
+    body: 'Google logout successful',
+    silent: false,
+  });
+}
 
   return (
     <div className="min-h-screen bg-black/30">
