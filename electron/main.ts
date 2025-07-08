@@ -99,7 +99,17 @@ app.on('activate', () => {
 })
 
 app.disableHardwareAcceleration()
-app.whenReady().then(createWindow)
+app.whenReady().then(() => {
+  createWindow()
+
+  const expressApp = express()
+  const PORT = 3000
+  expressApp.use(express.static(path.join(__dirname, '..', 'assets')))
+  expressApp.listen(PORT, () => {
+    console.log(`Static server running on http://localhost:${PORT}`)
+  })
+})
+
 
 ipcMain.on('minimize', () => {
   if (win) win.minimize()
@@ -301,29 +311,34 @@ ipcMain.handle('drive-export-text', async (_event, args: { content: string; file
   }
 })
 
-ipcMain.handle('drive-import-file', async (_event, fileId:string) => {
+ipcMain.handle('drive-import-file', async (_event, fileId: string) => {
   try {
     const res = await importDriveFile(fileId)
-    console.log("file uploaded: ", fileId)
-    return { success: true}
+
+    console.log("Imported file:", res.name) 
+    return {
+      success: true,
+      name: res.name,
+      content: res.content,
+    }
   } catch (error) {
     console.log("Import error: ", error)
     return { success: false, error: (error as Error).message }
   }
-  
 })
 
 // drive picka
 ipcMain.handle('open-google-picker', async () => {
   const apiKey = process.env.G_API_KEY ?? ''
   const token = (await getAuthClient())?.credentials.access_token ?? ''
-  console.log('Google Picker API Key:', apiKey);
-  console.log('Google Picker OAuth Token:', token);
+  // console.log('Google Picker API Key:', apiKey);
+  // console.log('Google Picker OAuth Token:', token);
 
   const pickerWindow = new BrowserWindow({
     width: 600,
     height: 600,
     modal: true,
+    backgroundColor: '#121212',
     parent: BrowserWindow.getFocusedWindow() ?? undefined,
     show: false,
     autoHideMenuBar: true,
@@ -336,12 +351,6 @@ ipcMain.handle('open-google-picker', async () => {
     },
   })
 
-const app = express()
-const PORT = 3000
-app.use(express.static(path.join(__dirname, '..', 'assets')))
-app.listen(PORT, () => {
-  console.log(`Static server running on http://localhost:${PORT}`)
-})
 
 await pickerWindow.loadURL('http://localhost:3000/picker.html')
 

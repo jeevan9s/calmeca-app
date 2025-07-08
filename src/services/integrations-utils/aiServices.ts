@@ -31,7 +31,7 @@ export async function generateSummary(text: string): Promise<string>{
     ]
     const result = await callChatCompletion(messages, 500)
     try {
-        return JSON.parse(result)
+        return result
     }catch{
         return ""
     }

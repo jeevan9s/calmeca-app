@@ -81,18 +81,18 @@ export const getLastEditedTime = async(): Promise<Date | null> => {
 )}
 
 export const getRelativeTimeStamp = (timestamp: Date | null): string => {
-    if (!timestamp) return "No edits yet"
+    if (!timestamp) return "no edits yet"
 
     const now = new Date()
     const diffSeconds = Math.floor((now.getTime() - timestamp.getTime()) / 1000)
 
-    if (diffSeconds < 60) return "Edited just now"
+    if (diffSeconds < 60) return "edited just now"
     
     const diffMinutes = Math.floor(diffSeconds / 60) 
-    if (diffMinutes < 60) return `Last edited ${diffMinutes} minute${diffMinutes !== 1 ? "s" : ""} ago`
+    if (diffMinutes < 60) return `Edited ${diffMinutes} minute${diffMinutes !== 1 ? "s" : ""} ago`
 
     const diffHours = Math.floor(diffMinutes / 60) 
-    if (diffHours < 24 ) return `Last edited ${diffHours} hour${diffHours!== 1 ? "s" : ""} ago`
+    if (diffHours < 24 ) return `Edited ${diffHours} hour${diffHours!== 1 ? "s" : ""} ago`
 
     const diffDays = Math.floor(diffHours / 24) 
     return `Last edited ${diffDays} day${diffDays !== 1 ? "s" : " "}`

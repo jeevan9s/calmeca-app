@@ -1,77 +1,72 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Google Picker</title>
-</head>
-<body>
-  <h1>Google Picker Loading...</h1>
-  <div id="status">Waiting for API...</div>
-
-  <script type="text/javascript">
-    function waitForPickerConfig() {
-      return new Promise((resolve) => {
-        if (window.pickerConfig?.apiKey && window.pickerConfig?.token) {
-          resolve();
-        } else {
-          const interval = setInterval(() => {
-            if (window.pickerConfig?.apiKey && window.pickerConfig?.token) {
-              clearInterval(interval);
-              resolve();
-            }
-          }, 50);
-        }
-      });
-    }
-
-    async function onApiLoad() {
-      console.log('Google API script loaded');
-      document.getElementById('status').innerText = 'API loaded, waiting for config...';
-
-      await waitForPickerConfig();
-      console.log('pickerConfig available:', window.pickerConfig);
-      document.getElementById('status').innerText = 'Config received, creating picker...';
-
-      gapi.load('picker', { callback: createPicker });
-    }
-
-    function createPicker() {
-      const API_KEY = window.pickerConfig.apiKey;
-      const OAUTH_TOKEN = window.pickerConfig.token;
-
-
-
-      if (!OAUTH_TOKEN || !API_KEY) {
-        console.error("Missing OAuth token or API key.");
-        document.getElementById('status').innerText = 'Missing OAuth token or API key.';
-        return;
+  <head>
+    <meta charset="UTF-8" />
+    <title>Google Picker</title>
+    <style>
+      html, body {
+        margin: 0;
+        padding: 0;
+        background: transparent;
+        overflow: hidden;
+        height: 100%;
+        width: 100%;
+        background-color: rgb(12, 12, 12);
+      }
+    </style>
+  </head>
+  <body>
+    <script type="text/javascript">
+      function waitForPickerConfig() {
+        return new Promise((resolve) => {
+          if (window.pickerConfig?.apiKey && window.pickerConfig?.token) {
+            resolve();
+          } else {
+            const interval = setInterval(() => {
+              if (window.pickerConfig?.apiKey && window.pickerConfig?.token) {
+                clearInterval(interval);
+                resolve();
+              }
+            }, 50);
+          }
+        });
       }
 
-      console.log('Creating picker with API_KEY and OAUTH_TOKEN');
+      async function onApiLoad() {
+        await waitForPickerConfig();
+        gapi.load('picker', { callback: createPicker });
+      }
 
-      const picker = new google.picker.PickerBuilder()
-        .addView(google.picker.ViewId.DOCS)
-        .setOAuthToken(OAUTH_TOKEN)
-        .setDeveloperKey(API_KEY)
-        .setCallback(pickerCallback)
-        .build();
+      function createPicker() {
+        const API_KEY = window.pickerConfig.apiKey;
+        const OAUTH_TOKEN = window.pickerConfig.token;
 
-      picker.setVisible(true);
-      document.getElementById('status').innerText = 'Picker should be visible.';
-    }
+        if (!OAUTH_TOKEN || !API_KEY) {
+          console.error("Missing OAuth token or API key.");
+          return;
+        }
 
-    function pickerCallback(data) {
-      console.log('Picker callback:', data);
-      if (data.action === google.picker.Action.PICKED) {
-        const file = data.docs[0];
-        if (file && file.id) {
-          console.log('File selected:', file.id);
-          window.electronAPI?.sendFileId(file.id);
+        const picker = new google.picker.PickerBuilder()
+          .addView(google.picker.ViewId.DOCS)
+          .setOAuthToken(OAUTH_TOKEN)
+          .setDeveloperKey(API_KEY)
+          .setCallback(pickerCallback)
+          .build();
+
+        picker.setVisible(true);
+      }
+
+      function pickerCallback(data) {
+        if (data.action === google.picker.Action.PICKED) {
+          const file = data.docs[0];
+          if (file && file.id) {
+            window.electronAPI?.sendFileId(file.id);
+            window.close()
+          }
         }
       }
-    }
-  </script>
+    </script>
 
-  <script src="https://apis.google.com/js/api.js?onload=onApiLoad"></script>
-</body>
+    <script src="https://apis.google.com/js/api.js?onload=onApiLoad"></script>
+  </body>
 </html>
