@@ -2,6 +2,7 @@
 const electron = require("electron");
 const maximizedListeners = /* @__PURE__ */ new Map();
 const notMaximizedListeners = /* @__PURE__ */ new Map();
+const loginSuccessListeners = /* @__PURE__ */ new Map();
 electron.contextBridge.exposeInMainWorld("electronAPI", {
   minimize: () => electron.ipcRenderer.send("minimize"),
   maximize: () => electron.ipcRenderer.send("maximize"),
@@ -9,6 +10,7 @@ electron.contextBridge.exposeInMainWorld("electronAPI", {
   close: () => electron.ipcRenderer.send("close"),
   googleLogin: async () => electron.ipcRenderer.invoke("google-login"),
   googleLogout: async () => electron.ipcRenderer.invoke("google-logout"),
+  startLoginRedirect: async () => electron.ipcRenderer.invoke("start-google-login"),
   onMaximized: (callback) => {
     const wrapped = (_event) => callback();
     maximizedListeners.set(callback, wrapped);
@@ -31,6 +33,17 @@ electron.contextBridge.exposeInMainWorld("electronAPI", {
     if (wrapped) {
       electron.ipcRenderer.removeListener("not-maximized", wrapped);
       notMaximizedListeners.delete(callback);
+    }
+  },
+  onLoginSuccess: (callback) => {
+    loginSuccessListeners.set(callback, callback);
+    electron.ipcRenderer.on("google-login-success", callback);
+  },
+  removeLoginSuccessListener: (callback) => {
+    const wrapped = loginSuccessListeners.get(callback);
+    if (wrapped) {
+      electron.ipcRenderer.removeListener("google-login-success", wrapped);
+      loginSuccessListeners.delete(callback);
     }
   }
 });

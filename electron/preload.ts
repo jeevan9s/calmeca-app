@@ -2,6 +2,7 @@ import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron'
 
 const maximizedListeners = new Map<() => void, (event: IpcRendererEvent) => void>()
 const notMaximizedListeners = new Map<() => void, (event: IpcRendererEvent) => void>()
+const loginSuccessListeners = new Map<(event: IpcRendererEvent, data: any) => void, (event: IpcRendererEvent, data: any) => void>()
 
 contextBridge.exposeInMainWorld('electronAPI', {
   minimize: () => ipcRenderer.send('minimize'),
@@ -11,6 +12,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   googleLogin: async () => ipcRenderer.invoke('google-login'),
   googleLogout: async () => ipcRenderer.invoke('google-logout'),
 
+  startLoginRedirect: async () => ipcRenderer.invoke('start-google-login'),
 
   onMaximized: (callback: () => void) => {
     const wrapped = (_event: IpcRendererEvent) => callback()
@@ -38,4 +40,16 @@ contextBridge.exposeInMainWorld('electronAPI', {
     }
   },
 
+  onLoginSuccess: (callback: (event: IpcRendererEvent, data: any) => void) => {
+    loginSuccessListeners.set(callback, callback)
+    ipcRenderer.on('google-login-success', callback)
+  },
+
+  removeLoginSuccessListener: (callback: (event: IpcRendererEvent, data: any) => void) => {
+    const wrapped = loginSuccessListeners.get(callback)
+    if (wrapped) {
+      ipcRenderer.removeListener('google-login-success', wrapped)
+      loginSuccessListeners.delete(callback)
+    }
+  },
 })

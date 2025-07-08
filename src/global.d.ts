@@ -28,7 +28,12 @@ declare global {
         success: boolean
         error?: string
       }>
+
       onMainProcessMessage: (callback: (message: string) => void) => void
+
+      startLoginRedirect: () => Promise<void>
+      onLoginSuccess: (callback: (event: any, data: any) => void) => void
+      removeLoginSuccessListener: (callback: (event: any, data: any) => void) => void
     }
   }
 }

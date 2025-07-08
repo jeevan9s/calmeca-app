@@ -75,7 +75,7 @@ export default function Landing() {
                 <div className="flex flex-col items-center gap-y-2">
                   <h1 id = "title" className="text-7xl text-white font-thin font-mp">Calmeca</h1>
                   <h2 id = "subtitle" className="text-sm font-scp font-light text-neutral-400">
-                    Click anywhere or press a key to launch.
+                    click anywhere or press a key to launch.
                   </h2>
                   
                 </div>

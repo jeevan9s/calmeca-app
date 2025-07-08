@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="taskbar.png" />
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <title>Login Successful!</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;500;600;700&display=swap");
+      @import url("https://fonts.googleapis.com/css2?family=Maven+Pro:wght@300;400;500;600;700&display=swap");
+      @import url("https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@300;400;500;600;700&display=swap");
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      html, body {
+        height: 100%;
+        width: 100%;
+        background-color: rgb(12, 12, 12);
+        font-family: "Source Code Pro", monospace;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        user-select: none;
+      }
+
+      #page {
+        max-width: 90%;
+        padding: 2rem;
+        animation: fadeIn 1s ease forwards;
+        opacity: 0;
+      }
+
+      h1 {
+        color: white;
+        font-family: "Maven Pro", sans-serif;
+        font-weight: 500;
+        font-size: clamp(1.5rem, 2.5vw, 2.5rem);
+        margin-bottom: 1rem;
+      }
+
+      p {
+        color: rgb(206, 206, 206);
+        font-size: clamp(1rem, 2vw, 1.2rem);
+        line-height: 1.6;
+      }
+
+      a {
+        color: #1a73e8;
+        text-decoration: underline;
+        cursor: pointer;
+      }
+
+      #icon {
+        width: 1em;
+        height: 1em;
+        margin-left: 6px;
+        stroke-width: 0.5px;
+        vertical-align: -3px;
+        position: relative;
+        stroke: white;
+        color: white;
+      }
+
+      #icon svg {
+        stroke: white;
+      }
+
+      #icon svg path {
+        stroke: white !important;
+      }
+
+      @keyframes fadeIn {
+        to {
+          opacity: 1;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="page" role="main" aria-label="Login successful message">
+      <h1>Login Successful :)</h1>
+      <p>
+        You can
+        <a href="#" onclick="closeWindow()" aria-label="Close window and continue using Calmeca">
+          close this window
+        </a>
+        <i id="icon" data-lucide="log-out" aria-hidden="true"></i>
+        and continue using Calmeca.
+      </p>
+    </div>
+    <script>
+      lucide.createIcons();
+      function closeWindow() {
+        try {
+          if (window.electronAPI && window.electronAPI.close) {
+            window.electronAPI.close();
+          } else {
+            window.close();
+          }
+        } catch {
+          window.close();
+        }
+      }
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape' || e.key === 'Enter') closeWindow();
+      });
+    </script>
+  </body>
+</html>
