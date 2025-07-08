@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain } from "electron";
+import { app, BrowserWindow, ipcMain, Notification } from "electron";
 import { fileURLToPath } from "url";
 import path from "path";
 import { createRequire } from "module";
@@ -42,21 +42,11 @@ function loadSavedTokens() {
     const token_path = getTokenPath();
     if (fs.existsSync(token_path)) {
       const tokenData = fs.readFileSync(token_path, "utf-8");
-      if (!tokenData.trim()) {
-        console.warn("Token file is empty");
-        return null;
-      }
+      if (!tokenData.trim()) return null;
       return JSON.parse(tokenData);
     }
     return null;
-  } catch (err) {
-    if (err instanceof SyntaxError) {
-      console.error("Invalid JSON in token file:", err.message);
-    } else if (err instanceof Error && "code" in err) {
-      console.error("File system error loading tokens:", err.message);
-    } else {
-      console.error("Unknown error loading tokens:", err);
-    }
+  } catch {
     return null;
   }
 }
@@ -75,12 +65,10 @@ async function getAuthClient() {
     try {
       await oauth2Client.getAccessToken();
       return oauth2Client;
-    } catch (err) {
-      console.log("Saved token invalid or expired:", err.message);
+    } catch {
       try {
         clearSavedTokens();
-      } catch (clearError) {
-        console.warn("Failed to clear invalid tokens:", clearError);
+      } catch {
       }
     }
   }
@@ -113,13 +101,9 @@ function clearSavedTokens() {
   if (fs.existsSync(token_path)) {
     try {
       fs.unlinkSync(token_path);
-      console.log("Saved tokens cleared.");
     } catch (err) {
-      console.error("Failed to delete token file:", err);
       throw err;
     }
-  } else {
-    console.log("No token file found to clear (this is normal for first-time logout).");
   }
 }
 const googleAuth = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
@@ -179,7 +163,6 @@ function createWindow() {
   }
   if (process.env.VITE_DEV_SERVER_URL) {
     win.loadURL(process.env.VITE_DEV_SERVER_URL);
-    win.webContents.openDevTools();
   } else {
     win.loadFile(path.join(__dirname, "./index.html"));
   }
@@ -254,7 +237,6 @@ ipcMain.handle("start-google-login", async () => {
         return;
       }
       const oauth2Client = new google.auth.OAuth2(clientId, clientSecret, redirectUri);
-      console.log("Client secret present?", !!clientSecret);
       authWindow.webContents.on("will-redirect", async (event, url) => {
         if (!url.startsWith(redirectUri)) return;
         event.preventDefault();
@@ -332,13 +314,21 @@ ipcMain.handle("google-login", async () => {
     } else if (typeof err === "string") {
       message = err;
     }
-    console.error("Google login failed:", message);
+    console.error(message);
     return { success: false, error: message };
   }
 });
+function showLogoutNotification() {
+  new Notification({
+    title: "Logout Successful",
+    body: "Google logout successful",
+    silent: false
+  }).show();
+}
 ipcMain.handle("google-logout", async () => {
   try {
     clearSavedTokens();
+    showLogoutNotification();
     return { success: true };
   } catch (err) {
     let message = "Unknown error";
@@ -347,7 +337,7 @@ ipcMain.handle("google-logout", async () => {
     } else if (typeof err === "string") {
       message = err;
     }
-    console.error("Google logout failed:", message);
+    console.error(message);
     return { success: false, error: message };
   }
 });

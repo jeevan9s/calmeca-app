@@ -50,23 +50,11 @@ export function loadSavedTokens() {
     const token_path = getTokenPath()
     if (fs.existsSync(token_path)) {
       const tokenData = fs.readFileSync(token_path, 'utf-8')
-      
-      if (!tokenData.trim()) {
-        console.warn('Token file is empty')
-        return null
-      }
-      
+      if (!tokenData.trim()) return null
       return JSON.parse(tokenData)
     }
     return null
-  } catch (err) {
-    if (err instanceof SyntaxError) {
-      console.error('Invalid JSON in token file:', err.message)
-    } else if (err instanceof Error && 'code' in err) {
-      console.error('File system error loading tokens:', err.message)
-    } else {
-      console.error('Unknown error loading tokens:', err)
-    }
+  } catch {
     return null
   }
 }
@@ -89,13 +77,10 @@ export async function getAuthClient(): Promise<Auth.OAuth2Client> {
     try {
       await oauth2Client.getAccessToken()
       return oauth2Client
-    } catch (err: any) {
-      console.log('Saved token invalid or expired:', err.message)
+    } catch {
       try {
         clearSavedTokens()
-      } catch (clearError) {
-        console.warn('Failed to clear invalid tokens:', clearError)
-      }
+      } catch {}
     }
   }
 
@@ -136,12 +121,8 @@ export function clearSavedTokens() {
   if (fs.existsSync(token_path)) {
     try {
       fs.unlinkSync(token_path)
-      console.log('Saved tokens cleared.')
     } catch (err) {
-      console.error('Failed to delete token file:', err)
       throw err
     }
-  } else {
-    console.log('No token file found to clear (this is normal for first-time logout).')
   }
 }

@@ -47,18 +47,12 @@ useEffect(() => {
     if (res.success) {
       setUser(null)
       setError(null)
-      showLogoutNotification()
     } else {
       setError(res.error ?? null)
     }
   }
 
-  function showLogoutNotification() {
-  new Notification('Logout Successful', {
-    body: 'Google logout successful',
-    silent: false,
-  });
-}
+
 
   return (
     <div className="min-h-screen bg-black/30">

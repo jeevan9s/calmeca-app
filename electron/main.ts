@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain } from 'electron'
+import { app, BrowserWindow, ipcMain, Notification } from 'electron'
 import { fileURLToPath } from 'url'
 import path from 'path'
 import { createRequire } from 'module'
@@ -66,7 +66,7 @@ function createWindow() {
 
   if (process.env.VITE_DEV_SERVER_URL) {
     win.loadURL(process.env.VITE_DEV_SERVER_URL)
-    win.webContents.openDevTools()
+
   } else {
     win.loadFile(path.join(__dirname, './index.html'))
   }
@@ -157,7 +157,6 @@ ipcMain.handle('start-google-login', async () => {
       }
 
       const oauth2Client = new google.auth.OAuth2(clientId, clientSecret, redirectUri)
-      console.log('Client secret present?', !!clientSecret)
 
       authWindow.webContents.on('will-redirect', async (event, url) => {
         if (!url.startsWith(redirectUri)) return
@@ -248,15 +247,26 @@ ipcMain.handle('google-login', async () => {
     } else if (typeof err === 'string') {
       message = err
     }
-    console.error('Google login failed:', message)
+    console.error(message)
     return { success: false, error: message }
   }
 })
 
+  function showLogoutNotification() {
+new Notification({
+  title: 'Logout Successful',
+  body: 'Google logout successful',
+  silent: false,
+}).show();
+
+}
+
 ipcMain.handle('google-logout', async () => {
   try {
     clearSavedTokens()
+    showLogoutNotification()
     return { success: true }
+
   } catch (err: unknown) {
     let message = 'Unknown error'
     if (err instanceof Error) {
@@ -264,7 +274,7 @@ ipcMain.handle('google-logout', async () => {
     } else if (typeof err === 'string') {
       message = err
     }
-    console.error('Google logout failed:', message)
+    console.error(message)
     return { success: false, error: message }
   }
 })
