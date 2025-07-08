@@ -6,6 +6,11 @@ import { google } from "googleapis";
 import dotenv from "dotenv";
 import fs from "fs";
 import crypto from "crypto";
+import { Buffer } from "buffer";
+import mammoth from "mammoth";
+import { PDFDocument, StandardFonts } from "pdf-lib";
+import { Document, Paragraph, TextRun, Packer } from "docx";
+import stream from "stream";
 dotenv.config();
 const env = process.env;
 const client_id = env.G_CLIENT_ID;
@@ -115,13 +120,156 @@ const googleAuth = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.definePr
   initializeTokenPath,
   loadSavedTokens
 }, Symbol.toStringTag, { value: "Module" }));
-const require2 = createRequire(import.meta.url);
+const pdfParse = require("pdf-parse");
+const SUPPORTED_MIME_TYPES = {
+  "text/plain": "txt",
+  "text/markdown": "md",
+  "application/json": "json",
+  "text/csv": "csv",
+  "application/pdf": "pdf",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "docx",
+  "application/msword": "doc"
+};
+function streamToBuffer(stream2) {
+  return new Promise((resolve, reject) => {
+    const chunks = [];
+    stream2.on("data", (chunk) => chunks.push(chunk));
+    stream2.on("end", () => resolve(Buffer.concat(chunks)));
+    stream2.on("error", reject);
+  });
+}
+async function importDriveFile(fileId) {
+  const auth = await getAuthClient();
+  const drive = google.drive({ version: "v3", auth });
+  const { data: fileMeta } = await drive.files.get({
+    fileId,
+    fields: "id, name, mimeType"
+  });
+  const mimeType = fileMeta.mimeType || "";
+  const name = fileMeta.name || "Unnamed file";
+  if (!(mimeType in SUPPORTED_MIME_TYPES)) {
+    throw new Error(`Unsupported file type: ${mimeType}`);
+  }
+  const response = await drive.files.get(
+    { fileId, alt: "media" },
+    { responseType: "stream" }
+  );
+  const fileBuffer = await streamToBuffer(response.data);
+  let content = "";
+  switch (mimeType) {
+    case "application/pdf":
+      content = (await pdfParse(fileBuffer)).text;
+      break;
+    case "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+      content = (await mammoth.extractRawText({ buffer: fileBuffer })).value;
+      break;
+    case "application/msword":
+      throw new Error("Legacy .doc format is not supported. Please use .docx format.");
+    default:
+      content = fileBuffer.toString("utf8");
+  }
+  return { id: fileMeta.id, name, mimeType, usedFor: "other", createdOn: /* @__PURE__ */ new Date(), content };
+}
+async function exportTextFeatureGDrive(content, filename, exportType2) {
+  const auth = await getAuthClient();
+  const drive = google.drive({ version: "v3", auth });
+  let buffer;
+  let mimeType;
+  filename = path.basename(filename, path.extname(filename));
+  switch (exportType2) {
+    case "md":
+    case "txt":
+      buffer = Buffer.from(content, "utf-8");
+      mimeType = exportType2 === "md" ? "text/markdown" : "text/plain";
+      filename += `.${exportType2}`;
+      break;
+    case "json":
+      buffer = Buffer.from(JSON.stringify({ content }, null, 2), "utf-8");
+      mimeType = "application/json";
+      filename += `.json`;
+      break;
+    case "pdf":
+      {
+        const pdfDoc = await PDFDocument.create();
+        const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+        const fontSize = 12;
+        const lineHeight = fontSize + 5;
+        const margin = 30;
+        const textLines = content.split("\n");
+        let page = pdfDoc.addPage();
+        const { width: _, height } = page.getSize();
+        let y = height - margin;
+        for (const line of textLines) {
+          if (y < margin + lineHeight) {
+            page = pdfDoc.addPage();
+            y = height - margin;
+          }
+          page.drawText(line, {
+            x: margin,
+            y,
+            size: fontSize,
+            font
+          });
+          y -= lineHeight;
+        }
+        const pdfBytes = await pdfDoc.save();
+        buffer = Buffer.from(pdfBytes);
+        mimeType = "application/pdf";
+        filename += ".pdf";
+      }
+      break;
+    case "docx":
+      {
+        const doc = new Document({
+          sections: [{
+            children: [
+              new Paragraph({
+                children: [
+                  new TextRun(content)
+                ]
+              })
+            ]
+          }]
+        });
+        const docBuffer = await Packer.toBuffer(doc);
+        buffer = Buffer.from(docBuffer);
+        mimeType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+        filename += ".docx";
+      }
+      break;
+    default:
+      throw new Error(`Unsupported export type: ${exportType2}`);
+  }
+  const fileMetadata = {
+    name: filename,
+    mimeType
+  };
+  const media = {
+    mimeType,
+    body: stream.Readable.from(buffer)
+  };
+  const res = await drive.files.create({
+    requestBody: fileMetadata,
+    media,
+    fields: "id, name"
+  });
+  if (!res.data.id) {
+    throw new Error("Failed to upload file to Google Drive");
+  }
+  await drive.permissions.create({
+    fileId: res.data.id,
+    requestBody: { role: "reader", type: "anyone" }
+  });
+  const driveUrl = `https://drive.google.com/file/d/${res.data.id}/view`;
+  return { fileId: res.data.id, name: res.data.name ?? filename, driveUrl };
+}
+const require$1 = createRequire(import.meta.url);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 let win = null;
 let setVibrancy = null;
 try {
-  const electronAcrylic = require2("electron-acrylic-window");
+  const electronAcrylic = require$1("electron-acrylic-window");
   setVibrancy = electronAcrylic.setVibrancy;
 } catch (error) {
   console.warn("electron-acrylic-window not available:", error);
@@ -340,4 +488,60 @@ ipcMain.handle("google-logout", async () => {
     console.error(message);
     return { success: false, error: message };
   }
+});
+ipcMain.handle("drive-export-text", async (_event, args) => {
+  try {
+    const { content, filename, type } = args;
+    const res = await exportTextFeatureGDrive(content, filename, type);
+    console.log("file exported: ", filename);
+    return {
+      success: true,
+      fileId: res.fileId,
+      name: res.name,
+      driveUrl: res.driveUrl
+    };
+  } catch (error) {
+    console.error("Export error:", error);
+    return { success: false, error: error.message };
+  }
+});
+ipcMain.handle("drive-import-file", async (_event, fileId) => {
+  try {
+    const res = await importDriveFile(fileId);
+    console.log("file uploaded: ", fileId);
+    return { success: true };
+  } catch (error) {
+    console.log("Import error: ", error);
+    return { success: false, error: error.message };
+  }
+});
+ipcMain.handle("open-google-picker", async () => {
+  const pickerWindow = new BrowserWindow({
+    width: 600,
+    height: 600,
+    modal: true,
+    parent: BrowserWindow.getFocusedWindow() ?? void 0,
+    show: false,
+    autoHideMenuBar: true,
+    webPreferences: {
+      preload: path.join(__dirname, "picker-preload.js"),
+      contextIsolation: true,
+      nodeIntegration: false
+    }
+  });
+  const pickerPath = path.join(__dirname, "..", "assets", "picker.html");
+  pickerWindow.loadFile(pickerPath);
+  pickerWindow.once("ready-to-show", () => {
+    pickerWindow.show();
+  });
+  return new Promise((resolve, reject) => {
+    const handleMessage = (_event, fileId) => {
+      resolve(fileId);
+      pickerWindow.close();
+    };
+    ipcMain.once("google-picker-file-id", handleMessage);
+    pickerWindow.on("closed", () => {
+      ipcMain.removeListener("google-picker-file-id", handleMessage);
+    });
+  });
 });

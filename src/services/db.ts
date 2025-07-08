@@ -160,6 +160,22 @@ export interface importedFile {
 export type generationType = 'summary' | 'flashcards' | 'quiz'
 export type exportType = 'md' | 'pdf' | 'txt' | 'docx' | 'json';
 
+export type exportResponse = {
+  success: boolean
+  fileId?: string
+  name?: string
+  driveUrl?: string
+  error?: string
+}
+
+export type importResponse = {
+  success: boolean
+  id?: string
+  name?: string
+  mimeType?: string
+  content?: string
+  error?: string
+}
 
 export interface generationOptions {
     quizType: 'multiple-choice' | 'short-answer' | 'true-false'

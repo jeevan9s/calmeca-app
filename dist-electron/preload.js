@@ -10,6 +10,9 @@ electron.contextBridge.exposeInMainWorld("electronAPI", {
   close: () => electron.ipcRenderer.send("close"),
   googleLogin: async () => electron.ipcRenderer.invoke("google-login"),
   googleLogout: async () => electron.ipcRenderer.invoke("google-logout"),
+  gTextExport: (content, filename, type) => electron.ipcRenderer.invoke("drive-export-text", { content, filename, type }),
+  gImportFile: (fileId) => electron.ipcRenderer.invoke("drive-import-file", fileId),
+  openGooglePicker: async () => electron.ipcRenderer.invoke("open-google-picker"),
   startLoginRedirect: async () => electron.ipcRenderer.invoke("start-google-login"),
   onMaximized: (callback) => {
     const wrapped = (_event) => callback();

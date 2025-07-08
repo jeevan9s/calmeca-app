@@ -1,4 +1,5 @@
 import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron'
+import { exportType, exportResponse, importResponse } from '@/services/db'
 
 const maximizedListeners = new Map<() => void, (event: IpcRendererEvent) => void>()
 const notMaximizedListeners = new Map<() => void, (event: IpcRendererEvent) => void>()
@@ -11,6 +12,14 @@ contextBridge.exposeInMainWorld('electronAPI', {
   close: () => ipcRenderer.send('close'),
   googleLogin: async () => ipcRenderer.invoke('google-login'),
   googleLogout: async () => ipcRenderer.invoke('google-logout'),
+
+  gTextExport: (content: string, filename: string, type: exportType): Promise<exportResponse> =>
+  ipcRenderer.invoke('drive-export-text', { content, filename, type }),
+
+  gImportFile: (fileId: string): Promise<importResponse> =>
+  ipcRenderer.invoke('drive-import-file', fileId),
+  openGooglePicker: async (): Promise<string> => ipcRenderer.invoke('open-google-picker'),
+
 
   startLoginRedirect: async () => ipcRenderer.invoke('start-google-login'),
 
