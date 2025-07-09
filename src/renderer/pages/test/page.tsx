@@ -309,7 +309,7 @@ const renderAIContent = () => {
 }
 
 return (
-  <div className="overflow-y-auto max-h-screen bg-black/30">
+  <div className="overflow-y-auto min-h-screen bg-black/30">
     <Layout />
     <div className="max-w-md mx-5 mt-10 text-left">
       <h1 className="text-4xl text-white font-raleway">
@@ -317,11 +317,73 @@ return (
       </h1>
     </div>
 
+    
+{importedFile && (
+  <>
+    <div className="fixed top-15 left-96 ml-40 w-80 flex flex-col gap-4 z-50">
+      <div className="p-3 bg-neutral-900 border border-neutral-700 rounded-lg text-white">
+        <h2 className="font-semibold font-raleway text-sm mb-2">
+          AI Tools
+        </h2>
+
+        <div>
+          <label className="block text-xs text-white/60 font-raleway">select content</label>
+          <select
+            value={contentType}
+            onChange={(e) => setContentType(e.target.value as typeof contentType)}
+            className="p-2 w-full bg-neutral-800 text-white text-sm rounded border border-gray-700 font-raleway"
+          >
+            <option value="summary">summary</option>
+            <option value="flashcards">flashcards</option>
+            <option value="quiz">quiz</option>
+          </select>
+
+          {contentType === 'quiz' && (
+            <div>
+              <label className="block text-xs text-white/60 font-raleway mt-2">quiz type:</label>
+              <select
+                value={quizType}
+                onChange={(e) => setQuizType(e.target.value as typeof quizType)}
+                className="p-2 w-full bg-neutral-800 text-white text-sm rounded border border-gray-700 font-raleway"
+              >
+                <option value="multiple-choice">multiple-choice</option>
+                <option value="true-false">true or false</option>
+                <option value="short-answer">short answer</option>
+                <option value="mixed">full quiz</option>
+              </select>
+            </div>
+          )}
+
+          <button
+            onClick={handleGenerate}
+            disabled={isGenerating}
+            className={`inline-block p-2 mt-2 text-xs cursor-pointer font-semibold font-raleway text-white rounded-lg shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-neutral-600 ${
+              isGenerating
+                ? 'bg-neutral-600 cursor-not-allowed'
+                : 'bg-neutral-800 hover:bg-neutral-700'
+            }`}
+          >
+            {isGenerating ? 'generating...' : 'generate AI content'}
+          </button>
+        </div>
+      </div>
+
+      {AIcontent && (
+        <div className="p-3 bg-2-900 border border-neutral-700 rounded-lg text-white max-h-48 max-w-96 overflow-auto bg-neutral-800 border-neutral-600 rounded p-2">
+          <h3 className="font-semibold font-raleway text-sm mb-2">Generated Content</h3>
+          <div className='w-64'>{renderAIContent()}</div>
+        </div>
+      )}
+    </div>
+
     <div className="max-w-md mx-5 mt-2 text-left">
       <h3 className="font-raleway text-md font-thin text-white/60">
         prototyping Google integrations: (auth, import, export).
       </h3>
     </div>
+  </>
+)}
+
 
     
     {user && (
@@ -441,70 +503,13 @@ return (
                 ✕ Clear
               </button>
             </h2>
-            <div className="max-h-64 overflow-auto">
+            <div className="max-h-40 overflow-auto">
               <pre className="whitespace-pre-wrap text-sm text-white/80 break-words">
                 {importedFile.content}
               </pre>
             </div>
           </div>
 
-          <div className="w-80 flex flex-col gap-4">
-            <div className="p-3 bg-neutral-900 border border-neutral-700 rounded-lg text-white">
-              <h2 className="font-semibold font-raleway text-sm mb-2">
-                AI Tools
-              </h2>
-
-              <div>
-                <label className="block text-xs text-white/60 font-raleway">select content</label>
-                <select
-                  value={contentType}
-                  onChange={(e) => setContentType(e.target.value as typeof contentType)}
-                  className="p-2 w-full bg-neutral-800 text-white text-sm rounded border border-gray-700 font-raleway"
-                >
-                  <option value="summary">summary</option>
-                  <option value="flashcards">flashcards</option>
-                  <option value="quiz">quiz</option>
-                </select>
-
-                {contentType === 'quiz' && (
-                  <div>
-                    <label className="block text-xs text-white/60 font-raleway mt-2">quiz type:</label>
-                    <select
-                      value={quizType}
-                      onChange={(e) => setQuizType(e.target.value as typeof quizType)}
-                      className="p-2 w-full bg-neutral-800 text-white text-sm rounded border border-gray-700 font-raleway"
-                    >
-                      <option value="multiple-choice">multiple-choice</option>
-                      <option value="true-false">true or false</option>
-                      <option value="short-answer">short answer</option>
-                      <option value="mixed">full quiz</option>
-                    </select>
-                  </div>
-                )}
-
-                <button
-                  onClick={handleGenerate}
-                  disabled={isGenerating}
-                  className={`inline-block p-2 mt-2 text-xs cursor-pointer font-semibold font-raleway text-white rounded-lg shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-neutral-600 ${
-                    isGenerating
-                      ? 'bg-neutral-600 cursor-not-allowed'
-                      : 'bg-neutral-800 hover:bg-neutral-700'
-                  }`}
-                >
-                  {isGenerating ? 'generating...' : 'generate AI content'}
-                </button>
-              </div>
-            </div>
-
-            {AIcontent && (
-              <div className="p-3 bg-2-900 border border-neutral-700 rounded-lg text-white">
-                <h3 className="font-semibold font-raleway text-sm mb-2">Generated Content</h3>
-                <div className="max-h-48 overflow-auto bg-neutral-800 border border-neutral-600 rounded p-2">
-                  {renderAIContent()}
-                </div>
-              </div>
-            )}
-          </div>
         </div>
       )}
     </div>

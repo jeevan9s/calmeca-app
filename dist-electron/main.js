@@ -46139,19 +46139,43 @@ async function generateFlashcards(text) {
   const messages = [
     {
       role: "system",
-      content: "You generate concise flashcards. Return a JSON array of {term, definition} pairs, based on the notes and lecture transcripts inputted."
+      content: `You are a flashcard generator. You must return ONLY a valid JSON array of objects with "term" and "definition" properties. 
+
+example format:
+[
+    {"term": "Key Concept", "definition": "Clear explanation of the concept"},
+    {"term": "Important Term", "definition": "Definition with context"}
+]`
     },
     {
       role: "user",
-      content: `Create 12 flashcards from the following content:
+      content: `Create flashcards from the following content:
 
 ${text}`
     }
   ];
-  const result = await callChatCompletion(messages, 500);
   try {
-    return JSON.parse(result);
-  } catch {
+    const result = await callChatCompletion(messages, 1e3);
+    let cleanedResult = result.trim();
+    if (cleanedResult.startsWith("```json")) {
+      cleanedResult = cleanedResult.replace(/```json\n?/, "").replace(/\n?```$/, "");
+    } else if (cleanedResult.startsWith("```")) {
+      cleanedResult = cleanedResult.replace(/```\n?/, "").replace(/\n?```$/, "");
+    }
+    const jsonStart = cleanedResult.indexOf("[");
+    const jsonEnd = cleanedResult.lastIndexOf("]");
+    if (jsonStart !== -1 && jsonEnd !== -1 && jsonEnd > jsonStart) {
+      cleanedResult = cleanedResult.substring(jsonStart, jsonEnd + 1);
+    }
+    const parsed = JSON.parse(cleanedResult);
+    if (!Array.isArray(parsed)) {
+      return [];
+    }
+    const validFlashcards = parsed.filter((card) => {
+      return card && typeof card === "object" && typeof card.term === "string" && typeof card.definition === "string" && card.term.trim() !== "" && card.definition.trim() !== "";
+    });
+    return validFlashcards;
+  } catch (error2) {
     return [];
   }
 }
