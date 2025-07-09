@@ -12,9 +12,12 @@ const client_id = env.G_CLIENT_ID
 const redirect_uri = env.G_REDIRECT_URI
 const client_secret = env.G_CLIENT_SECRET
 const scopes = [
+  'https://www.googleapis.com/auth/drive',
   'https://www.googleapis.com/auth/drive.file',
   'https://www.googleapis.com/auth/userinfo.profile',
-  'https://www.googleapis.com/auth/userinfo.email'
+  'https://www.googleapis.com/auth/userinfo.email',
+  'https://www.googleapis.com/auth/drive.readonly',
+
 ]
 
 if (!client_id || !redirect_uri) {

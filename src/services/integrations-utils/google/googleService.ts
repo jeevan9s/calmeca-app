@@ -37,7 +37,7 @@ function streamToBuffer(stream: Readable): Promise<Buffer> {
     })
 }
 // import any file 
-export async function importDriveFile(fileId:string): Promise<importedFile> {
+export async function importDriveFile(fileId: string): Promise<importedFile> {
     const auth = await getAuthClient()
     const drive = google.drive({version: 'v3', auth})
 
@@ -48,17 +48,20 @@ export async function importDriveFile(fileId:string): Promise<importedFile> {
 
     const mimeType = fileMeta.mimeType || ''
     const name = fileMeta.name || 'Unnamed file'
-    if (!(mimeType in SUPPORTED_MIME_TYPES)) {
-  throw new Error(`Unsupported file type: ${mimeType}`);
-}
-    // downloads files as stream
-    const response = await drive.files.get( 
-        { fileId, alt: 'media' }, { responseType: 'stream'})
     
-      const fileBuffer = await streamToBuffer(response.data as Readable)
-      let content = ''
+    if (!(mimeType in SUPPORTED_MIME_TYPES)) {
+        throw new Error(`Unsupported file type: ${mimeType}`);
+    }
 
-      switch (mimeType) {
+    const response = await drive.files.get( 
+        { fileId, alt: 'media' }, 
+        { responseType: 'stream' }
+    )
+    
+    const fileBuffer = await streamToBuffer(response.data as Readable)
+    let content = ''
+
+    switch (mimeType) {
         case 'application/pdf':
             content = (await pdfParse(fileBuffer)).text
             break
@@ -68,10 +71,17 @@ export async function importDriveFile(fileId:string): Promise<importedFile> {
         case 'application/msword':
             throw new Error('Legacy .doc format is not supported. Please use .docx format.')
         default:
-            content = fileBuffer.toString('utf8') // readable as UTF-8 text -> csv, json, md, txt
-      }
+            content = fileBuffer.toString('utf8')
+    }
 
-      return { id: fileMeta.id!, name, mimeType, usedFor: 'other',  createdOn: new Date(), content}
+    return { 
+        id: fileMeta.id!, 
+        name, 
+        mimeType, 
+        usedFor: 'other',  
+        createdOn: new Date(), 
+        content
+    }
 }
 
 // EXPORTER SERVICE FUNCTIONS 

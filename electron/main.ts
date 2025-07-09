@@ -11,7 +11,9 @@ import {
   getTokenPath,
 } from '../src/services/integrations-utils/google/googleAuth'
 import { exportTextFeatureGDrive, importDriveFile } from '@/services/integrations-utils/google/googleService'
-import { exportType } from '@/services/db'
+import { AIContentRequest, exportType, generationOptions } from '@/services/db'
+import { parseArgs } from 'util'
+import { generateFromDrive } from '@/services/integrations-utils/cloudGen'
 
 const require = createRequire(import.meta.url)
 const __filename = fileURLToPath(import.meta.url)
@@ -378,3 +380,14 @@ await pickerWindow.loadURL('http://localhost:3000/picker.html')
     })
   })
 })
+
+// ai generated content handler 
+ipcMain.handle('generate-ai-content', async (_event, args: AIContentRequest) => {
+  const { type, content, options } = args;
+  try {
+    const result = await generateFromDrive(type, content, options);
+    return { success: true, result };
+  } catch (error) {
+    return { success: false, error: (error as Error).message };
+  }
+});

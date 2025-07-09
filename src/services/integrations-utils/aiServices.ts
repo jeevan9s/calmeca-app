@@ -73,18 +73,16 @@ export async function generateQuiz(
   switch (quizType) {
     case "multiple-choice":
       instruction = length ? `Generate exactly ${length} multiple-choice questions`
-        : "Generate an appropriate  number of multiple-choice questions based on the length of the content. Minimum of 5, maximum of 20.";
+        : "Generate 5-8 multiple-choice questions based on the content.";
       break;
     case "true-false":
       instruction = length ? `Generate exactly ${length} true-false questions`
-        :"Generate an appropriate  number of true/false questions based on the length of the content. Minimum of 5, maximum of 20.";
+        :"Generate 5-8 true/false questions based on the content.";
       break;
     case "short-answer":
       instruction = length ? `Generate exactly ${length} short-answer questions`
-        :"Generate an appropriate  number of short-answer questions based on the length of the content. Minimum of 3, maximum of 15.";
+        :"Generate 3-5 short-answer questions based on the content.";
       break;
-
-
     case "mixed":
         if (length) {
             const perType = Math.floor(length / 3)
@@ -93,9 +91,8 @@ export async function generateQuiz(
         - ${perType} true/false
         - ${length - 2 * perType} short-answer questions based on the content.`;
         } else {
-
       instruction =
-        "Generate a mixed quiz with a balanced number of multiple-choice, true/false, and short-answer questions. Choose question count based on the content length. Multiple-choice and true/false: 5–20 each. Short-answer: 3–15.";
+        "Generate a mixed quiz with 3 multiple-choice, 3 true/false, and 2 short-answer questions.";
         }
         break;
   }
@@ -103,8 +100,30 @@ export async function generateQuiz(
   const messages: ChatCompletionMessageParam[] = [
     {
       role: "system",
-      content:
-        "You generate academic quiz questions with the following types: multiple-choice, true/false, short-answer. Output a JSON array where each question object includes: 'type', 'question', 'correctAnswer', and optionally 'options' for multiple-choice and true/false.",
+      content: `You generate academic quiz questions. You must respond with ONLY a valid JSON array, no other text.
+
+Each question object must have:
+- "type": "multiple-choice" OR "true-false" OR "short-answer"
+- "question": the question text
+- "correctAnswer": the correct answer
+- "options": array of 4 choices (only for multiple-choice)
+
+Example format:
+[
+  {
+    "type": "multiple-choice",
+    "question": "What is the capital of France?",
+    "options": ["London", "Berlin", "Paris", "Madrid"],
+    "correctAnswer": "Paris"
+  },
+  {
+    "type": "true-false",
+    "question": "The Earth is flat.",
+    "correctAnswer": "false"
+  }
+]
+
+Return ONLY the JSON array, no other text.`
     },
     {
       role: "user",
@@ -112,10 +131,38 @@ export async function generateQuiz(
     },
   ];
 
-  const result = await callChatCompletion(messages, 1000);
+  console.log('Sending to OpenAI:', {
+    instruction,
+    contentLength: text.length,
+    contentPreview: text.substring(0, 100) + '...'
+  });
+
+  const result = await callChatCompletion(messages, 2000); // Increased token limit
+  
+  console.log('OpenAI raw response:', result);
+  console.log('Response length:', result.length);
+  
   try {
-    return JSON.parse(result);
-  } catch {
+    const parsed = JSON.parse(result);
+    console.log('Parsed successfully:', parsed);
+    return parsed;
+  } catch (error) {
+    console.error('JSON parse error:', error);
+    console.error('Raw response that failed to parse:', result);
+    
+    // Try to extract JSON from the response if it's wrapped in other text
+    const jsonMatch = result.match(/\[[\s\S]*\]/);
+    if (jsonMatch) {
+      try {
+        console.log('Trying to parse extracted JSON:', jsonMatch[0]);
+        const extracted = JSON.parse(jsonMatch[0]);
+        console.log('Extracted JSON parsed successfully:', extracted);
+        return extracted;
+      } catch (extractError) {
+        console.error('Failed to parse extracted JSON:', extractError);
+      }
+    }
+    
     return [];
   }
 }

@@ -16,6 +16,51 @@ export default function GoogleTest() {
   const [isLoading, setIsLoading] = useState(false)
   const [isExporting, setIsExporting] = useState(false)
   const [isImporting, setIsImporting] = useState(false)
+  const [contentType, setContentType] = useState<'summary' | 'flashcards' | 'quiz'>('summary')
+  const [quizType, setQuizType] = useState<'multiple-choice' | 'true-false' | 'short-answer' | 'mixed'>('mixed')
+  const [AIcontent, setAIContent] = useState<string | null>(null)
+  const [parsedContent, setParsedContent] = useState<any>(null)
+  const [isGenerating, setIsGenerating] = useState(false)
+  const [flashcards, setFlashcards] = useState<{term: string; definition: string}[]>([])
+  const [quiz, setQuiz] = useState<
+    {
+      type: string;
+      question: string;
+      options?: string[];
+      correctAnswer: string;
+    }[]
+  >([])
+
+const parseAIContent = (content: any, type: string) => {
+  if (typeof content !== "string") {
+    console.error("AI content is not a string:", content)
+    setParsedContent(null)
+    return
+  }
+
+  if (!content.trim()) {
+    console.error("Empty AI content — nothing to parse.")
+    setParsedContent(null)
+    return
+  }
+
+  try {
+    if (type === 'summary') {
+      setParsedContent(content)
+    } else if (type === 'flashcards' || type === 'quiz') {
+      const parsed = JSON.parse(content)
+      setParsedContent(parsed)
+
+      if (type === 'flashcards') setFlashcards(parsed)
+      else if (type === 'quiz') setQuiz(parsed)
+    }
+  } catch (err) {
+    console.error('Error parsing AI content:', err, content)
+    setParsedContent(null)
+  }
+}
+
+
 
   useEffect(() => {
     const loginSuccessHandler = async (_event: any, data: any) => {
@@ -40,7 +85,6 @@ export default function GoogleTest() {
     }
   }, [])
 
-  // auth stuff
 const handleLogin = async () => {
   console.log('Attempting login')
   setIsLoading(true)
@@ -71,7 +115,6 @@ const handleLogin = async () => {
   }
 }
 
-
   const handleLogout = async () => {
     setIsLoading(true)
     setError(null)
@@ -91,7 +134,6 @@ const handleLogin = async () => {
     }
   }
 
-  // import/export
   const handleExport = async () => {
     if (!text.trim()) {
       alert("Enter some content to export.")
@@ -151,136 +193,245 @@ const handleLogin = async () => {
     }
   }
 
-  return (
-    <div className="min-h-screen bg-black/30">
-      <Layout />
-      <div className="max-w-md mx-5 mt-10 text-left">
-        <h1 className="text-4xl text-white font-raleway">
-          G-Drive Testing
-        </h1>
-      </div>
+const handleGenerate = async () => {
+  if (!importedFile?.content) {
+    alert('Import a file first')
+    return
+  }
 
-      <div className="max-w-md mx-5 mt-2 text-left">
-        <h3 className="font-raleway text-md font-thin text-white/60">
-          prototyping Google integrations: (auth, import, export).
-        </h3>
-      </div>
+  setIsGenerating(true)
+  setAIContent(null)
+  setParsedContent(null)
 
+  try {
+    const requestData = {
+      type: contentType,
+      content: importedFile.content,
+      options: contentType === 'quiz' ? { quizType } : undefined,
+    }
+    
+    console.log('Sending to AI service:', requestData) // Debug what we're sending
+    console.log('Content length:', importedFile.content.length) // Check if content is actually there
+    console.log('Content preview:', importedFile.content.substring(0, 200) + '...') // Show first 200 chars
+
+    const res = await window.electronAPI.generateAIContent(requestData)
+
+    console.log('AI Generation response:', res) // Debug log
+
+    if (res.success && res.result !== undefined) {
+      console.log('Result type:', typeof res.result) // Debug log
+      console.log('Result content:', res.result) // Debug log
       
-      {error && (
-        <div className="max-w-md mx-5 mt-4 p-3 bg-red-900/50 border border-red-700 rounded-lg text-red-200 text-sm">
-          {error}
-        </div>
-      )}
-
+      // Store the raw result for debugging
+      setAIContent(JSON.stringify(res.result, null, 2))
       
-      {user && (
-        <div className="max-w-md mx-5 mt-4 p-3 bg-green-900/50 border border-green-700 rounded-lg text-green-200 text-sm">
-          <p className="font-semibold">logged in as: {user.name}</p>
-          <p className="text-xs text-green-300">{user.email}</p>
-        </div>
-      )}
+      if (contentType === 'summary') {
+        // For summary, result should be a string
+        if (typeof res.result === 'string') {
+          setParsedContent(res.result)
+        } else {
+          console.error('Expected string for summary, got:', typeof res.result)
+          setParsedContent(null)
+        }
+      } else if (contentType === 'flashcards' || contentType === 'quiz') {
+        // For flashcards/quiz, result should be an array
+        if (Array.isArray(res.result)) {
+          setParsedContent(res.result)
+          if (contentType === 'flashcards') setFlashcards(res.result)
+          else if (contentType === 'quiz') setQuiz(res.result)
+        } else {
+          console.error(`Expected array for ${contentType}, got:`, typeof res.result)
+          setParsedContent(null)
+        }
+      }
+    } else {
+      console.error('Generation failed:', res.error)
+      alert(`Generation failed: ${res.error || 'Unknown error'}`)
+    }
+  } catch (err) {
+    console.error("AI Generation error: ", err)
+    alert("AI failed unexpectedly")
+  } finally {
+    setIsGenerating(false)
+  }
+}
 
-      <div className="flex flex-col mx-5 mt-4">
-        
-        <label className="block mb-1 text-sm text-white/60 font-raleway">Auth Testing</label>
-        <div className="flex gap-4 items-center mb-4">
-          <button
-            className={`inline-block py-3 px-6 text-sm cursor-pointer font-semibold font-raleway text-white rounded-lg shadow-md transition-all ${
-              isLoading 
-                ? 'bg-neutral-600 cursor-not-allowed' 
-                : 'bg-neutral-800 hover:bg-neutral-700'
-            }`}
-            onClick={handleLogin}
-            disabled={isLoading}
-          >
-            {isLoading ? 'loading...' : 'login with Google'}
-          </button>
-          <button
-            className={`inline-block py-3 px-6 text-sm font-semibold font-raleway text-white rounded-lg shadow-md transition-all ${
-              isLoading 
-                ? 'bg-neutral-600 cursor-not-allowed' 
-                : 'bg-neutral-800 hover:bg-red-900'
-            }`}
-            onClick={handleLogout}
-            disabled={isLoading}
-          >
-            {isLoading ? 'loading...' : 'logout'}
-          </button>
-        </div>
 
-        
-        <div className="max-w-md text-left">
-          <label className="block mb-1 text-sm text-white/60 font-raleway">File Export</label>
-          
-          
-          <div className="flex gap-3 items-center mb-2">
-            <input
-              type="text"
-              value={filename}
-              onChange={(e) => setFilename(e.target.value)}
-              placeholder="enter filename"
-              className="p-2 bg-neutral-800 text-white text-sm rounded border border-gray-700 font-raleway flex-1"
-            />
-            <select 
-              value={exportType} 
-              onChange={(e) => setExportType(e.target.value as exportType)} 
-              className="p-2 bg-neutral-800 text-white text-sm rounded border border-gray-700 font-raleway"
-            >
-              <option value="txt">.txt</option>
-              <option value="pdf">.pdf</option>
-              <option value="md">.md</option>
-              <option value="docx">.docx</option>
-              <option value="json">.json</option>
-            </select>
+const renderAIContent = () => {
+  if (!parsedContent) return null
+  
+  if (contentType === 'summary') {
+    return (
+      <div className="whitespace-pre-wrap text-xs text-white/80 font-raleway">
+        {parsedContent}
+      </div>
+    )
+  }
+  
+  if (contentType === 'flashcards') {
+    return (
+      <div className="space-y-2 text-xs">
+        {parsedContent.map((card: any, index: number) => (
+          <div key={index} className="border border-neutral-600 rounded p-2 bg-neutral-700">
+            <div className="font-semibold text-white">{card.term}</div>
+            <div className="text-white/70 text-xs mt-1">{card.definition}</div>
           </div>
+        ))}
+      </div>
+    )
+  }
+  
+  if (contentType === 'quiz') {
+    return (
+      <div className="space-y-3 text-xs">
+        {parsedContent.map((question: any, index: number) => (
+          <div key={index} className="border border-neutral-600 rounded p-2 bg-neutral-700">
+            <div className="font-semibold text-white text-xs mb-1">
+              {index + 1}. {question.question}
+            </div>
+            {question.options && (
+              <div className="ml-2 space-y-1">
+                {question.options.map((option: string, optIndex: number) => (
+                  <div key={optIndex} className="text-white/70 text-xs">
+                    {String.fromCharCode(65 + optIndex)}. {option}
+                  </div>
+                ))}
+              </div>
+            )}
+            <div className="text-green-400 text-xs mt-1">
+              Answer: {question.correctAnswer}
+            </div>
+          </div>
+        ))}
+      </div>
+    )
+  }
+}
 
-          <textarea 
-            id="message" 
-            rows={4} 
-            value={text} 
-            onChange={(e) => setText(e.target.value)} 
-            placeholder="enter content to export..."
-            className="block p-3 w-full text-sm text-white bg-neutral-800 rounded-lg border border-gray-300 resize-vertical"
+return (
+  <div className="overflow-y-auto max-h-screen bg-black/30">
+    <Layout />
+    <div className="max-w-md mx-5 mt-10 text-left">
+      <h1 className="text-4xl text-white font-raleway">
+        G-Drive Testing
+      </h1>
+    </div>
+
+    <div className="max-w-md mx-5 mt-2 text-left">
+      <h3 className="font-raleway text-md font-thin text-white/60">
+        prototyping Google integrations: (auth, import, export).
+      </h3>
+    </div>
+
+    
+    {user && (
+      <div className="max-w-md mx-5 mt-4 p-3 bg-green-900/50 border border-green-700 rounded-lg text-green-200 text-sm">
+        <p className="font-semibold">logged in as: {user.name}</p>
+        <p className="text-xs text-green-300">{user.email}</p>
+      </div>
+    )}
+
+    <div className="flex flex-col mx-5 mt-4">
+      
+      <label className="block mb-1 text-sm text-white/60 font-raleway">Auth Testing</label>
+      <div className="flex gap-4 items-center mb-4">
+        <button
+          className={`inline-block py-3 px-6 text-sm cursor-pointer font-semibold font-raleway text-white rounded-lg shadow-md transition-all ${
+            isLoading 
+              ? 'bg-neutral-600 cursor-not-allowed' 
+              : 'bg-neutral-800 hover:bg-neutral-700'
+          }`}
+          onClick={handleLogin}
+          disabled={isLoading}
+        >
+          {isLoading ? 'loading...' : 'login with Google'}
+        </button>
+        <button
+          className={`inline-block py-3 px-6 text-sm font-semibold font-raleway text-white rounded-lg shadow-md transition-all ${
+            isLoading 
+              ? 'bg-neutral-600 cursor-not-allowed' 
+              : 'bg-neutral-800 hover:bg-red-900'
+          }`}
+          onClick={handleLogout}
+          disabled={isLoading}
+        >
+          {isLoading ? 'loading...' : 'logout'}
+        </button>
+      </div>
+
+      
+      <div className="max-w-md text-left">
+        <label className="block mb-1 text-sm text-white/60 font-raleway">File Export</label>
+        
+        
+        <div className="flex gap-3 items-center mb-2">
+          <input
+            type="text"
+            value={filename}
+            onChange={(e) => setFilename(e.target.value)}
+            placeholder="enter filename"
+            className="p-2 bg-neutral-800 text-white text-sm rounded border border-gray-700 font-raleway flex-1"
           />
-          <button
-            onClick={handleExport}
-            disabled={isExporting || !user}
-            className={`inline-block p-2.5 mt-2 text-xs cursor-pointer font-semibold font-raleway text-white rounded-lg shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-neutral-600 ${
-              isExporting || !user
-                ? 'bg-neutral-600 cursor-not-allowed'
-                : 'bg-neutral-800 hover:bg-neutral-700'
-            }`}
+          <select 
+            value={exportType} 
+            onChange={(e) => setExportType(e.target.value as exportType)} 
+            className="p-2 bg-neutral-800 text-white text-sm rounded border border-gray-700 font-raleway"
           >
-            {isExporting ? 'exporting...' : 'export'}
-          </button>
-          {!user && (
-            <p className="text-xs text-red-400 mt-1">please login to export files</p>
-          )}
+            <option value="txt">.txt</option>
+            <option value="pdf">.pdf</option>
+            <option value="md">.md</option>
+            <option value="docx">.docx</option>
+            <option value="json">.json</option>
+          </select>
         </div>
 
-        
-        <div className="max-w-md text-left mt-6">
-          <label className="block mb-1 text-sm text-white/60 font-raleway">File Import</label>
-          <button
-            onClick={handleImport}
-            disabled={isImporting || !user}
-            className={`inline-block p-2.5 text-xs cursor-pointer font-semibold font-raleway text-white rounded-lg shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-neutral-600 ${
-              isImporting || !user
-                ? 'bg-neutral-600 cursor-not-allowed'
-                : 'bg-neutral-800 hover:bg-neutral-700'
-            }`}
-          >
-            {isImporting ? 'Importing...' : 'import from Google drive'}
-          </button>
-          {!user && (
-            <p className="text-xs text-red-400 mt-1">please login to import files</p>
-          )}
-        </div>
+        <textarea 
+          id="message" 
+          rows={4} 
+          value={text} 
+          onChange={(e) => setText(e.target.value)} 
+          placeholder="enter content to export..."
+          className="block p-3 w-full text-sm text-white bg-neutral-800 rounded-lg border border-gray-300 resize-vertical"
+        />
+        <button
+          onClick={handleExport}
+          disabled={isExporting || !user}
+          className={`inline-block p-2.5 mt-2 text-xs cursor-pointer font-semibold font-raleway text-white rounded-lg shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-neutral-600 ${
+            isExporting || !user
+              ? 'bg-neutral-600 cursor-not-allowed'
+              : 'bg-neutral-800 hover:bg-neutral-700'
+          }`}
+        >
+          {isExporting ? 'exporting...' : 'export'}
+        </button>
+        {!user && (
+          <p className="text-xs text-red-400 mt-1">please login to export files</p>
+        )}
+      </div>
 
-        
-        {importedFile && (
-          <div className="max-w-md mt-6 p-4 bg-neutral-900 border border-neutral-700 rounded-lg text-white">
+      
+      <div className="max-w-md text-left mt-6">
+        <label className="block mb-1 text-sm text-white/60 font-raleway">File Import</label>
+        <button
+          onClick={handleImport}
+          disabled={isImporting || !user}
+          className={`inline-block p-2.5 text-xs cursor-pointer font-semibold font-raleway text-white rounded-lg shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-neutral-600 ${
+            isImporting || !user
+              ? 'bg-neutral-600 cursor-not-allowed'
+              : 'bg-neutral-800 hover:bg-neutral-700'
+          }`}
+        >
+          {isImporting ? 'Importing...' : 'import from Google drive'}
+        </button>
+        {!user && (
+          <p className="text-xs text-red-400 mt-1">please login to import files</p>
+        )}
+      </div>
+
+      
+      {importedFile && (
+        <div className="flex gap-6 mt-6">
+          <div className="flex-1 p-4 bg-neutral-900 border border-neutral-700 rounded-lg text-white">
             <h2 className="font-semibold font-raleway text-md mb-2 flex items-center gap-2">
                Imported: {importedFile.name}
               <button
@@ -296,8 +447,67 @@ const handleLogin = async () => {
               </pre>
             </div>
           </div>
-        )}
-      </div>
+
+          <div className="w-80 flex flex-col gap-4">
+            <div className="p-3 bg-neutral-900 border border-neutral-700 rounded-lg text-white">
+              <h2 className="font-semibold font-raleway text-sm mb-2">
+                AI Tools
+              </h2>
+
+              <div>
+                <label className="block text-xs text-white/60 font-raleway">select content</label>
+                <select
+                  value={contentType}
+                  onChange={(e) => setContentType(e.target.value as typeof contentType)}
+                  className="p-2 w-full bg-neutral-800 text-white text-sm rounded border border-gray-700 font-raleway"
+                >
+                  <option value="summary">summary</option>
+                  <option value="flashcards">flashcards</option>
+                  <option value="quiz">quiz</option>
+                </select>
+
+                {contentType === 'quiz' && (
+                  <div>
+                    <label className="block text-xs text-white/60 font-raleway mt-2">quiz type:</label>
+                    <select
+                      value={quizType}
+                      onChange={(e) => setQuizType(e.target.value as typeof quizType)}
+                      className="p-2 w-full bg-neutral-800 text-white text-sm rounded border border-gray-700 font-raleway"
+                    >
+                      <option value="multiple-choice">multiple-choice</option>
+                      <option value="true-false">true or false</option>
+                      <option value="short-answer">short answer</option>
+                      <option value="mixed">full quiz</option>
+                    </select>
+                  </div>
+                )}
+
+                <button
+                  onClick={handleGenerate}
+                  disabled={isGenerating}
+                  className={`inline-block p-2 mt-2 text-xs cursor-pointer font-semibold font-raleway text-white rounded-lg shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-neutral-600 ${
+                    isGenerating
+                      ? 'bg-neutral-600 cursor-not-allowed'
+                      : 'bg-neutral-800 hover:bg-neutral-700'
+                  }`}
+                >
+                  {isGenerating ? 'generating...' : 'generate AI content'}
+                </button>
+              </div>
+            </div>
+
+            {AIcontent && (
+              <div className="p-3 bg-2-900 border border-neutral-700 rounded-lg text-white">
+                <h3 className="font-semibold font-raleway text-sm mb-2">Generated Content</h3>
+                <div className="max-h-48 overflow-auto bg-neutral-800 border border-neutral-600 rounded p-2">
+                  {renderAIContent()}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
-  )
+  </div>
+)
 }

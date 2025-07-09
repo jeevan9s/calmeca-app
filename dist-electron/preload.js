@@ -49,6 +49,9 @@ electron.contextBridge.exposeInMainWorld("electronAPI", {
       electron.ipcRenderer.removeListener("google-login-success", wrapped);
       loginSuccessListeners.delete(callback);
     }
+  },
+  generateAIContent: async (args) => {
+    return await electron.ipcRenderer.invoke("generate-ai-content", args);
   }
 });
 process.argv.reduce((acc, arg) => {

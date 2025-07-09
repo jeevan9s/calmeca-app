@@ -1,4 +1,3 @@
-# Logs
 logs
 *.log
 npm-debug.log*
@@ -7,22 +6,45 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
+pids
+*.pid
+*.seed
+*.pid.lock
+
+lib-cov
+
+coverage
+
+node_modules/
+
+dist/
+dist-ssr/
+build/
+out/
+release/
+
 *.local
 
-# Editor directories and files
+.env
+.env.*.local
+.DS_Store
+*.sw?
+
 .vscode/*
 !.vscode/extensions.json
-.idea
-.DS_Store
+.idea/
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
-*.sw?
-.env
 
-#Eletron builds
-release
+.AppleDouble
+.LSOverride
+
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+*~
+
+.cache/

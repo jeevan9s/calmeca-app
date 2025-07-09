@@ -19,6 +19,7 @@ import dotenv from "dotenv";
 import mammoth from "mammoth";
 import { PDFDocument, StandardFonts } from "pdf-lib";
 import { Document, Paragraph, TextRun, Packer } from "docx";
+import OpenAI from "openai";
 var commonjsGlobal = typeof globalThis !== "undefined" ? globalThis : typeof window !== "undefined" ? window : typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : {};
 function getDefaultExportFromCjs(x) {
   return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, "default") ? x["default"] : x;
@@ -35588,7 +35589,7 @@ var arrayToObject = function arrayToObject2(source, options) {
   }
   return obj;
 };
-var merge$2 = function merge(target, source, options) {
+var merge$3 = function merge(target, source, options) {
   if (!source) {
     return target;
   }
@@ -35750,7 +35751,7 @@ var utils$3 = {
   isBuffer,
   isRegExp,
   maybeMap,
-  merge: merge$2
+  merge: merge$3
 };
 var getSideChannel2 = sideChannel;
 var utils$2 = utils$3;
@@ -36518,9 +36519,9 @@ var bodyParserExports = bodyParser.exports;
  * Copyright(c) 2015 Douglas Christopher Wilson
  * MIT Licensed
  */
-var mergeDescriptors = merge$1;
+var mergeDescriptors = merge$2;
 var hasOwnProperty$1 = Object.prototype.hasOwnProperty;
-function merge$1(dest, src2, redefine) {
+function merge$2(dest, src2, redefine) {
   if (!dest) {
     throw new TypeError("argument dest is required");
   }
@@ -37072,14 +37073,14 @@ function fastparse(str) {
     return parse$6(str);
   }
   var pathname = str;
-  var query2 = null;
+  var query3 = null;
   var search = null;
   for (var i = 1; i < str.length; i++) {
     switch (str.charCodeAt(i)) {
       case 63:
         if (search === null) {
           pathname = str.substring(0, i);
-          query2 = str.substring(i + 1);
+          query3 = str.substring(i + 1);
           search = str.substring(i);
         }
         break;
@@ -37099,7 +37100,7 @@ function fastparse(str) {
   url2.href = str;
   url2.pathname = pathname;
   if (search !== null) {
-    url2.query = query2;
+    url2.query = query3;
     url2.search = search;
   }
   return url2;
@@ -37117,7 +37118,7 @@ var debug$7 = srcExports$2("finalhandler");
 var encodeUrl$3 = encodeurl$1;
 var escapeHtml$2 = escapeHtml_1;
 var onFinished$2 = onFinishedExports;
-var parseUrl$1 = parseurlExports;
+var parseUrl$2 = parseurlExports;
 var statuses$2 = statuses$3;
 var unpipe = unpipe_1;
 var DOUBLE_SPACE_REGEXP = /\x20{2}/g;
@@ -37202,7 +37203,7 @@ function getErrorStatusCode(err) {
 }
 function getResourceName(req2) {
   try {
-    return parseUrl$1.original(req2).pathname;
+    return parseUrl$2.original(req2).pathname;
   } catch (e) {
     return "resource";
   }
@@ -38093,7 +38094,7 @@ var mixin = utilsMergeExports;
 var debug$3 = srcExports$1("express:router");
 var deprecate$3 = depd_1("express");
 var flatten = arrayFlatten_1;
-var parseUrl = parseurlExports;
+var parseUrl$1 = parseurlExports;
 var setPrototypeOf$1 = setprototypeof;
 var objectRegExp = /^\[object (\S+)\]$/;
 var slice = Array.prototype.slice;
@@ -38377,7 +38378,7 @@ function appendMethods(list, addition) {
 }
 function getPathname(req2) {
   try {
-    return parseUrl(req2).pathname;
+    return parseUrl$1(req2).pathname;
   } catch (err) {
     return void 0;
   }
@@ -38491,34 +38492,27 @@ init.init = function(app2) {
  * Copyright(c) 2014-2015 Douglas Christopher Wilson
  * MIT Licensed
  */
-var query;
-var hasRequiredQuery;
-function requireQuery() {
-  if (hasRequiredQuery) return query;
-  hasRequiredQuery = 1;
-  var merge3 = utilsMergeExports;
-  var parseUrl2 = parseurlExports;
-  var qs = lib;
-  query = function query2(options) {
-    var opts = merge3({}, options);
-    var queryparse = qs.parse;
-    if (typeof options === "function") {
-      queryparse = options;
-      opts = void 0;
+var merge$1 = utilsMergeExports;
+var parseUrl = parseurlExports;
+var qs = lib;
+var query = function query2(options) {
+  var opts = merge$1({}, options);
+  var queryparse = qs.parse;
+  if (typeof options === "function") {
+    queryparse = options;
+    opts = void 0;
+  }
+  if (opts !== void 0 && opts.allowPrototypes === void 0) {
+    opts.allowPrototypes = true;
+  }
+  return function query3(req2, res2, next) {
+    if (!req2.query) {
+      var val = parseUrl(req2).query;
+      req2.query = queryparse(val, opts);
     }
-    if (opts !== void 0 && opts.allowPrototypes === void 0) {
-      opts.allowPrototypes = true;
-    }
-    return function query3(req2, res2, next) {
-      if (!req2.query) {
-        var val = parseUrl2(req2).query;
-        req2.query = queryparse(val, opts);
-      }
-      next();
-    };
+    next();
   };
-  return query;
-}
+};
 function commonjsRequire(path3) {
   throw new Error('Could not dynamically require "' + path3 + '". Please configure the dynamicRequireTargets or/and ignoreDynamicRequires option of @rollup/plugin-commonjs appropriately for this require call to work.');
 }
@@ -43732,7 +43726,7 @@ var proxyAddrExports = proxyAddr.exports;
   var mime2 = sendExports.mime;
   var etag3 = etag_1;
   var proxyaddr2 = proxyAddrExports;
-  var qs = lib;
+  var qs2 = lib;
   var querystring = require$$8;
   exports.etag = createETagGenerator({ weak: false });
   exports.wetag = createETagGenerator({ weak: true });
@@ -43847,7 +43841,7 @@ var proxyAddrExports = proxyAddr.exports;
     };
   }
   function parseExtendedQueryString(str) {
-    return qs.parse(str, {
+    return qs2.parse(str, {
       allowPrototypes: true
     });
   }
@@ -43867,7 +43861,7 @@ var proxyAddrExports = proxyAddr.exports;
   var Router = routerExports;
   var methods2 = methods$2;
   var middleware = init;
-  var query2 = requireQuery();
+  var query$1 = query;
   var debug2 = srcExports$1("express:application");
   var View2 = view;
   var http2 = require$$0$8;
@@ -43933,7 +43927,7 @@ var proxyAddrExports = proxyAddr.exports;
         caseSensitive: this.enabled("case sensitive routing"),
         strict: this.enabled("strict routing")
       });
-      this._router.use(query2(this.get("query parser fn")));
+      this._router.use(query$1(this.get("query parser fn")));
       this._router.use(middleware.init(this));
     }
   };
@@ -44763,12 +44757,12 @@ req.range = function range2(size, options) {
 req.param = function param2(name, defaultValue) {
   var params = this.params || {};
   var body = this.body || {};
-  var query2 = this.query || {};
+  var query3 = this.query || {};
   var args = arguments.length === 1 ? "name" : "name, default";
   deprecate$1("req.param(" + args + "): Use req.params, req.body, or req.query instead");
   if (null != params[name] && params.hasOwnProperty(name)) return params[name];
   if (null != body[name]) return body[name];
-  if (null != query2[name]) return query2[name];
+  if (null != query3[name]) return query3[name];
   return defaultValue;
 };
 req.is = function is(types) {
@@ -45802,7 +45796,7 @@ function requireServeStatic() {
   exports.Route = Route2;
   exports.Router = Router;
   exports.json = bodyParser2.json;
-  exports.query = requireQuery();
+  exports.query = query;
   exports.raw = bodyParser2.raw;
   exports.static = requireServeStatic();
   exports.text = bodyParser2.text;
@@ -45851,9 +45845,11 @@ const client_id = env.G_CLIENT_ID;
 const redirect_uri = env.G_REDIRECT_URI;
 const client_secret = env.G_CLIENT_SECRET;
 const scopes = [
+  "https://www.googleapis.com/auth/drive",
   "https://www.googleapis.com/auth/drive.file",
   "https://www.googleapis.com/auth/userinfo.profile",
-  "https://www.googleapis.com/auth/userinfo.email"
+  "https://www.googleapis.com/auth/userinfo.email",
+  "https://www.googleapis.com/auth/drive.readonly"
 ];
 if (!client_id || !redirect_uri) {
   throw new Error("Missing G_CLIENT_ID or G_REDIRECT_URI in env variables");
@@ -46003,7 +45999,14 @@ async function importDriveFile(fileId) {
     default:
       content = fileBuffer.toString("utf8");
   }
-  return { id: fileMeta.id, name, mimeType, usedFor: "other", createdOn: /* @__PURE__ */ new Date(), content };
+  return {
+    id: fileMeta.id,
+    name,
+    mimeType,
+    usedFor: "other",
+    createdOn: /* @__PURE__ */ new Date(),
+    content
+  };
 }
 async function exportTextFeatureGDrive(content, filename, exportType2) {
   const auth = await getAuthClient();
@@ -46098,6 +46101,167 @@ async function exportTextFeatureGDrive(content, filename, exportType2) {
   });
   const driveUrl = `https://drive.google.com/file/d/${res2.data.id}/view`;
   return { fileId: res2.data.id, name: res2.data.name ?? filename, driveUrl };
+}
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY
+});
+async function callChatCompletion(messages, maxTokens = 300) {
+  var _a;
+  const response2 = await openai.chat.completions.create({
+    model: "gpt-4o-mini",
+    messages,
+    max_tokens: maxTokens,
+    temperature: 0.5
+  });
+  return ((_a = response2.choices[0].message.content) == null ? void 0 : _a.trim()) ?? "";
+}
+async function generateSummary(text) {
+  const messages = [
+    {
+      role: "system",
+      content: "You are a helpful assistant that summarizes academic text like notes and lecture transcripts concisely. You start off each summary with a highlights/key takeaways section, and then a proper detailed summary of the topics."
+    },
+    {
+      role: "user",
+      content: `Summarize the following:
+
+${text}`
+    }
+  ];
+  const result = await callChatCompletion(messages, 500);
+  try {
+    return result;
+  } catch {
+    return "";
+  }
+}
+async function generateFlashcards(text) {
+  const messages = [
+    {
+      role: "system",
+      content: "You generate concise flashcards. Return a JSON array of {term, definition} pairs, based on the notes and lecture transcripts inputted."
+    },
+    {
+      role: "user",
+      content: `Create 12 flashcards from the following content:
+
+${text}`
+    }
+  ];
+  const result = await callChatCompletion(messages, 500);
+  try {
+    return JSON.parse(result);
+  } catch {
+    return [];
+  }
+}
+async function generateQuiz(text, quizType, length) {
+  let instruction = "";
+  switch (quizType) {
+    case "multiple-choice":
+      instruction = length ? `Generate exactly ${length} multiple-choice questions` : "Generate 5-8 multiple-choice questions based on the content.";
+      break;
+    case "true-false":
+      instruction = length ? `Generate exactly ${length} true-false questions` : "Generate 5-8 true/false questions based on the content.";
+      break;
+    case "short-answer":
+      instruction = length ? `Generate exactly ${length} short-answer questions` : "Generate 3-5 short-answer questions based on the content.";
+      break;
+    case "mixed":
+      if (length) {
+        const perType = Math.floor(length / 3);
+        instruction = `Generate a mixed quiz with:
+        - ${perType} multiple-choice
+        - ${perType} true/false
+        - ${length - 2 * perType} short-answer questions based on the content.`;
+      } else {
+        instruction = "Generate a mixed quiz with 3 multiple-choice, 3 true/false, and 2 short-answer questions.";
+      }
+      break;
+  }
+  const messages = [
+    {
+      role: "system",
+      content: `You generate academic quiz questions. You must respond with ONLY a valid JSON array, no other text.
+
+Each question object must have:
+- "type": "multiple-choice" OR "true-false" OR "short-answer"
+- "question": the question text
+- "correctAnswer": the correct answer
+- "options": array of 4 choices (only for multiple-choice)
+
+Example format:
+[
+  {
+    "type": "multiple-choice",
+    "question": "What is the capital of France?",
+    "options": ["London", "Berlin", "Paris", "Madrid"],
+    "correctAnswer": "Paris"
+  },
+  {
+    "type": "true-false",
+    "question": "The Earth is flat.",
+    "correctAnswer": "false"
+  }
+]
+
+Return ONLY the JSON array, no other text.`
+    },
+    {
+      role: "user",
+      content: `${instruction}
+
+Generate quiz questions based on the following content:
+
+${text}`
+    }
+  ];
+  console.log("Sending to OpenAI:", {
+    instruction,
+    contentLength: text.length,
+    contentPreview: text.substring(0, 100) + "..."
+  });
+  const result = await callChatCompletion(messages, 2e3);
+  console.log("OpenAI raw response:", result);
+  console.log("Response length:", result.length);
+  try {
+    const parsed = JSON.parse(result);
+    console.log("Parsed successfully:", parsed);
+    return parsed;
+  } catch (error2) {
+    console.error("JSON parse error:", error2);
+    console.error("Raw response that failed to parse:", result);
+    const jsonMatch = result.match(/\[[\s\S]*\]/);
+    if (jsonMatch) {
+      try {
+        console.log("Trying to parse extracted JSON:", jsonMatch[0]);
+        const extracted = JSON.parse(jsonMatch[0]);
+        console.log("Extracted JSON parsed successfully:", extracted);
+        return extracted;
+      } catch (extractError) {
+        console.error("Failed to parse extracted JSON:", extractError);
+      }
+    }
+    return [];
+  }
+}
+async function generateFromDrive(type3, content, options) {
+  switch (type3) {
+    case "summary":
+      const summary = await generateSummary(content);
+      console.log("summary generated");
+      return summary;
+    case "flashcards":
+      const flashcards = await generateFlashcards(content);
+      console.log("flashcards generated");
+      return flashcards;
+    case "quiz":
+      const quiz = await generateQuiz(content, (options == null ? void 0 : options.quizType) || "mixed", options == null ? void 0 : options.length);
+      console.log("quiz generated");
+      return quiz;
+    default:
+      throw new Error("Unsupported generation type");
+  }
 }
 const require$1 = createRequire(import.meta.url);
 const __filename = fileURLToPath(import.meta.url);
@@ -46402,4 +46566,13 @@ ipcMain.handle("open-google-picker", async () => {
       reject(new Error("Picker window closed without selection"));
     });
   });
+});
+ipcMain.handle("generate-ai-content", async (_event, args) => {
+  const { type: type3, content, options } = args;
+  try {
+    const result = await generateFromDrive(type3, content, options);
+    return { success: true, result };
+  } catch (error2) {
+    return { success: false, error: error2.message };
+  }
 });

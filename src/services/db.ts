@@ -178,8 +178,17 @@ export type importResponse = {
 }
 
 export interface generationOptions {
-    quizType: 'multiple-choice' | 'short-answer' | 'true-false'
+    quizType?: 'multiple-choice' | 'short-answer' | 'true-false' | 'mixed'
     length?: number
+}
+
+export interface AIContentRequest {
+  type: 'summary' | 'flashcards' | 'quiz';
+  content: string;
+  options?: {
+    quizType?: 'multiple-choice' | 'true-false' | 'short-answer' | 'mixed';
+    length?: number;
+  };
 }
 
 // class declartin & dexie 

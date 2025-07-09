@@ -24,6 +24,11 @@ declare global {
       token: string
       apiKey: string
     }
+    generateAIContent: (args: import('@/services/db').AIContentRequest) => Promise<{
+        success: boolean;
+        result?: any;
+        error?: string;
+      }>
 
     }
   }

@@ -1,5 +1,5 @@
 import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron'
-import { exportType, exportResponse, importResponse } from '@/services/db'
+import { exportType, exportResponse, importResponse, AIContentRequest } from '@/services/db'
 
 const maximizedListeners = new Map<() => void, (event: IpcRendererEvent) => void>()
 const notMaximizedListeners = new Map<() => void, (event: IpcRendererEvent) => void>()
@@ -67,6 +67,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
       ipcRenderer.removeListener('google-login-success', wrapped)
       loginSuccessListeners.delete(callback)
     }
+  },
+
+    generateAIContent: async (args: AIContentRequest) => {
+    return await ipcRenderer.invoke('generate-ai-content', args);
   },
 })
 
