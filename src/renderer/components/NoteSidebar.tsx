@@ -121,6 +121,7 @@ export default function NoteSidebar() {
                 >
                 </motion.div>
             )}
+            yes
         </>
     )
 }
