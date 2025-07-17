@@ -35,3 +35,12 @@ html, body, #root {
   padding: 0;
   overflow: hidden; 
 }
+
+textarea:focus,
+input:focus,
+select:focus,
+button:focus {
+  outline: none !important;
+  box-shadow: none  !important;
+  border-color: none !important; /* or specify the color you want */
+}

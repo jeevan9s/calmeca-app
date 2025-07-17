@@ -89,13 +89,13 @@ export const getRelativeTimeStamp = (timestamp: Date | null): string => {
     if (diffSeconds < 60) return "edited just now"
     
     const diffMinutes = Math.floor(diffSeconds / 60) 
-    if (diffMinutes < 60) return `Edited ${diffMinutes} minute${diffMinutes !== 1 ? "s" : ""} ago`
+    if (diffMinutes < 60) return `edited ${diffMinutes} minute${diffMinutes !== 1 ? "s" : ""} ago`
 
     const diffHours = Math.floor(diffMinutes / 60) 
-    if (diffHours < 24 ) return `Edited ${diffHours} hour${diffHours!== 1 ? "s" : ""} ago`
+    if (diffHours < 24 ) return `edited ${diffHours} hour${diffHours!== 1 ? "s" : ""} ago`
 
     const diffDays = Math.floor(diffHours / 24) 
-    return `Last edited ${diffDays} day${diffDays !== 1 ? "s" : " "}`
+    return `last edited ${diffDays} day${diffDays !== 1 ? "s" : " "}`
 }
 
 export const updateCourseFromChild = async (courseId:string, updatedFrom: 'note' | 'assignment' | 'summary' | 'flashcard' | 'calendar' | 'quiz' | 'other') => {

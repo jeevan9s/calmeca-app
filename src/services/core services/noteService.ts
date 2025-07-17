@@ -6,18 +6,26 @@ import { getCourseColor, updateTimestamp, updateCourseFromChild } from "../integ
 // impl crud, fetching notes by course, most recent 
 
 export const addNote = async (note: Omit<Note, 'id' | 'createdOn' | 'updatedOn' | 'color'>): Promise<Note> => {
-    
-        const now = new Date()
-        const newNote: Note = {
-            ...note,
-            id: generateId(),
-            createdOn: now,
-            updatedOn: now, // later on implement
-            color: await getCourseColor(note.courseId)
-        }
-        await db.notes.add(newNote)
-        await updateCourseFromChild(newNote.courseId, 'note')
-        return newNote
+    const now = new Date();
+
+    const color = note.courseId && note.courseId.trim() !== ""
+        ? await getCourseColor(note.courseId)
+        : undefined;
+
+    const newNote: Note = {
+        ...note,
+        id: generateId(),
+        createdOn: now,
+        updatedOn: now,
+        color,  
+    };
+
+    await db.notes.add(newNote);
+    if (newNote.courseId && newNote.courseId.trim() !== "") {
+  await updateCourseFromChild(newNote.courseId, "note");
+}
+
+    return newNote;
 }
 
 export const deleteNote = async (id: string) => {

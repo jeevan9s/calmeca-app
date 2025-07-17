@@ -10,7 +10,7 @@ export default function Notebook() {
         <div id = "notebook-page" className="min-h-screen bg-black/30">
             <Layout />
             <NoteSidebar />
-            
+    
         </div>
     )
 }

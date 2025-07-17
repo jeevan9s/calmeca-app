@@ -4,6 +4,7 @@ import Dexie, { Table } from 'dexie'
 export interface Course {
     id: string;
     courseId: string;
+    description?: string
     name: string;
     color: string;
     type: string; // lecture-based, project-based, tutorial, etc. 
@@ -37,12 +38,14 @@ export interface CalendarEvent {
 export interface Note {
     id: string
     title: string 
+    course?: []
     courseId: string
     content: string; //MDX 
     createdOn: Date;
     updatedOn: Date;
     tags?: string[];
-    color: string;
+    color?: string;
+    description?: string
 }
 
 // AI TOOL INTERFACEs
@@ -217,7 +220,7 @@ export class CalmecaDB extends Dexie {
             courses: 'id, name, type, color, archived, updatedOn, updatedFrom, endsOn',
             assignments: 'id, title, courseId, type, deadline, completed, color',
             calendarEvents: 'id, title, date, source, sourceId, color',
-            notes: 'id, courseId, createdOn, updatedOn',
+            notes: 'id, courseId, createdOn, updatedOn, description',
             flashcardDecks: 'id, courseId, completed, updatedOn, origin, score',
             flashcards: 'id, deckId',
             summaries: 'id, noteId, courseId, content, color, createdOn',

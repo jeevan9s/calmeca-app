@@ -1,15 +1,11 @@
 // Course Service File
 import { db } from "../db";
 import { Course } from "../db";
-<<<<<<< HEAD
-import { generateId, getCourseColor } from "../utils & integrations/utilityServicies";
-=======
 import { generateId, getCourseColor } from "../integrations-utils/utilityServicies";
->>>>>>> fdb54f8cff2dcddd1dbe8dacc74bcbed1d1445e8
 
 // implementin CRUD, some archive stuff, return functions 
 
-export const addCourse = async (course: Omit<Course, 'id' | 'createdOn' | 'archived'>) => {
+export const addCourse = async (course: Omit<Course, 'id' | 'createdOn' | 'archived' | 'updatedOn'>) => {
     const newCourse: Course = {
         ...course,
         id: generateId(),
