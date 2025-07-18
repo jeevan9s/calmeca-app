@@ -1,79 +1,94 @@
-import { useState, useRef, useEffect } from "react";
-import NewNoteDialog from "./NewNoteDialog";
-import CourseManager from "../course_manager/CourseManager";
-import FilterModal from "./NoteOptionsDialog";
-import { Note, Course } from "@/services/db";
-import { getAllCourses } from "@/services/core services/courseService";
-import { deleteNote } from "@/services/core services/noteService";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useRef, useEffect } from "react"
+import NewNoteDialog from "./NewNoteDialog"
+import CourseManager from "../course_manager/CourseManager"
+import FilterModal from "../OptionsDialog"
+import { Note, Course } from "@/services/db"
+import { getAllCourses } from "@/services/core services/courseService"
+import { deleteNote } from "@/services/core services/noteService"
+import { motion, AnimatePresence } from "framer-motion"
 import {
   PanelLeft,
   ChevronsRight,
   LayoutGrid,
   Plus,
   FilePlus2,
-  Search,
   Settings2,
   Trash2,
-} from "lucide-react";
+} from "lucide-react"
 
 export default function NoteSidebar() {
-  const [isOpen, setIsOpen] = useState(true);
-  const [width, setWidth] = useState(180);
-  const isResizing = useRef(false);
+  const [isOpen, setIsOpen] = useState(true)
+  const [width, setWidth] = useState(180)
+  const isResizing = useRef(false)
 
-  const MIN_W = 128;
-  const ABS_MIN_W = 60;
-  const MAX_W = 256;
+  const MIN_W = 128
+  const ABS_MIN_W = 60
+  const MAX_W = 256
 
   const handleMouseDown = () => {
-    isResizing.current = true;
-    document.addEventListener("mousemove", handleMouseMove);
-    document.addEventListener("mouseup", handleMouseUp);
-  };
+    isResizing.current = true
+    document.addEventListener("mousemove", handleMouseMove)
+    document.addEventListener("mouseup", handleMouseUp)
+  }
 
   const handleMouseMove = (e: MouseEvent) => {
-    if (!isResizing.current) return;
-    const newW = e.clientX;
+    if (!isResizing.current) return
+    const newW = e.clientX
     if (newW >= MIN_W && newW <= MAX_W) {
-      setWidth(newW);
+      setWidth(newW)
     }
-  };
+  }
 
   const handleMouseUp = () => {
-    isResizing.current = false;
-    document.removeEventListener("mousemove", handleMouseMove);
-    document.removeEventListener("mouseup", handleMouseUp);
-  };
+    isResizing.current = false
+    document.removeEventListener("mousemove", handleMouseMove)
+    document.removeEventListener("mouseup", handleMouseUp)
+  }
 
   const handleResizeClick = () => {
-    setWidth(ABS_MIN_W);
-  };
+    setWidth(ABS_MIN_W)
+  }
 
-  const collapsed = width <= MIN_W;
+  const collapsed = width <= MIN_W
 
-  const [newNoteOpen, setNewNoteOpen] = useState(false);
-  const [filterModalOpen, setFilterModalOpen] = useState(false);
-  const [courseManagerOpen, setCourseManagerOpen] = useState(false);
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [notes, setNotes] = useState<Note[]>([]);
+  const [newNoteOpen, setNewNoteOpen] = useState(false)
+  const [filterModalOpen, setFilterModalOpen] = useState(false)
+  const [courseManagerOpen, setCourseManagerOpen] = useState(false)
+
+  const [courses, setCourses] = useState<Course[]>([])
+  const [allNotes, setAllNotes] = useState<Note[]>([])
+  const [activeFilters, setActiveFilters] = useState<string[]>([])
+  const [activeSort, setActiveSort] = useState<string>("")
 
   useEffect(() => {
     async function loadCourses() {
-      const loadedCourses = await getAllCourses();
-      setCourses(loadedCourses);
+      const loadedCourses = await getAllCourses()
+      setCourses(loadedCourses)
     }
-    loadCourses();
-  }, []);
+    loadCourses()
+  }, [])
 
   const handleCreateNote = (note: Note) => {
-    setNotes((prev) => [note, ...prev]);
-  };
+    setAllNotes((prev) => [note, ...prev])
+  }
 
   const handleDeleteNote = async (id: string) => {
-    await deleteNote(id);
-    setNotes((prev) => prev.filter((note) => note.id !== id));
-  };
+    await deleteNote(id)
+    setAllNotes((prev) => prev.filter((note) => note.id !== id))
+  }
+
+  const filteredNotes = allNotes
+    .filter((note) => {
+      if (activeFilters.length === 0) return true
+      return activeFilters.includes(note.courseId)
+    })
+    .sort((a, b) => {
+      if (activeSort === "title-asc") return a.title.localeCompare(b.title)
+      if (activeSort === "title-desc") return b.title.localeCompare(a.title)
+      if (activeSort === "newest") return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      if (activeSort === "oldest") return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+      return 0
+    })
 
   return (
     <>
@@ -83,23 +98,36 @@ export default function NoteSidebar() {
         onCreate={handleCreateNote}
         courses={courses}
       />
+
       <FilterModal
         isOpen={filterModalOpen}
         onClose={() => setFilterModalOpen(false)}
-        filterOptions={[]}
-        sortOptions={[]}
-        selectedFilters={[]}
-        selectedSort={null}
-        onFilterChange={() => {}}
-        onSortChange={() => {}}
+        filterOptions={courses.map((c) => ({ label: c.name, value: c.id }))}
+        sortOptions={[
+          { label: "title a–z", value: "title-asc" },
+          { label: "title z–a", value: "title-desc" },
+          { label: "newest", value: "newest" },
+          { label: "oldest", value: "oldest" }
+        ]}
+        selectedFilters={activeFilters}
+        selectedSort={activeSort}
+        onApply={(filters, sort) => {
+          setActiveFilters(filters)
+          setActiveSort(sort)
+          setFilterModalOpen(false)
+        }}
+        onClear={() => {
+          setActiveFilters([])
+          setActiveSort("")
+        }}
       />
 
       <CourseManager
         isOpen={courseManagerOpen}
         onClose={() => setCourseManagerOpen(false)}
         onCreate={(newCourse) => {
-          setCourses((prev) => [newCourse, ...prev]);
-          setCourseManagerOpen(false);
+          setCourses((prev) => [newCourse, ...prev])
+          setCourseManagerOpen(false)
         }}
       />
 
@@ -130,12 +158,12 @@ export default function NoteSidebar() {
                         <motion.button
                           key={i}
                           onClick={() => {
-      if (Icon === PanelLeft) {
-        handleResizeClick();
-      } else if (Icon === LayoutGrid) {
-        setCourseManagerOpen(true);
-      }
-    }}
+                            if (Icon === PanelLeft) {
+                              handleResizeClick()
+                            } else if (Icon === LayoutGrid) {
+                              setCourseManagerOpen(true)
+                            }
+                          }}
                           className="p-1 rounded-lg"
                           whileHover={{
                             backgroundColor: "rgba(255,255,255,0.1)",
@@ -157,7 +185,7 @@ export default function NoteSidebar() {
                   </div>
 
                   <div className="flex flex-row gap-2 mt-2 justify-end">
-                    {[Search, Settings2].map((Icon, i) => (
+                    {[Settings2].map((Icon, i) => (
                       <motion.button
                         key={i}
                         className="p-1 rounded-lg"
@@ -198,7 +226,7 @@ export default function NoteSidebar() {
                     </motion.button>
 
                     <div className="flex flex-col gap-2 mt-4 max-h-[50vh] overflow-y-auto">
-                      {notes.map((note) => (
+                      {filteredNotes.map((note) => (
                         <div
                           key={note.id}
                           className="bg-white/5 text-white text-sm px-3 py-2 rounded-md font-raleway truncate hover:bg-white/10 cursor-pointer flex justify-between items-center"
@@ -209,7 +237,7 @@ export default function NoteSidebar() {
                             className="p-1 rounded hover:bg-red-700/70"
                             aria-label="delete note"
                           >
-                            <Trash2 className="w-4 h-4  hover:scale-105" />
+                            <Trash2 className="w-4 h-4 hover:scale-105" />
                           </button>
                         </div>
                       ))}
@@ -225,35 +253,31 @@ export default function NoteSidebar() {
                   exit={{ opacity: 0, x: -10 }}
                   transition={{ duration: 0.2 }}
                 >
-                  {[
-                    ChevronsRight,
-                    LayoutGrid,
-                    FilePlus2,
-                    Search,
-                    Settings2,
-                  ].map((Icon, i) => (
-                    <motion.button
-                      key={i}
-                      className="p-1 rounded-lg"
-                      whileHover={{
-                        backgroundColor: "rgba(255,255,255,0.1)",
-                        scale: 1.05,
-                      }}
-                      transition={{
-                        type: "spring",
-                        stiffness: 300,
-                        damping: 20,
-                      }}
-                      onClick={() => {
-                        if (Icon === ChevronsRight) setWidth(MAX_W);
-                        else if (Icon === FilePlus2) setNewNoteOpen(true);
-                        else if (Icon === Settings2) setFilterModalOpen(true);
-                        else if (Icon === LayoutGrid) setCourseManagerOpen(true)
-                      }}
-                    >
-                      <Icon className="w-5 h-5 text-white" strokeWidth={1.85} />
-                    </motion.button>
-                  ))}
+                  {[ChevronsRight, LayoutGrid, FilePlus2, Settings2].map(
+                    (Icon, i) => (
+                      <motion.button
+                        key={i}
+                        className="p-1 rounded-lg"
+                        whileHover={{
+                          backgroundColor: "rgba(255,255,255,0.1)",
+                          scale: 1.05,
+                        }}
+                        transition={{
+                          type: "spring",
+                          stiffness: 300,
+                          damping: 20,
+                        }}
+                        onClick={() => {
+                          if (Icon === ChevronsRight) setWidth(MAX_W)
+                          else if (Icon === FilePlus2) setNewNoteOpen(true)
+                          else if (Icon === Settings2) setFilterModalOpen(true)
+                          else if (Icon === LayoutGrid) setCourseManagerOpen(true)
+                        }}
+                      >
+                        <Icon className="w-5 h-5 text-white" strokeWidth={1.85} />
+                      </motion.button>
+                    )
+                  )}
                 </motion.div>
               )}
             </AnimatePresence>
@@ -283,5 +307,5 @@ export default function NoteSidebar() {
         />
       )}
     </>
-  );
+  )
 }

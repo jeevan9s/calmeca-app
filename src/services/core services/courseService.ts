@@ -13,7 +13,7 @@ export const addCourse = async (course: Omit<Course, 'id' | 'createdOn' | 'archi
         updatedOn: new Date(),
         updatedFrom: undefined,
         archived: false,
-        color: await getCourseColor(course.courseId)
+       color: course.color || "#ffffffff"
     }
     await db.courses.add(newCourse)
     return newCourse

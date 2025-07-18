@@ -41,7 +41,7 @@ export interface Note {
     course?: []
     courseId: string
     content: string; //MDX 
-    createdOn: Date;
+    createdAt: Date;
     updatedOn: Date;
     tags?: string[];
     color?: string;

@@ -1,16 +1,16 @@
-import { Dialog, Transition } from "@headlessui/react";
-import { Fragment, useState, useEffect } from "react";
+import { Dialog, Transition } from "@headlessui/react"
+import { Fragment, useState, useEffect } from "react"
 
 type FilterModalProps = {
-  isOpen: boolean;
-  onClose: () => void;
-  filterOptions: string[];
-  sortOptions: string[];
-  selectedFilters: string[];
-  selectedSort: string;
-  onApply: (filters: string[], sort: string) => void;
-  onClear: () => void;
-};
+  isOpen: boolean
+  onClose: () => void
+  filterOptions: { label: string; value: string }[]
+  sortOptions: { label: string; value: string }[]
+  selectedFilters: string[]
+  selectedSort: string
+  onApply: (filters: string[], sort: string) => void
+  onClear: () => void
+}
 
 export default function FilterModal({
   isOpen,
@@ -22,32 +22,33 @@ export default function FilterModal({
   onApply,
   onClear,
 }: FilterModalProps) {
-  const [filters, setFilters] = useState<string[]>(selectedFilters);
-  const [sort, setSort] = useState<string>(selectedSort);
+  const [filters, setFilters] = useState<string[]>(selectedFilters)
+  const [sort, setSort] = useState<string>(selectedSort)
 
   useEffect(() => {
-    setFilters(selectedFilters);
-    setSort(selectedSort);
-  }, [selectedFilters, selectedSort, isOpen]);
+    setFilters(selectedFilters)
+    setSort(selectedSort)
+  }, [selectedFilters, selectedSort, isOpen])
 
-  const toggleFilter = (option: string) => {
-    if (filters.includes(option)) {
-      setFilters(filters.filter((f) => f !== option));
+  const toggleFilter = (value: string) => {
+    if (filters.includes(value)) {
+      setFilters(filters.filter((f) => f !== value))
     } else {
-      setFilters([...filters, option]);
+      setFilters([...filters, value])
     }
-  };
+  }
 
   const handleApply = () => {
-    onApply(filters, sort);
-    onClose();
-  };
+    onApply(filters, sort)
+    onClose()
+  }
 
   const handleClear = () => {
-    setFilters([]);
-    setSort("");
-    onClear();
-  };
+    setFilters([])
+    setSort("")
+    onClear()
+    onClose()
+  }
 
   return (
     <Transition appear show={isOpen} as={Fragment}>
@@ -83,18 +84,18 @@ export default function FilterModal({
                 <div className="mb-6">
                   <p className="font-raleway text-white mb-2 font-semibold">filter by</p>
                   <div className="flex flex-col space-y-2 max-h-48 overflow-y-auto">
-                    {filterOptions.map((option) => (
+                    {filterOptions.map(({ label, value }) => (
                       <label
-                        key={option}
+                        key={value}
                         className="inline-flex items-center cursor-pointer text-white select-none"
                       >
                         <input
                           type="checkbox"
                           className="form-checkbox h-5 w-5 text-white bg-black/60 border-white/40 rounded"
-                          checked={filters.includes(option)}
-                          onChange={() => toggleFilter(option)}
+                          checked={filters.includes(value)}
+                          onChange={() => toggleFilter(value)}
                         />
-                        <span className="ml-2 font-raleway">{option}</span>
+                        <span className="ml-2 font-raleway">{label}</span>
                       </label>
                     ))}
                   </div>
@@ -103,19 +104,19 @@ export default function FilterModal({
                 <div className="mb-6">
                   <p className="font-raleway text-white mb-2 font-semibold">sort by</p>
                   <div className="flex flex-col space-y-2 max-h-32 overflow-y-auto">
-                    {sortOptions.map((option) => (
+                    {sortOptions.map(({ label, value }) => (
                       <label
-                        key={option}
+                        key={value}
                         className="inline-flex items-center cursor-pointer text-white select-none"
                       >
                         <input
                           type="radio"
                           name="sort"
                           className="form-radio h-5 w-5 text-white bg-black/60 border-white/40 rounded"
-                          checked={sort === option}
-                          onChange={() => setSort(option)}
+                          checked={sort === value}
+                          onChange={() => setSort(value)}
                         />
-                        <span className="ml-2 font-raleway">{option}</span>
+                        <span className="ml-2 font-raleway">{label}</span>
                       </label>
                     ))}
                   </div>
@@ -141,5 +142,5 @@ export default function FilterModal({
         </div>
       </Dialog>
     </Transition>
-  );
+  )
 }

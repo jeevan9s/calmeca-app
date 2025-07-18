@@ -1,46 +1,50 @@
-// composable accessible course manager page
-import { addCourse, getActiveCourses } from "@/services/core services/courseService"
-import { Course } from "@/services/db"
+import { addCourse, getActiveCourses, updateCourse } from "@/services/core services/courseService"
+import { Course, db } from "@/services/db"
 import { useState, useEffect, Fragment, useCallback } from "react"
 import { Dialog, Transition } from "@headlessui/react"
 import { X } from "lucide-react"
 import CourseCard from "./CourseCard"
 import { AddNewCourseCard } from "./NewCourseCard"
+import { useLiveQuery } from "dexie-react-hooks"
 
 export type newCourseInput = Omit<
   Course,
   "id" | "createdOn" | "archived" | "updatedOn" | "updatedFrom"
 >
+
 type courseManagerProps = {
   isOpen: boolean
   onClose: () => void
   course?: Course
-  onCreate: (course: Course) => void
 }
 
 export default function CourseManager({
   isOpen,
   onClose,
-  course,
-  onCreate,
+  course
 }: courseManagerProps) {
-  console.log("hello")
   const [inputs, setInputs] = useState<newCourseInput>({
     name: "",
     courseId: "",
     type: "",
     description: "",
     endsOn: new Date(),
-    color: "",
+    color: ""
   })
 
   const [loading, setLoading] = useState(false)
+  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null)
+  const [isAddNewOpen, setIsAddNewOpen] = useState(false)
+
+  const courses = useLiveQuery(() =>
+    getActiveCourses()
+  )
 
   const handleChange = <K extends keyof newCourseInput>(
     field: K,
     value: newCourseInput[K]
   ) => {
-    setInputs((prev) => ({ ...prev, [field]: value }))
+    setInputs(prev => ({ ...prev, [field]: value }))
   }
 
   useEffect(() => {
@@ -52,71 +56,43 @@ export default function CourseManager({
         type: "",
         description: "",
         endsOn: new Date(),
-        color: "#000000",
+        color: "#000000"
       })
   }, [course, isOpen])
 
   const handleSubmit = async () => {
-    if (!inputs.name.trim()) return
+    if (!inputs.name.trim() && !inputs.courseId.trim()) return
 
     setLoading(true)
     try {
-      const course = await addCourse({
-        ...inputs,
-        name: inputs.name.trim(),
-        description: inputs.description?.trim() || "",
-      })
-      onCreate(course)
-      setInputs({
-        name: "",
-        description: "",
-        courseId: "",
-        type: "",
-        endsOn: new Date(),
-        color: "",
-      })
+      if (course) {
+        await updateCourse(course.id, { ...course, ...inputs })
+      } else {
+        await addCourse({
+          ...inputs,
+          name: inputs.name.trim(),
+          description: inputs.description?.trim() || ""
+        })
+      }
       onClose()
     } catch (err) {
-      console.error("Failed to add course:", err)
+      console.error("Failed to save course:", err)
     } finally {
       setLoading(false)
     }
   }
 
-    const [courses, setCourses] = useState<Course[]>([])
-  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null)
-  const [isAddNewOpen, setIsAddNewOpen] = useState(false)
-
-  
-  useEffect(() => {
-    if (isOpen) {
-      getActiveCourses().then(setCourses)
-    }
-  }, [isOpen])
-
-  const handleAddCourse = useCallback(
-    (newCourse: Course) => {
-      setCourses((prev) => [...prev, newCourse])
-      setSelectedCourse(newCourse)
-      setIsAddNewOpen(false)
-      onCreate(newCourse)
-    },
-    [onCreate]
-  )
-
   const handleCancel = () => {
     setInputs({
       name: "",
-      description: "",
       courseId: "",
       type: "",
+      description: "",
       endsOn: new Date(),
-      color: "",
+      color: ""
     })
     onClose()
   }
-
-  
 
   return (
     <Transition appear show={isOpen} as={Fragment}>
@@ -145,7 +121,7 @@ export default function CourseManager({
           >
             <Dialog.Panel className="relative w-full max-w-6xl h-[90vh] overflow-y-auto transform rounded-xl bg-white/5 backdrop-blur-2xl border border-white/10 p-10 shadow-xl">
               <button
-                className="absolute top-3 right-5 text-white text-xl hover:text-red-800 transition"
+                className="absolute top-3 right-5 text-white text-xl hover:text-white transition"
                 onClick={onClose}
               >
                 <X size={20} />
@@ -153,21 +129,16 @@ export default function CourseManager({
 
               <h1 className="font-raleway font-bold font-800 text-4xl text-white mb-10">courses</h1>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-  {courses.map((c) => (
-    <CourseCard
-      key={c.id}
-      course={c}
-      isSelected={selectedCourse?.id === c.id}
-      onSelect={setSelectedCourse}
-    />
-  ))}
-  <AddNewCourseCard onClick={() => setIsAddNewOpen(true)} />
-</div>
-
-
-              
-
-              
+                {courses?.map(c => (
+                  <CourseCard
+                    key={c.id}
+                    course={c}
+                    isSelected={selectedCourse?.id === c.id}
+                    onSelect={setSelectedCourse}
+                  />
+                ))}
+                <AddNewCourseCard onClick={() => setIsAddNewOpen(true)} />
+              </div>
             </Dialog.Panel>
           </Transition.Child>
         </div>

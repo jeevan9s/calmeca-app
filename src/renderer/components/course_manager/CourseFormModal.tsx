@@ -16,7 +16,7 @@ import {
 import { format } from "date-fns"
 import { Course } from "@/services/db"
 import { addCourse, updateCourse } from "@/services/core services/courseService"
-import { ChromePicker } from "react-color"
+import { ChromePicker, ColorResult } from "react-color"
 
 type CourseFormModalProps = {
   open: boolean
@@ -33,31 +33,48 @@ export default function CourseFormModal({
 }: CourseFormModalProps) {
   const [name, setName] = useState("")
   const [description, setDescription] = useState("")
+  const [courseId, setCourseId] = useState("")
   const [color, setColor] = useState("#ffffff")
   const [type, setType] = useState("other")
   const [endsOn, setEndsOn] = useState<Date | undefined>()
+  const [errors, setErrors] = useState<{ name?: string, courseId?: string }>({})
 
   useEffect(() => {
     if (initialData) {
       setName(initialData.name || "")
+      setCourseId(initialData.courseId || "")
       setDescription(initialData.description || "")
       setColor(initialData.color || "#ffffff")
       setType(initialData.type || "other")
-      setEndsOn(initialData.endsOn)
+      setEndsOn(initialData.endsOn ? new Date(initialData.endsOn) : undefined)
     } else {
       setName("")
+      setCourseId("")
       setDescription("")
       setColor("#3b82f6")
       setType("other")
       setEndsOn(undefined)
     }
+    setErrors({})
   }, [initialData, open])
 
-  const handleSave = async () => {
-    if (!name || !type || !endsOn) return
+  const validate = () => {
+    const newErrors = {} as typeof errors
 
-    const baseData = {
-      courseId: name.toLowerCase().replace(/\s+/g, "-"),
+    if (!name.trim() && !courseId.trim()) {
+      newErrors.name = "course name or code is required"
+      newErrors.courseId = "course name or code is required"
+    }
+
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
+  const handleSave = async () => {
+    if (!validate()) return
+
+    const courseData = {
+      courseId,
       name,
       description,
       endsOn,
@@ -65,16 +82,20 @@ export default function CourseFormModal({
       color,
     }
 
-    if (initialData?.id) {
-      await updateCourse(initialData.id, {
-        ...baseData,
-        updatedFrom: "other",
-      })
-    } else {
-      await addCourse(baseData)
+    try {
+      if (initialData?.id) {
+        await updateCourse(initialData.id, {
+          ...courseData,
+          updatedFrom: "other",
+        })
+      } else {
+        await addCourse(courseData as Omit<Course, "id" | "createdOn" | "archived" | "updatedOn">)
+      }
+      onSave(courseData)
+      onClose()
+    } catch (error) {
+      console.error("Failed to save course:", error)
     }
-
-    onClose()
   }
 
   return (
@@ -95,6 +116,18 @@ export default function CourseFormModal({
               placeholder="eg. Introduction to Computer Science"
               className="bg-zinc-800 text-white border-zinc-700 font-raleway"
             />
+            {errors.name && <p className="text-red-500 text-xs">{errors.name}</p>}
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-sm text-gray-300 font-dm">course code</label>
+            <Input
+              value={courseId}
+              onChange={(e) => setCourseId(e.target.value)}
+              placeholder="eg. CS-100"
+              className="bg-zinc-800 text-white border-zinc-700 font-dm"
+            />
+            {errors.courseId && <p className="text-red-500 text-xs">{errors.courseId}</p>}
           </div>
 
           <div className="space-y-1">
@@ -119,7 +152,7 @@ export default function CourseFormModal({
               <PopoverContent className="p-2 bg-zinc-900 border border-zinc-700">
                 <ChromePicker
                   color={color}
-                  onChange={(updated) => setColor(updated.hex)}
+                  onChange={(updated: ColorResult) => setColor(updated.hex)}
                   disableAlpha
                 />
               </PopoverContent>
@@ -133,48 +166,46 @@ export default function CourseFormModal({
               onChange={(e) => setType(e.target.value)}
               className="w-full h-10 rounded-md bg-zinc-800 text-white border border-zinc-700 px-3"
             >
-              <option>lecture</option>
-              <option>project-based</option>
-              <option>tutorial</option>
-              <option>seminar</option>
-              <option>workshop</option>
+              <option value="lecture">lecture</option>
+              <option value="project-based">project-based</option>
+              <option value="tutorial">tutorial</option>
+              <option value="seminar">seminar</option>
+              <option value="workshop">workshop</option>
+              <option value="other">other</option>
             </select>
           </div>
 
           <div className="space-y-1">
-            <label className="text-sm text-gray-300">end date</label>
+            <label className="text-sm text-gray-300">end date (optional)</label>
             <Popover>
-  <PopoverTrigger asChild>
-    <Button className="w-full justify-start text-left font-normal bg-zinc-800 text-white border-zinc-700 hover:bg-zinc-700">
-      {endsOn ? format(endsOn, "PPP") : <span className="text-zinc-400">select date</span>}
-    </Button>
-  </PopoverTrigger>
-  <PopoverContent className="w-auto p-0 bg-zinc-900 border border-zinc-700">
-    <Calendar
-      mode="single"
-      selected={endsOn}
-      onSelect={(date) => {
-        setEndsOn(date);
-        document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
-      }}
-      initialFocus
-      className="bg-zinc-900 font-raleway text-white/80"
-      classNames={{
-        day: "text-white/80 hover:bg-white/10 rounded-md transition-colors",
-        day_selected: "bg-blue-500 text-white hover:bg-blue-600",
-        day_today: "border border-white/30",
-        head_cell: "text-white/60 text-xs font-normal",
-        nav_button: "text-white/80 hover:bg-white/10 rounded-md",
-        caption: "text-white/90",
-      }}
-    />
-  </PopoverContent>
-</Popover>
+              <PopoverTrigger asChild>
+                <Button className="w-full justify-start text-left font-normal bg-zinc-800 text-white border-zinc-700 hover:bg-zinc-700">
+                  {endsOn ? format(endsOn, "PPP") : <span className="text-zinc-400">select date</span>}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0 bg-zinc-900 border border-zinc-700">
+                <Calendar
+                  mode="single"
+                  selected={endsOn}
+                  onSelect={setEndsOn}
+                  initialFocus
+                  className="bg-zinc-900 font-raleway text-white/80"
+                  classNames={{
+                    day: "text-white/80 hover:bg-white/10 rounded-md transition-colors",
+                    day_selected: "bg-blue-500 text-white hover:bg-blue-600",
+                    day_today: "border border-white/30",
+                    head_cell: "text-white/60 text-xs font-normal",
+                    nav_button: "text-white/80 hover:bg-white/10 rounded-md",
+                    caption: "text-white/90",
+                  }}
+                />
+              </PopoverContent>
+            </Popover>
           </div>
 
           <div className="flex justify-end pt-2">
             <button
-              onClick={handleSave}
+              onClick={() => {handleSave(); onClose()}}
               className="inline-block py-3 px-5 bg-zinc-800 text-sm font-semibold font-raleway text-white rounded-xl shadow-md transition-all hover:bg-white/40"
             >
               {initialData ? "update" : "create"}
