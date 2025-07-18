@@ -13,21 +13,6 @@ export const seedDummyCourses = async () => {
     endsOn: new Date('2025-12-01'),
   });
 
-  await addCourse({
-    name: 'Linear Algebra',
-    courseId: 'MATH204',
-    color: '#16a34a',
-    type: 'Lecture',
-    endsOn: new Date('2025-12-05'),
-  });
-
-  await addCourse({
-    name: 'Engineering Design',
-    courseId: 'ENGD100',
-    color: '#f97316',
-    type: 'Project-Based',
-    endsOn: new Date('2025-11-20'),
-  });
 
   const course1 = await addCourse({
     name: 'Physics  1',

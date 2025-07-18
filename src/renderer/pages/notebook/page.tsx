@@ -1,4 +1,4 @@
-import NoteSidebar from "@/renderer/components/NoteSidebar";
+import NoteSidebar from "@/renderer/components/notes/NoteSidebar";
 import Layout from "../../components/Layout";
 import { MDXEditor } from '@mdxeditor/editor'
 import '@mdxeditor/editor/style.css'

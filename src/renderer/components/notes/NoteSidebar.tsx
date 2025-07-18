@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import NewNoteDialog from "./NewNoteDialog";
-import CourseManager from "./CourseManager";
+import CourseManager from "../course_manager/CourseManager";
 import FilterModal from "./NoteOptionsDialog";
 import { Note, Course } from "@/services/db";
 import { getAllCourses } from "@/services/core services/courseService";
