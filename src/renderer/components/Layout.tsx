@@ -26,42 +26,43 @@ export default function Layout({disableHoverZones = false, children}: LayoutProp
   const isCalendarHovered = calendarHoveredButton || calendarHoveredMouse;
   const isCalendarVisible = calendarLocked || isCalendarHovered;
 
-  useEffect(() => {
-    if (disableHoverZones) return
-    const handleHover = (e: MouseEvent) => {
-      const x = e.clientX;
-      const y = e.clientY;
-      const centerStart = window.innerWidth * 0.35;
-      const centerEnd = window.innerWidth * 0.65;
+useEffect(() => {
+  const handleHover = (e: MouseEvent) => {
+    if (disableHoverZones) return;
 
-      if (!calendarLocked && y <= 25 && x >= centerStart && x <= centerEnd) {
-        setCalendarHoveredMouse(true);
-        setIsHoveredMouse(false); 
-        return;
-      } else {
+    const x = e.clientX;
+    const y = e.clientY;
+    const centerStart = window.innerWidth * 0.35;
+    const centerEnd = window.innerWidth * 0.65;
+
+    if (!calendarLocked && y <= 25 && x >= centerStart && x <= centerEnd) {
+      setCalendarHoveredMouse(true);
+      setIsHoveredMouse(false); 
+      return;
+    } else {
+      setCalendarHoveredMouse(false);
+    }
+
+    if (!isLocked && x <= 25) {
+      setIsHoveredMouse(true);
+      if (windowWidth <= 600 && isCalendarVisible) {
         setCalendarHoveredMouse(false);
+        setCalendarLocked(false);
       }
+    } else {
+      setIsHoveredMouse(false);
+    }
+  };
 
-      if (!isLocked && x <= 25) {
-        setIsHoveredMouse(true);
-        if (windowWidth <= 600 && isCalendarVisible) {
-          setCalendarHoveredMouse(false);
-          setCalendarLocked(false);
-        }
-      } else {
-        setIsHoveredMouse(false);
-      }
-    };
+  window.addEventListener('mousemove', handleHover);
+  const handleResize = () => setWindowWidth(window.innerWidth);
+  window.addEventListener('resize', handleResize);
 
-    window.addEventListener('mousemove', handleHover);
-    const handleResize = () => setWindowWidth(window.innerWidth);
-    window.addEventListener('resize', handleResize);
-
-    return () => {
-      window.removeEventListener('mousemove', handleHover);
-      window.removeEventListener('resize', handleResize);
-    };
-  }, [isLocked, calendarLocked, calendarHoveredMouse, isHoveredMouse, windowWidth, isCalendarVisible]);
+  return () => {
+    window.removeEventListener('mousemove', handleHover);
+    window.removeEventListener('resize', handleResize);
+  };
+}, [disableHoverZones, isLocked, calendarLocked, isHoveredMouse, windowWidth, isCalendarVisible]);
 
   const toggleQuickNav = () => {
     if (windowWidth <= 800 && isAlertsOpen) setIsAlertsOpen(false);
@@ -99,6 +100,7 @@ export default function Layout({disableHoverZones = false, children}: LayoutProp
         isHovered={sidebarVisible}
         setIsHovered={setIsHoveredMouse}
         setIsLocked={setIsLocked}
+        disableHoverZones={disableHoverZones}
       />
 
       <AnimatePresence>

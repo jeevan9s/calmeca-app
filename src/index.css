@@ -2,6 +2,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Maven+Pro:wght@300;400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@300;400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=PT+Serif:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Aguafina+Script:wght@300;400;500;600;700&display=swap');
+
 
 @tailwind base;
 @tailwind components;
@@ -28,6 +32,28 @@
   font-family: 'Source Code Pro', sans-serif;
 }
 
+
+.font-system {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+.font-serif {
+  font-family: 'PT Serif', serif
+}
+.font-sans {
+  font-family: Arial, Helvetica, Verdana, Geneva, Tahoma, 'Segoe UI', sans-serif
+}
+
+.font-mono {
+  font-family: 'Roboto Mono', monospace
+}
+
+.font-sans-serif {
+  font-family: Calibri, sans-serif
+}
+
+
+
+
 html, body, #root {
   width: 100%;
   height: 100%;
@@ -42,5 +68,6 @@ select:focus,
 button:focus {
   outline: none !important;
   box-shadow: none  !important;
-  border-color: none !important; /* or specify the color you want */
+  border-color: none !important; 
 }
+

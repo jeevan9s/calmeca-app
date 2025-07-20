@@ -8,13 +8,16 @@ import '@/renderer/styles/sb.css'
     isHovered: boolean
     setIsHovered: (hovering: boolean) => void
     setIsLocked: (locked: boolean) => void
+    disableHoverZones?: boolean
   }
 
-export default function Sidebar( {isLocked, isHovered, setIsLocked, setIsHovered} :sbProps ) {
+export default function Sidebar( {isLocked, isHovered, setIsLocked, setIsHovered, disableHoverZones} :sbProps ) {
   const isVisible = isLocked || isHovered
 
   // appear on hover logic
   useEffect(() => {
+    if (disableHoverZones) return
+
     const handleHover = (e: MouseEvent) => {
       if (!isLocked && e.clientX <= 20) {
         setIsHovered(true)
@@ -29,8 +32,8 @@ export default function Sidebar( {isLocked, isHovered, setIsLocked, setIsHovered
   return (
 <motion.aside
   id="sb-panel"
-  onMouseEnter={() => !isLocked && setIsHovered(true)}
-  onMouseLeave={() => !isLocked && setIsHovered(false)}
+  onMouseEnter={() => !disableHoverZones && !isLocked && setIsHovered(true)}
+  onMouseLeave={() => !disableHoverZones && !isLocked && setIsHovered(false)}
   className={`
     flex fixed z-50 flex-col transition-all duration-200 ease-in-out
     ${isVisible ? 'w-44 sm:w-52 md:w-56' : 'w-0'}

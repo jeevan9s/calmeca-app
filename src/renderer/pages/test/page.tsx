@@ -210,23 +210,23 @@ const handleGenerate = async () => {
       options: contentType === 'quiz' ? { quizType } : undefined,
     }
     
-    console.log('Sending to AI service:', requestData) // Debug what we're sending
-    console.log('Content length:', importedFile.content.length) // Check if content is actually there
-    console.log('Content preview:', importedFile.content.substring(0, 200) + '...') // Show first 200 chars
+    console.log('Sending to AI service:', requestData) 
+    console.log('Content length:', importedFile.content.length) 
+    console.log('Content preview:', importedFile.content.substring(0, 200) + '...') 
 
     const res = await window.electronAPI.generateAIContent(requestData)
 
-    console.log('AI Generation response:', res) // Debug log
+    console.log('AI Generation response:', res) 
 
     if (res.success && res.result !== undefined) {
-      console.log('Result type:', typeof res.result) // Debug log
-      console.log('Result content:', res.result) // Debug log
+      console.log('Result type:', typeof res.result) 
+      console.log('Result content:', res.result) 
       
-      // Store the raw result for debugging
+      
       setAIContent(JSON.stringify(res.result, null, 2))
       
       if (contentType === 'summary') {
-        // For summary, result should be a string
+        
         if (typeof res.result === 'string') {
           setParsedContent(res.result)
         } else {
@@ -234,7 +234,7 @@ const handleGenerate = async () => {
           setParsedContent(null)
         }
       } else if (contentType === 'flashcards' || contentType === 'quiz') {
-        // For flashcards/quiz, result should be an array
+        
         if (Array.isArray(res.result)) {
           setParsedContent(res.result)
           if (contentType === 'flashcards') setFlashcards(res.result)

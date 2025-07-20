@@ -16,7 +16,7 @@ import {
 import { format } from "date-fns"
 import { Course } from "@/services/db"
 import { addCourse, updateCourse } from "@/services/core services/courseService"
-import { ChromePicker, ColorResult } from "react-color"
+import { HexColorPicker } from "react-colorful"
 
 type CourseFormModalProps = {
   open: boolean
@@ -149,13 +149,39 @@ export default function CourseFormModal({
                   style={{ backgroundColor: color }}
                 />
               </PopoverTrigger>
-              <PopoverContent className="p-2 bg-zinc-900 border border-zinc-700">
-                <ChromePicker
-                  color={color}
-                  onChange={(updated: ColorResult) => setColor(updated.hex)}
-                  disableAlpha
-                />
-              </PopoverContent>
+<PopoverContent
+  align="start"
+  sideOffset={8}
+  className="w-[230px] p-4 bg-zinc-800 border border-zinc-200 rounded-xl shadow-lg z-50 space-y-3"
+>
+  <HexColorPicker color={color} onChange={setColor} className="rounded-md" />
+
+  <div className="flex justify-between items-center text-xs text-white font-mono">
+    <span>HEX</span>
+    <span>{color.toUpperCase()}</span>
+  </div>
+
+  <div className="grid grid-cols-3 gap-2 text-xs text-zinc-300 font-mono">
+    {["R", "G", "B"].map((channel, i) => {
+      const rgb = parseInt(color.slice(1), 16);
+      const r = (rgb >> 16) & 255;
+      const g = (rgb >> 8) & 255;
+      const b = rgb & 255;
+      const values = [r, g, b];
+
+      return (
+        <div key={channel} className="flex flex-col items-center">
+          <label className="text-[10px]">{channel}</label>
+          <input
+            value={values[i]}
+            disabled
+            className="w-12 text-center py-1 border border-zinc-300 rounded bg-gray-200 text-zinc-800"
+          />
+        </div>
+      );
+    })}
+  </div>
+</PopoverContent>
             </Popover>
           </div>
 
