@@ -1,0 +1,38 @@
+/* notebook.css */
+
+/* Light and dark background themes */
+.background-light800_dark200 {
+  background-color: #f5f5f5; /* Light mode */
+}
+
+.dark .background-light800_dark200 {
+  background-color: #1e1e1e; /* Dark mode */
+}
+
+/* Light and dark border colors */
+.light-border-2 {
+  border: 2px solid #e0e0e0; /* Light mode border */
+}
+
+.dark .light-border-2 {
+  border: 2px solid #333333; /* Dark mode border */
+}
+
+/* Markdown editor base styling */
+.markdown-editor {
+  padding: 1rem;
+  font-family: system-ui, sans-serif;
+  font-size: 1rem;
+  line-height: 1.6;
+  border-radius: 0.5rem;
+}
+
+/* Optional: specific styles for .dark-editor */
+.dark .dark-editor {
+  color: #ddd;
+}
+
+/* Handle the border styling */
+.markdown-editor.border {
+  border-radius: 0.375rem;
+}

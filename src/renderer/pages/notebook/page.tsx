@@ -1,10 +1,10 @@
-import { useState } from "react";
-import NoteSidebar from "@/renderer/components/notes/NoteSidebar";
-import Layout from "../../components/Layout";
-import "@mdxeditor/editor/style.css";
+"use client";
+
+import React from "react";
 import {
   MDXEditor,
   headingsPlugin,
+  StrikeThroughSupSubTogglesProps,
   listsPlugin,
   quotePlugin,
   thematicBreakPlugin,
@@ -30,35 +30,46 @@ import {
   InsertAdmonition,
   CodeToggle,
   DiffSourceToggleWrapper,
-  InsertCodeBlock
-} from '@mdxeditor/editor';
+  InsertCodeBlock,
+  StrikeThroughSupSubToggles,
+} from "@mdxeditor/editor";
 
-interface NoteEditorProps {
-  content?: string;
-  onChange?: (content: string) => void;
+import { basicDark } from "cm6-theme-basic-dark";
+import { javascript } from "@codemirror/lang-javascript";
+import { html } from "@codemirror/lang-html";
+import { css } from "@codemirror/lang-css";
+import { json } from "@codemirror/lang-json";
+import { markdown } from "@codemirror/lang-markdown";
+import { python } from "@codemirror/lang-python";
+import { sql } from "@codemirror/lang-sql";
+import { useTheme } from "next-themes";
+import "@mdxeditor/editor/style.css";
+import Layout from "@/renderer/components/Layout";
+import NoteSidebar from "@/renderer/components/notes/NoteSidebar";
+
+interface Props {
+  value?: string;
+  onChange?: (value: string) => void;
 }
 
-export default function Notebook({ 
-  content = '# Start writing your note here...\n\nThis is a basic example.', 
-  onChange = () => {} 
-}: NoteEditorProps) {
-  const [editorKey, setEditorKey] = useState(0); 
+export default function Notebook({
+  value = "# Welcome\n\n- Sample content\n~~strikethrough~~\n^superscript^\n~subscript~",
+  onChange = () => {},
+}: Props) {
+  const { resolvedTheme } = useTheme();
+  const themeExtension = resolvedTheme === "dark" ? [basicDark] : [];
 
   return (
-    <div id="notebook-page" className="min-h-screen bg-black/30 text-white flex flex-col">
+    <div className="min-h-screen w-full flex flex-col bg-gray-50 dark:bg-gray-900">
       <Layout />
-      <div className="flex flex-1">
+      <div className="flex flex-1 overflow-hidden">
         <NoteSidebar />
-        <div className="flex-1 p-4">
-          <div 
-            className="h-full border border-gray-700 rounded-lg overflow-hidden"
-            key={editorKey} 
-          >
+        <div className="flex-1 overflow-auto p-4">
+          <div className="h-full border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden bg-white dark:bg-gray-800">
             <MDXEditor
-              markdown={content}
+              markdown={value}
               onChange={onChange}
-              contentEditableClassName="prose max-w-none text-gray-200 bg-gray-900 p-4"
-              className="bg-gray-800"
+              contentEditableClassName="prose max-w-none p-6 dark:text-gray-200"
               plugins={[
                 headingsPlugin(),
                 listsPlugin(),
@@ -68,33 +79,51 @@ export default function Notebook({
                 tablePlugin(),
                 imagePlugin({
                   imageUploadHandler: async (image: File) => {
-                    
                     return URL.createObjectURL(image);
-                  }
+                  },
                 }),
                 linkPlugin(),
                 linkDialogPlugin(),
-                codeBlockPlugin({ defaultCodeBlockLanguage: 'txt' }),
-                codeMirrorPlugin({ 
-                  codeBlockLanguages: { 
-                    js: 'JavaScript',
-                    py: 'Python', 
-                    css: 'CSS', 
-                    txt: 'Plain Text', 
-                    ts: 'TypeScript',
-                    md: 'Markdown'
-                  } 
+                codeBlockPlugin({ defaultCodeBlockLanguage: "plaintext" }),
+                codeMirrorPlugin({
+                  codeBlockLanguages: {
+                    plaintext: "Plain Text",
+                    javascript: "JavaScript",
+                    typescript: "TypeScript",
+                    jsx: "JSX",
+                    tsx: "TSX",
+                    css: "CSS",
+                    html: "HTML",
+                    json: "JSON",
+                    markdown: "Markdown",
+                    python: "Python",
+                    bash: "Bash",
+                    sql: "SQL",
+                  },
+                  codeMirrorExtensions: [
+                    ...themeExtension,
+                    javascript(),
+                    html(),
+                    css(),
+                    json(),
+                    markdown(),
+                    python(),
+                    sql(),
+                  ],
                 }),
-                directivesPlugin({ directiveDescriptors: [AdmonitionDirectiveDescriptor] }),
-                diffSourcePlugin({ viewMode: 'rich-text', diffMarkdown: 'boo' }),
+                directivesPlugin({
+                  directiveDescriptors: [AdmonitionDirectiveDescriptor],
+                }),
+                diffSourcePlugin({ viewMode: "rich-text" }),
                 toolbarPlugin({
                   toolbarContents: () => (
                     <DiffSourceToggleWrapper>
                       <UndoRedo />
                       <BoldItalicUnderlineToggles />
+                      <StrikeThroughSupSubToggles />
+                      <CodeToggle />
                       <ListsToggle />
                       <BlockTypeSelect />
-                      <CodeToggle />
                       <CreateLink />
                       <InsertImage />
                       <InsertTable />
@@ -102,8 +131,8 @@ export default function Notebook({
                       <InsertAdmonition />
                       <InsertCodeBlock />
                     </DiffSourceToggleWrapper>
-                  )
-                })
+                  ),
+                }),
               ]}
             />
           </div>
