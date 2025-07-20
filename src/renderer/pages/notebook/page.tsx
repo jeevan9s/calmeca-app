@@ -61,7 +61,7 @@ export default function Notebook({
 
   return (
     <div className="min-h-screen w-full flex flex-col bg-gray-50 dark:bg-gray-900">
-      <Layout />
+      <Layout disableHoverZones > </Layout>
       <div className="flex flex-1 overflow-hidden">
         <NoteSidebar />
         <div className="flex-1 overflow-auto p-4">

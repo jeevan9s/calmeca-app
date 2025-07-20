@@ -31,6 +31,7 @@ type TitleBarProps = {
   isAlertsOpen: boolean
   isQuickNavOpen: boolean
   disableButton: boolean
+  disableHoverZones?: boolean
 }
 
 
@@ -48,6 +49,7 @@ export default function TitleBar({
   ontoggleQuickNav,
   ontoggleAlerts,
   disableButton,
+  disableHoverZones=false,
   solidBackground = false,
   outline = false
 }: TitleBarProps) {
@@ -67,7 +69,7 @@ useEffect(() => {
 
   fetchAndUpdate()
 
-  const interval = setInterval(fetchAndUpdate, 60000) // every 60 seconds
+  const interval = setInterval(fetchAndUpdate, 60000) 
 
   return () => clearInterval(interval)
 }, [])
@@ -91,7 +93,7 @@ useEffect(() => {
 
 
   const shouldShowHoverZone =
-    windowWidth >= 640 && !isCalendarLocked && !isCalendarHovered && !isAlertsOpen && !isQuickNavOpen
+    windowWidth >= 640 && !isCalendarLocked && !isCalendarHovered && !isAlertsOpen && !isQuickNavOpen && !disableHoverZones
 
   let paddingLeft = 0
   if (isLocked) {
@@ -186,7 +188,7 @@ useEffect(() => {
 )}
 
           {(!isLocked || windowWidth >= 640) && (
-            <p className="text-neutral-500 text-xs sm:text-sm leading-none font-raleway">
+            <p className="text-neutral-500 text-xs sm:text-xs leading-none font-md">
               {relativeTime} 
             </p>
           )}

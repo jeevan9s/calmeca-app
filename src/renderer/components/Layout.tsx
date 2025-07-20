@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, ReactNode } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import Sidebar from './Sidebar';
 import Titlebar from './Titlebar';
@@ -6,7 +6,12 @@ import QuickNav from './QuickNav';
 import Alerts from './Alerts';
 import CalendarPopup from './CalendarPopup';
 
-export default function Layout() {
+type LayoutProps = {
+  disableHoverZones?: boolean
+  children: ReactNode
+}
+
+export default function Layout({disableHoverZones = false, children}: LayoutProps) {
   const [isLocked, setIsLocked] = useState(false);
   const [calendarLocked, setCalendarLocked] = useState(false);
   const [calendarHoveredMouse, setCalendarHoveredMouse] = useState(false);
@@ -22,6 +27,7 @@ export default function Layout() {
   const isCalendarVisible = calendarLocked || isCalendarHovered;
 
   useEffect(() => {
+    if (disableHoverZones) return
     const handleHover = (e: MouseEvent) => {
       const x = e.clientX;
       const y = e.clientY;
@@ -85,6 +91,7 @@ export default function Layout() {
         isCalendarLocked={calendarLocked}
         setIsCalendarHovered={setCalendarHoveredButton}
         setIsCalendarLocked={setCalendarLocked}
+         disableHoverZones={disableHoverZones}
       />
 
       <Sidebar
