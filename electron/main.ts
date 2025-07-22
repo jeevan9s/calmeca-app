@@ -11,7 +11,7 @@ import {
   getTokenPath,
 } from '../src/services/integrations-utils/google/googleAuth'
 import { exportTextFeatureGDrive, importDriveFile } from '@/services/integrations-utils/google/googleService'
-import { AIContentRequest, exportType, generationOptions } from '@/services/db'
+import { AIContentRequest, exportType, exportResponse } from '@/services/db'
 import { parseArgs } from 'util'
 import { generateFromDrive } from '@/services/integrations-utils/cloudGen'
 
@@ -160,6 +160,11 @@ ipcMain.handle('start-google-login', async () => {
         if (authWindow) authWindow.show()
       })
 
+      authWindow.on('closed', () => {
+        authWindow = null
+        reject(new Error('User closed the login window'))
+      })
+
       const clientId = process.env.G_CLIENT_ID
       const clientSecret = process.env.G_CLIENT_SECRET
       const redirectUri = process.env.G_REDIRECT_URI
@@ -209,6 +214,20 @@ ipcMain.handle('start-google-login', async () => {
           const fs = await import('fs')
           fs.writeFileSync(tokenPath, JSON.stringify(tokens))
 
+          const oauth2 = google.oauth2({version: 'v2', auth: oauth2Client})
+          const {data} = await oauth2.userinfo.get()
+
+          // Emit login success event to renderer
+          if (win) {
+            win.webContents.send('google-login-success', {
+              user: {
+                name: data.name,
+                email: data.email,
+                picture: data.picture
+              }
+            })
+          }
+
           if (authWindow) {
             authWindow.loadFile(path.join(__dirname, '..', 'assets', 'oauth-redirect.html'))
           }
@@ -216,19 +235,21 @@ ipcMain.handle('start-google-login', async () => {
           setTimeout(() => {
             authWindow?.close()
             authWindow = null
-            resolve({ success: true, tokens })
-          }, 10000)
+            resolve({
+              success: true, tokens,
+              user: {
+                name: data.name,
+                email: data.email,
+                picture: data.picture
+              }
+            })
+          })
         } catch (tokenError) {
           console.error('Token exchange failed:', tokenError)
           reject(tokenError)
           authWindow?.close()
           authWindow = null
         }
-      })
-
-      authWindow.on('closed', () => {
-        authWindow = null
-        reject(new Error('User closed the login window'))
       })
     } catch (error) {
       console.error('Failed to start Google login:', error)
@@ -237,50 +258,9 @@ ipcMain.handle('start-google-login', async () => {
   })
 })
 
-// GOOGLE AUTH HANDLERS
-
-ipcMain.handle('google-login', async () => {
-  try {
-    const authClient = await getAuthClient()
-    if (!authClient) throw new Error('No valid auth client')
-    
-    const oauth2 = google.oauth2({ version: 'v2', auth: authClient })
-    const { data } = await oauth2.userinfo.get()
-
-    return {
-      success: true,
-      tokens: authClient.credentials,
-      user: {
-        name: data.name,
-        email: data.email,
-        picture: data.picture,
-      },
-    }
-  } catch (err: unknown) {
-    let message = 'Unknown error'
-    if (err instanceof Error) {
-      message = err.message
-    } else if (typeof err === 'string') {
-      message = err
-    }
-    console.error(message)
-    return { success: false, error: message }
-  }
-})
-
-  function showLogoutNotification() {
-new Notification({
-  title: 'Logout Successful',
-  body: 'Google logout successful',
-  silent: false,
-}).show();
-
-}
-
 ipcMain.handle('google-logout', async () => {
   try {
     clearSavedTokens()
-    showLogoutNotification()
     return { success: true }
 
   } catch (err: unknown) {
@@ -295,23 +275,30 @@ ipcMain.handle('google-logout', async () => {
   }
 })
 
+
 // GOOGLE IMPORT/EXPORT HANDLERS
-ipcMain.handle('drive-export-text', async (_event, args: { content: string; filename: string; type: exportType }) => {
-  try {
-    const { content, filename, type } = args
-    const res = await exportTextFeatureGDrive(content, filename, type)
-    console.log("file exported: ", filename)
-    return {
-  success: true,
-  fileId: res.fileId,
-  name: res.name,
-  driveUrl: res.driveUrl,
-}
-  } catch (error) {
-    console.error('Export error:', error)
-    return { success: false, error: (error as Error).message }
+ipcMain.handle(
+  'drive-export-text',
+  async (
+    _event,
+    args: { content: string; filename: string; type: exportType }
+  ): Promise<exportResponse> => {
+    try {
+      const { content, filename, type } = args;
+      const res = await exportTextFeatureGDrive(content, filename, type);
+      console.log('file exported: ', filename);
+      return {
+        success: true,
+        fileId: res.fileId,
+        name: res.name,
+        driveUrl: res.driveUrl,
+      };
+    } catch (error) {
+      console.error('Export error:', error);
+      return { success: false, error: (error as Error).message };
+    }
   }
-})
+);
 
 ipcMain.handle('drive-import-file', async (_event, fileId: string) => {
   try {

@@ -38,7 +38,6 @@ import {
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/popover";
 import { HexColorPicker } from "react-colorful";
 
-
 import { useState, useEffect } from "react";
 import { basicDark } from "cm6-theme-basic-dark";
 import { javascript } from "@codemirror/lang-javascript";
@@ -54,24 +53,23 @@ import "@mdxeditor/editor/style.css";
 import Layout from "@/renderer/components/Layout";
 import NoteSidebar from "@/renderer/components/notes/NoteSidebar";
 import { Eye } from "react-feather";
-import { Baseline } from "lucide-react";
-import { animate, useMotionValue } from "framer-motion";
+import { exportType, exportResponse } from "@/services/db";
+import ExportDialog from "@/renderer/components/notes/ExportDialog";
+import { Baseline, Save } from "lucide-react";
 
 interface Props {
   value?: string;
   onChange?: (value: string) => void;
 }
 
-export default function Notebook({
-  value = "",
-  onChange = () => {},
-}: Props) {
+export default function Notebook({ value = "", onChange = () => {} }: Props) {
   const { resolvedTheme } = useTheme();
   const themeExtension = resolvedTheme === "dark" ? [basicDark] : [];
   const [toolbarVisible, setToolbarVisible] = useState(true);
   const [font, setFont] = useState("font-system");
+  const [error, setError] = useState<string | null>(null);
   const [color, setColor] = useState("#000000");
-  const typingOpacity = useMotionValue(1);
+  const [text, setText] = useState(value);
 
   const fontOptions = [
     { value: "font-system", label: "system" },
@@ -81,22 +79,81 @@ export default function Notebook({
     { value: "font-mono", label: "mono" },
   ];
 
-  function applyColorToSelection(color: string) {
-    document.execCommand("foreColor", false, color);
-  }
+  const [exportType, setExportType] = useState<exportType>("pdf");
+  const [filename, setFilename] = useState("untitled");
+  const [isExporting, setIsExporting] = useState(false);
+
+  const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
+  const openDialog = () => setIsExportDialogOpen(true);
+  const closeDialog = () => setIsExportDialogOpen(false);
 
   const handleChange = (value: string) => {
-  onChange(value);
-};
+    onChange(value);
+    setText(value);
+  };
 
+  const handleNoteExport = async () => {
+    if (!text.trim()) {
+      alert("Enter some content to export.");
+      return;
+    }
+    if (!filename.trim()) {
+      alert("Enter a filename.");
+      return;
+    }
 
+    setIsExporting(true);
+    setError(null);
 
+    try {
+      const res: exportResponse = await window.electronAPI.gTextExport(
+        text,
+        filename,
+        exportType
+      );
+      if (res.success) {
+        alert(`File uploaded successfully!\n${res.driveUrl}`);
+      } else {
+        alert(`Failed to export file: ${res.error || "Unknown error"}`);
+        setError(res.error || "Export failed");
+      }
+    } catch (err) {
+      console.error("Export error:", err);
+      alert("Export failed unexpectedly");
+      setError("Export failed unexpectedly");
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const [windowWidth, setWindowWidth] = useState(
+    typeof window !== "undefined" ? window.innerWidth : 1200
+  );
+
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const isMobile = windowWidth < 768;
 
   return (
     <div className="min-h-screen w-full flex flex-col bg-natural-950">
       <Layout disableHoverZones> </Layout>
       <div className="flex flex-1 overflow-hidden">
         <NoteSidebar />
+        <ExportDialog
+          isOpen={isExportDialogOpen}
+          content={text}
+          filename={filename}
+          exportType={exportType}
+          isExporting={isExporting}
+          onFilenameChange={setFilename}
+          onTypeChange={setExportType}
+          onClose={closeDialog}
+          onConfirm={handleNoteExport}
+        />
         <div className="flex-1 overflow-auto p-4">
           <div className="h-full border border-gray-200 overflow-auto bg-white">
             <MDXEditor
@@ -111,9 +168,8 @@ export default function Notebook({
                 markdownShortcutPlugin(),
                 tablePlugin(),
                 imagePlugin({
-                  imageUploadHandler: async (image: File) => {
-                    return URL.createObjectURL(image);
-                  },
+                  imageUploadHandler: async (image: File) =>
+                    URL.createObjectURL(image),
                 }),
                 linkPlugin(),
                 linkDialogPlugin(),
@@ -149,13 +205,16 @@ export default function Notebook({
                 }),
                 diffSourcePlugin({ viewMode: "rich-text" }),
                 toolbarPlugin({
-                  toolbarClassName: `flex gap-3 items-center relative ${toolbarVisible ? "bg-gray-100" : "bg-white"}`,
+                  toolbarClassName: `flex flex-wrap items-center relative gap-2 px-2 py-1 ${
+                    toolbarVisible ? "bg-gray-100" : "bg-white"
+                  } max-h-[56px]`,
                   toolbarContents: () => (
                     <>
                       <motion.div
                         initial={{ opacity: 1, x: 0 }}
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: -20 }}
+                        className="flex items-center"
                       >
                         <motion.button
                           onClick={() => setToolbarVisible((v) => !v)}
@@ -163,7 +222,7 @@ export default function Notebook({
                           aria-label={
                             toolbarVisible ? "hide toolbar" : "show toolbar"
                           }
-                          className="px-2 py-1 rounded"
+                          className="px-2 py-1 rounded flex items-center justify-center"
                           animate={{
                             backgroundColor: toolbarVisible
                               ? "#f3f4f6"
@@ -190,12 +249,9 @@ export default function Notebook({
                               stiffness: 300,
                               damping: 20,
                             }}
+                            className="flex items-center"
                           >
-                            {toolbarVisible ? (
-                              <EyeOff size={18} />
-                            ) : (
-                              <Eye size={18} />
-                            )}
+                            {toolbarVisible ? <EyeOff size={18} /> : <Eye size={18} />}
                           </motion.div>
                         </motion.button>
                       </motion.div>
@@ -206,7 +262,10 @@ export default function Notebook({
                             initial={{ opacity: 0, x: 20 }}
                             animate={{ opacity: 1, x: 0 }}
                             exit={{ opacity: 0, x: 20 }}
-                            className="flex gap-2 h-8 items-center"
+                            className={`flex flex-wrap items-center gap-2 h-8 flex-grow min-w-0 ${
+                              isMobile ? "justify-center" : "justify-start"
+                            }`}
+                            style={{ minWidth: 0 }}
                           >
                             <DiffSourceToggleWrapper>
                               <motion.div whileHover={{ scale: 1.05 }}>
@@ -233,46 +292,46 @@ export default function Notebook({
                                         aria-label="pick text colour"
                                         className="h-7 w-7 p-0 rounded flex items-center justify-center border border-gray-200"
                                       >
-                                        <Baseline
-                                          size={22}
-                                          className="text-gray-700"
-                                        />
+                                        <Baseline size={22} className="text-gray-700" />
                                       </Button>
                                     </motion.div>
                                   </PopoverTrigger>
-<PopoverContent
-  align="start"
-  sideOffset={8}
-  className="w-[230px] p-4 bg-zinc-800 border border-zinc-200 rounded-xl shadow-lg z-50 space-y-3"
->
-  <HexColorPicker color={color} onChange={setColor} className="rounded-md" />
+                                  <PopoverContent
+                                    align="start"
+                                    sideOffset={8}
+                                    className="w-[230px] p-4 bg-zinc-800 border border-zinc-200 rounded-xl shadow-lg z-50 space-y-3"
+                                  >
+                                    <HexColorPicker
+                                      color={color}
+                                      onChange={setColor}
+                                      className="rounded-md"
+                                    />
 
-  <div className="flex justify-between items-center text-xs text-white font-mono">
-    <span>HEX</span>
-    <span>{color.toUpperCase()}</span>
-  </div>
+                                    <div className="flex justify-between items-center text-xs text-white font-mono">
+                                      <span>HEX</span>
+                                      <span>{color.toUpperCase()}</span>
+                                    </div>
 
-  <div className="grid grid-cols-3 gap-2 text-xs text-zinc-300 font-mono">
-    {["R", "G", "B"].map((channel, i) => {
-      const rgb = parseInt(color.slice(1), 16);
-      const r = (rgb >> 16) & 255;
-      const g = (rgb >> 8) & 255;
-      const b = rgb & 255;
-      const values = [r, g, b];
-
-      return (
-        <div key={channel} className="flex flex-col items-center">
-          <label className="text-[10px]">{channel}</label>
-          <input
-            value={values[i]}
-            disabled
-            className="w-12 text-center py-1 border border-zinc-300 rounded bg-gray-200 text-zinc-800"
-          />
-        </div>
-      );
-    })}
-  </div>
-</PopoverContent>
+                                    <div className="grid grid-cols-3 gap-2 text-xs text-zinc-300 font-mono">
+                                      {["R", "G", "B"].map((channel, i) => {
+                                        const rgb = parseInt(color.slice(1), 16);
+                                        const r = (rgb >> 16) & 255;
+                                        const g = (rgb >> 8) & 255;
+                                        const b = rgb & 255;
+                                        const values = [r, g, b];
+                                        return (
+                                          <div key={channel} className="flex flex-col items-center">
+                                            <label className="text-[10px]">{channel}</label>
+                                            <input
+                                              value={values[i]}
+                                              disabled
+                                              className="w-12 text-center py-1 border border-zinc-300 rounded bg-gray-200 text-zinc-800"
+                                            />
+                                          </div>
+                                        );
+                                      })}
+                                    </div>
+                                  </PopoverContent>
                                 </Popover>
                               </motion.div>
                               <motion.div whileHover={{ scale: 1.05 }}>
@@ -310,6 +369,23 @@ export default function Notebook({
                               </motion.div>
                               <motion.div whileHover={{ scale: 1.05 }}>
                                 <InsertCodeBlock />
+                              </motion.div>
+                              <motion.div
+                                className={`${
+                                  isMobile
+                                    ? "w-full flex justify-center mt-1"
+                                    : "absolute right-5"
+                                } rounded`}
+                                whileHover={{ scale: 1.05 }}
+                              >
+                                <Button
+                                  type="button"
+                                  aria-label="export"
+                                  className="h-7 w-7 p-0 rounded flex cursor-pointer items-center justify-center border border-gray-200"
+                                  onClick={openDialog}
+                                >
+                                  <Save size={22} className="text-gray-200" />
+                                </Button>
                               </motion.div>
                             </DiffSourceToggleWrapper>
                           </motion.div>

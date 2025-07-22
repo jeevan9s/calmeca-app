@@ -4,7 +4,7 @@ import Sidebar from './Sidebar';
 import Titlebar from './Titlebar';
 import QuickNav from './QuickNav';
 import Alerts from './Alerts';
-import CalendarPopup from './CalendarPopup';
+
 
 type LayoutProps = {
   disableHoverZones?: boolean
@@ -13,9 +13,6 @@ type LayoutProps = {
 
 export default function Layout({disableHoverZones = false, children}: LayoutProps) {
   const [isLocked, setIsLocked] = useState(false);
-  const [calendarLocked, setCalendarLocked] = useState(false);
-  const [calendarHoveredMouse, setCalendarHoveredMouse] = useState(false);
-  const [calendarHoveredButton, setCalendarHoveredButton] = useState(false);
   const [isHoveredMouse, setIsHoveredMouse] = useState(false);
   const [isHoveredButton, setIsHoveredButton] = useState(false);
   const [isQuickNavOpen, setIsQuickNavOpen] = useState(false);
@@ -23,8 +20,7 @@ export default function Layout({disableHoverZones = false, children}: LayoutProp
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
   const isHovered = isHoveredButton || isHoveredMouse;
-  const isCalendarHovered = calendarHoveredButton || calendarHoveredMouse;
-  const isCalendarVisible = calendarLocked || isCalendarHovered;
+
 
 useEffect(() => {
   const handleHover = (e: MouseEvent) => {
@@ -35,20 +31,13 @@ useEffect(() => {
     const centerStart = window.innerWidth * 0.35;
     const centerEnd = window.innerWidth * 0.65;
 
-    if (!calendarLocked && y <= 25 && x >= centerStart && x <= centerEnd) {
-      setCalendarHoveredMouse(true);
+    if ( y <= 25 && x >= centerStart && x <= centerEnd) {
       setIsHoveredMouse(false); 
       return;
-    } else {
-      setCalendarHoveredMouse(false);
-    }
+    } 
 
     if (!isLocked && x <= 25) {
       setIsHoveredMouse(true);
-      if (windowWidth <= 600 && isCalendarVisible) {
-        setCalendarHoveredMouse(false);
-        setCalendarLocked(false);
-      }
     } else {
       setIsHoveredMouse(false);
     }
@@ -62,7 +51,7 @@ useEffect(() => {
     window.removeEventListener('mousemove', handleHover);
     window.removeEventListener('resize', handleResize);
   };
-}, [disableHoverZones, isLocked, calendarLocked, isHoveredMouse, windowWidth, isCalendarVisible]);
+}, [disableHoverZones, isLocked, isHoveredMouse, windowWidth]);
 
   const toggleQuickNav = () => {
     if (windowWidth <= 800 && isAlertsOpen) setIsAlertsOpen(false);
@@ -74,26 +63,23 @@ useEffect(() => {
     setIsAlertsOpen((prev) => !prev);
   };
 
-  const sidebarVisible = windowWidth <= 600 ? isHovered && !isCalendarVisible : isHovered;
-  const calendarVisible = (calendarLocked || isCalendarHovered) && !isAlertsOpen && !isQuickNavOpen && (windowWidth > 600 && !isHovered)
+  const sidebarVisible = windowWidth <= 600 ? isHovered  : isHovered;
   const isSidebarHovered = isHoveredButton || isHoveredMouse;
 
   return (
     <>
-      <Titlebar
-        isLocked={isLocked}
-        isHovered={isSidebarHovered}
-        setIsHovered={setIsHoveredButton}
-        setIsLocked={setIsLocked}
-        solidBackground={true}
-        ontoggleQuickNav={toggleQuickNav}
-        ontoggleAlerts={toggleAlerts}
-        isCalendarHovered={calendarHoveredButton}
-        isCalendarLocked={calendarLocked}
-        setIsCalendarHovered={setCalendarHoveredButton}
-        setIsCalendarLocked={setCalendarLocked}
-         disableHoverZones={disableHoverZones}
-      />
+<Titlebar
+  isLocked={isLocked}
+  isHovered={isSidebarHovered}
+  setIsHovered={setIsHoveredButton}
+  setIsLocked={setIsLocked}
+  solidBackground={true}
+  ontoggleQuickNav={toggleQuickNav}
+  ontoggleAlerts={toggleAlerts}
+  disableHoverZones={disableHoverZones}
+  isAlertsOpen={isAlertsOpen}
+  isQuickNavOpen={isQuickNavOpen}
+  />
 
       <Sidebar
         isLocked={isLocked}
@@ -120,20 +106,6 @@ useEffect(() => {
     </motion.div>
   )}
 </AnimatePresence>
-
-      <AnimatePresence>
-        {calendarVisible && (
-          <CalendarPopup
-            calendarLocked={calendarLocked}
-            calendarHovered={isCalendarHovered}
-            setCalendarLocked={setCalendarLocked}
-            setCalendarHovered={(hovering) => {
-              setCalendarHoveredMouse(hovering);
-              setCalendarHoveredButton(hovering);
-            }}
-          />
-        )}
-      </AnimatePresence>
     </>
   );
 }

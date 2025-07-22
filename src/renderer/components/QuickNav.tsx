@@ -2,8 +2,12 @@ import { useState, useEffect } from 'react'
 import { motion, easeInOut } from 'framer-motion'
 import  '@/renderer/styles/quicknav.css'
 
+type QuickNavProps = {
+  isQuickNavOpen: boolean;
+  setIsQuickNavOpen: React.Dispatch<React.SetStateAction<boolean>>;
+};
 
-export default function QuickNav() {
+export default function QuickNav({ isQuickNavOpen, setIsQuickNavOpen }: QuickNavProps) {
   const [windowWidth, setWindowWidth] = useState(window.innerWidth)
   const [windowHeight, setWindowHeight] = useState(window.innerHeight)
 

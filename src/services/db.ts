@@ -163,13 +163,17 @@ export interface importedFile {
 export type generationType = 'summary' | 'flashcards' | 'quiz'
 export type exportType = 'md' | 'pdf' | 'txt' | 'docx' | 'json';
 
-export type exportResponse = {
-  success: boolean
-  fileId?: string
-  name?: string
-  driveUrl?: string
-  error?: string
-}
+export type exportResponse =
+  | {
+      success: true;
+      fileId: string;
+      name: string;
+      driveUrl: string;
+    }
+  | {
+      success: false;
+      error: string;
+    }
 
 export type importResponse = {
   success: boolean
