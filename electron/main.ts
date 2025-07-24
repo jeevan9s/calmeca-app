@@ -51,7 +51,14 @@ function createWindow() {
       contextIsolation: true,
       nodeIntegration: false,
     },
+    
   })
+
+  win.on('resize', () => {
+  if (win && win.webContents) {
+    win.webContents.send(win.isMaximized() ? 'maximized' : 'not-maximized')
+  }
+})
 
   if (setVibrancy && win) {
     try {
@@ -128,8 +135,17 @@ ipcMain.on('maximize', () => {
 })
 
 ipcMain.on('restore', () => {
-  if (win) win.restore()
+  if (!win) return
+
+  if (win.isMinimized()) {
+    win.restore()
+  } else if (win.isMaximized()) {
+    win.unmaximize()
+  } else {
+    win.focus()
+  }
 })
+
 
 ipcMain.on('close', () => {
   if (win) win.close()
