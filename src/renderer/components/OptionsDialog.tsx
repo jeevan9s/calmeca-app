@@ -76,7 +76,8 @@ export default function FilterModal({
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-md transform rounded-xl bg-white/5 backdrop-blur-2xl border border-white/10 p-6 text-left shadow-lg transition-all">
+              <Dialog.Panel className="w-full max-w-md transform rounded-xl bg-neutral-900 p-6 text-left shadow-lg transition-all">
+
                 <Dialog.Title className="text-lg font-raleway font-semibold text-white mb-4">
                   filter & sort
                 </Dialog.Title>

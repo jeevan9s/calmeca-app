@@ -49,25 +49,24 @@ export default function CourseCard({ course, isSelected, onSelect, onDelete, onA
   }
 
   return (
-    <>
-      <motion.div
-        layout
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="cursor-pointer"
-        transition={{ duration: 0.2, ease: "easeInOut" }}
-        whileHover={{
-          scale: 1.03,
-          transition: { duration: 0.15, ease: "easeInOut" }
-        }}
-        whileTap={{ scale: 0.98, transition: { duration: 0.1, ease: "easeInOut" } }}
-          onClick={() => {
-    onSelect(course);
-    setIsModalOpen(true); 
-    
-  }}
-        
-         >
+  <>
+    <motion.div
+      layout
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="cursor-pointer"
+      transition={{ duration: 0.2, ease: "easeInOut" }}
+      whileHover={{
+        scale: 1.03,
+        transition: { duration: 0.15, ease: "easeInOut" }
+      }}
+      whileTap={{ scale: 0.98, transition: { duration: 0.1, ease: "easeInOut" } }}
+      onClick={() => {
+        onSelect(course);
+        setIsModalOpen(true); 
+      }}
+    >
+      <Card className="relative bg-zinc-900 border-gray-700 rounded-lg overflow-hidden">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
@@ -118,68 +117,66 @@ export default function CourseCard({ course, isSelected, onSelect, onDelete, onA
           </DropdownMenuContent>
         </DropdownMenu>
 
-        <Card className="bg-zinc-900 border-gray-700 rounded-lg overflow-hidden">
-          <div className="h-1 w-full" style={{ backgroundColor: course.color }} />
-          <div className="p-5">
-            <h3 className="font-semibold font-mp text-gray-100">{course.name}</h3>
-            <p className="text-sm font-dm text-gray-400">{course.courseId}</p>
-            <p className="text-xs mt-2 font-raleway text-gray-500">{course.type}</p>
-          </div>
-        </Card>
-      </motion.div>
+        <div className="h-1 w-full" style={{ backgroundColor: course.color }} />
+        <div className="p-5">
+          <h3 className="font-semibold font-raleway text-gray-100">{course.name}</h3>
+          <p className="text-sm font-mp text-gray-400">{course.courseId}</p>
+          <p className="text-xs mt-2 font-raleway text-gray-500">{course.type}</p>
+        </div>
+      </Card>
+    </motion.div>
 
-      <CourseFormModal
-        open={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSave={() => setIsModalOpen(false)}
-        initialData={course}
-      />
+    <CourseFormModal
+      open={isModalOpen}
+      onClose={() => setIsModalOpen(false)}
+      onSave={() => setIsModalOpen(false)}
+      initialData={course}
+    />
 
+    <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+      <AlertDialogContent className="bg-zinc-900 border-zinc-700 text-white">
+        <AlertDialogHeader>
+          <AlertDialogTitle className="font-raleway">delete course?</AlertDialogTitle>
+          <AlertDialogDescription className="text-zinc-300 font-raleway">
+            Are you sure you want to delete "{course.name}"? This action cannot be undone.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel className="bg-zinc-800 border-zinc-700 hover:bg-zinc-700">
+            cancel
+          </AlertDialogCancel>
+          <AlertDialogAction
+            onClick={handleDelete}
+            className="bg-red-500 hover:bg-red-600"
+          >
+            delete
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
 
-      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <AlertDialogContent className="bg-zinc-900 border-zinc-700 text-white">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="font-raleway">delete course?</AlertDialogTitle>
-            <AlertDialogDescription className="text-zinc-300 font-raleway">
-              Are you sure you want to delete "{course.name}"? This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="bg-zinc-800 border-zinc-700 hover:bg-zinc-700">
-              cancel
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDelete}
-              className="bg-red-500 hover:bg-red-600"
-            >
-              delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+    <AlertDialog open={isArchiveDialogOpen} onOpenChange={setIsArchiveDialogOpen}>
+      <AlertDialogContent className="bg-zinc-900 border-zinc-700 text-white">
+        <AlertDialogHeader>
+          <AlertDialogTitle className="font-raleway">archive?</AlertDialogTitle>
+          <AlertDialogDescription className="text-zinc-300">
+            archive "{course.name}"? you can restore it later from the course archive.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel className="bg-zinc-800 border-zinc-700 hover:bg-zinc-700">
+            cancel
+          </AlertDialogCancel>
+          <AlertDialogAction
+            onClick={handleArchive}
+            className="bg-yellow-500 hover:bg-yellow-600"
+          >
+            archive
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  </>
+)
 
-      
-      <AlertDialog open={isArchiveDialogOpen} onOpenChange={setIsArchiveDialogOpen}>
-        <AlertDialogContent className="bg-zinc-900 border-zinc-700 text-white">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="font-raleway">archive?</AlertDialogTitle>
-            <AlertDialogDescription className="text-zinc-300">
-              archive "{course.name}"? you can restore it later from the course archive.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="bg-zinc-800 border-zinc-700 hover:bg-zinc-700">
-              cancel
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleArchive}
-              className="bg-yellow-500 hover:bg-yellow-600"
-            >
-              archive
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </>
-  )
 }

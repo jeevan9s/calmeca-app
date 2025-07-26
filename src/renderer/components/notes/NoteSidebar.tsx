@@ -133,7 +133,7 @@ export default function NoteSidebar() {
 
       {isOpen ? (
         <motion.div
-          className="relative min-h-screen bg-black/40 flex flex-col"
+          className="relative min-h-screen bg-black/40 border-1 border-gray-700 flex flex-col"
           animate={{ width }}
           initial={false}
           transition={{ type: "spring", stiffness: 200, damping: 30 }}

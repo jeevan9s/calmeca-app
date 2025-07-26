@@ -36,3 +36,39 @@
 .markdown-editor.border {
   border-radius: 0.375rem;
 }
+
+/* Remove tooltips from MDX editor components */
+[data-tooltip],
+[title],
+.mdxeditor-toolbar button[title],
+.mdxeditor-toolbar [data-tooltip],
+.mdxeditor button[title],
+.mdxeditor [data-tooltip] {
+  pointer-events: auto !important;
+}
+
+[data-tooltip]:hover::after,
+[data-tooltip]:hover::before,
+[title]:hover::after,
+[title]:hover::before {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+}
+
+/* Hide any tooltip containers */
+.tooltip,
+[role="tooltip"],
+.mdxeditor-tooltip {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+}
+
+/* Remove title attributes that show native browser tooltips */
+.mdxeditor-toolbar button,
+.mdxeditor button,
+.mdxeditor select {
+  pointer-events: auto;
+}
+

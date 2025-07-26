@@ -30,7 +30,6 @@ export function AddNewCourseCard({}: AddNewCourseCardProps) {
         open={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSave={(data: Partial<Course>) => {
-          // handle saving course here or lift state up
           setIsModalOpen(false)
         }}
       />
