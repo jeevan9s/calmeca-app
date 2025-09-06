@@ -1,81 +1,86 @@
-import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron'
-import { exportType, exportResponse, importResponse, AIContentRequest } from '@/services/db'
+import { contextBridge, ipcRenderer, IpcRendererEvent } from "electron";
 
-const maximizedListeners = new Map<() => void, (event: IpcRendererEvent) => void>()
-const notMaximizedListeners = new Map<() => void, (event: IpcRendererEvent) => void>()
-const loginSuccessListeners = new Map<(event: IpcRendererEvent, data: any) => void, (event: IpcRendererEvent, data: any) => void>()
+const maximizedListeners = new Map<
+  () => void,
+  (event: IpcRendererEvent) => void
+>();
+const notMaximizedListeners = new Map<
+  () => void,
+  (event: IpcRendererEvent) => void
+>();
+const loginSuccessListeners = new Map<
+  (event: IpcRendererEvent, data: any) => void,
+  (event: IpcRendererEvent, data: any) => void
+>();
 
-contextBridge.exposeInMainWorld('electronAPI', {
-  minimize: () => ipcRenderer.send('minimize'),
-  maximize: () => ipcRenderer.send('maximize'),
-  restore: () => ipcRenderer.send('restore'),
-  close: () => ipcRenderer.send('close'),
-  googleLogin: async () => ipcRenderer.invoke('google-login'),
-  googleLogout: async () => ipcRenderer.invoke('google-logout'),
+contextBridge.exposeInMainWorld("electronAPI", {
+  minimize: () => ipcRenderer.send("minimize"),
+  maximize: () => ipcRenderer.send("maximize"),
+  restore: () => ipcRenderer.send("restore"),
+  close: () => ipcRenderer.send("close"),
+  googleLogin: async () => ipcRenderer.invoke("google-login"),
+  googleLogout: async () => ipcRenderer.invoke("google-logout"),
+  startMicrosoftLogin: () => ipcRenderer.invoke("start-microsoft-login"),
+  microsoftLogout: () => ipcRenderer.invoke("microsoft-logout"),
 
-  gTextExport: (content: string, filename: string, type: exportType): Promise<exportResponse> =>
-    ipcRenderer.invoke('drive-export-text', { content, filename, type }),
+  startLoginRedirect: async () => ipcRenderer.invoke("start-google-login"),
 
-  gImportFile: (fileId: string): Promise<importResponse> =>
-    ipcRenderer.invoke('drive-import-file', fileId),
-
-  openGooglePicker: async (): Promise<string> =>
-    ipcRenderer.invoke('open-google-picker'),
-
-  sendFileId: (fileId: string) =>
-    ipcRenderer.send('google-picker-file-id', fileId),
-
-  startLoginRedirect: async () =>
-    ipcRenderer.invoke('start-google-login'),
+  fetchGoogleCalendarEvents: () =>
+    ipcRenderer.invoke("fetch-google-calendar-events"),
+  addGoogleCalendarEvent: (summary: string, start: string) =>
+    ipcRenderer.invoke("add-google-calendar-event", { summary, start }),
 
   onMaximized: (callback: () => void) => {
-    const wrapped = (_event: IpcRendererEvent) => callback()
-    maximizedListeners.set(callback, wrapped)
-    ipcRenderer.on('maximized', wrapped)
+    const wrapped = (_event: IpcRendererEvent) => callback();
+    maximizedListeners.set(callback, wrapped);
+    ipcRenderer.on("maximized", wrapped);
   },
 
   offMaximized: (callback: () => void) => {
-    const wrapped = maximizedListeners.get(callback)
+    const wrapped = maximizedListeners.get(callback);
     if (wrapped) {
-      ipcRenderer.removeListener('maximized', wrapped)
-      maximizedListeners.delete(callback)
+      ipcRenderer.removeListener("maximized", wrapped);
+      maximizedListeners.delete(callback);
     }
   },
 
   onNotMaximized: (callback: () => void) => {
-    const wrapped = (_event: IpcRendererEvent) => callback()
-    notMaximizedListeners.set(callback, wrapped)
-    ipcRenderer.on('not-maximized', wrapped)
+    const wrapped = (_event: IpcRendererEvent) => callback();
+    notMaximizedListeners.set(callback, wrapped);
+    ipcRenderer.on("not-maximized", wrapped);
   },
 
   offNotMaximized: (callback: () => void) => {
-    const wrapped = notMaximizedListeners.get(callback)
+    const wrapped = notMaximizedListeners.get(callback);
     if (wrapped) {
-      ipcRenderer.removeListener('not-maximized', wrapped)
-      notMaximizedListeners.delete(callback)
+      ipcRenderer.removeListener("not-maximized", wrapped);
+      notMaximizedListeners.delete(callback);
     }
   },
 
   onLoginSuccess: (callback: (event: IpcRendererEvent, data: any) => void) => {
-    loginSuccessListeners.set(callback, callback)
-    ipcRenderer.on('google-login-success', callback)
+    loginSuccessListeners.set(callback, callback);
+    ipcRenderer.on("google-login-success", callback);
   },
 
-  removeLoginSuccessListener: (callback: (event: IpcRendererEvent, data: any) => void) => {
-    const wrapped = loginSuccessListeners.get(callback)
+  removeLoginSuccessListener: (
+    callback: (event: IpcRendererEvent, data: any) => void
+  ) => {
+    const wrapped = loginSuccessListeners.get(callback);
     if (wrapped) {
-      ipcRenderer.removeListener('google-login-success', wrapped)
-      loginSuccessListeners.delete(callback)
+      ipcRenderer.removeListener("google-login-success", wrapped);
+      loginSuccessListeners.delete(callback);
     }
   },
 
-    generateAIContent: async (args: AIContentRequest) => {
-    return await ipcRenderer.invoke('generate-ai-content', args);
+  onMicrosoftLoginSuccess: (
+    callback: (event: IpcRendererEvent, data: any) => void
+  ) => {
+    ipcRenderer.on("microsoft-login-success", callback);
   },
-})
-
-const pickerArgs = process.argv.reduce<Record<string, string>>((acc, arg) => {
-  const match = arg.match(/^--([^=]+)=(.*)$/)
-  if (match) acc[match[1]] = match[2]
-  return acc
-}, {})
+  removeMicrosoftLoginSuccessListener: (
+    callback: (event: IpcRendererEvent, data: any) => void
+  ) => {
+    ipcRenderer.removeListener("microsoft-login-success", callback);
+  },
+});

@@ -1,10 +1,10 @@
 // Microsoft Service File
 import { Client } from "@microsoft/microsoft-graph-client";
-import { getMicrosoftAuthClient } from "./microsoftAuth";
+import { getMicrosoftGraphClient } from "./microsoftAuth";
 import { MicrosoftFile } from "../../db";
 
 export async function listOneDriveFiles(folderId?: string): Promise<MicrosoftFile[]> {
-    const client: Client = getMicrosoftAuthClient();
+    const client: Client = await getMicrosoftGraphClient();
 
     const endpoint = folderId
         ? `/me/drive/items/${folderId}/children`
@@ -24,7 +24,7 @@ export async function listOneDriveFiles(folderId?: string): Promise<MicrosoftFil
 }
 
 export async function getUpcomingCalendarEvents(): Promise<any[]> {
-    const client: Client = getMicrosoftAuthClient();
+    const client: Client = await getMicrosoftGraphClient();
 
     const now = new Date().toISOString();
     const res = await client
@@ -45,7 +45,7 @@ export async function getUpcomingCalendarEvents(): Promise<any[]> {
 }
 
 export async function getTodayCalendarEvents(): Promise<any[]> {
-    const client: Client = getMicrosoftAuthClient();
+    const client: Client = await getMicrosoftGraphClient();
 
     const start = new Date();
     start.setHours(0,0,0,0);

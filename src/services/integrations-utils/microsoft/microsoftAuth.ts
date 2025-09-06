@@ -1,4 +1,5 @@
 import { PublicClientApplication, Configuration, AuthorizationUrlRequest, AuthenticationResult } from "@azure/msal-node";
+import { Client } from "@microsoft/microsoft-graph-client";
 import dotenv from "dotenv";
 import fs from "fs";
 import path from "path";
@@ -58,12 +59,16 @@ export function clearSavedTokens() {
     if (fs.existsSync(file)) fs.unlinkSync(file);
 }
 
-export async function getAuthClient(): Promise<PublicClientApplication> {
-    const saved = loadSavedTokens();
-    if (saved && saved.accessToken) {
-        return pca;
+export function getMicrosoftGraphClient(): Client {
+    const tokens = loadSavedTokens();
+    if (!tokens || !tokens.accessToken) {
+        throw new Error("No valid Microsoft access token found.");
     }
-    throw new Error("No valid session, please login.");
+    return Client.init({
+        authProvider: (done) => {
+            done(null, tokens.accessToken);
+        }
+    });
 }
 
 export async function getAuthUrl(): Promise<string> {

@@ -10,11 +10,11 @@ electron.contextBridge.exposeInMainWorld("electronAPI", {
   close: () => electron.ipcRenderer.send("close"),
   googleLogin: async () => electron.ipcRenderer.invoke("google-login"),
   googleLogout: async () => electron.ipcRenderer.invoke("google-logout"),
-  gTextExport: (content, filename, type) => electron.ipcRenderer.invoke("drive-export-text", { content, filename, type }),
-  gImportFile: (fileId) => electron.ipcRenderer.invoke("drive-import-file", fileId),
-  openGooglePicker: async () => electron.ipcRenderer.invoke("open-google-picker"),
-  sendFileId: (fileId) => electron.ipcRenderer.send("google-picker-file-id", fileId),
+  startMicrosoftLogin: () => electron.ipcRenderer.invoke("start-microsoft-login"),
+  microsoftLogout: () => electron.ipcRenderer.invoke("microsoft-logout"),
   startLoginRedirect: async () => electron.ipcRenderer.invoke("start-google-login"),
+  fetchGoogleCalendarEvents: () => electron.ipcRenderer.invoke("fetch-google-calendar-events"),
+  addGoogleCalendarEvent: (summary, start) => electron.ipcRenderer.invoke("add-google-calendar-event", { summary, start }),
   onMaximized: (callback) => {
     const wrapped = (_event) => callback();
     maximizedListeners.set(callback, wrapped);
@@ -50,12 +50,10 @@ electron.contextBridge.exposeInMainWorld("electronAPI", {
       loginSuccessListeners.delete(callback);
     }
   },
-  generateAIContent: async (args) => {
-    return await electron.ipcRenderer.invoke("generate-ai-content", args);
+  onMicrosoftLoginSuccess: (callback) => {
+    electron.ipcRenderer.on("microsoft-login-success", callback);
+  },
+  removeMicrosoftLoginSuccessListener: (callback) => {
+    electron.ipcRenderer.removeListener("microsoft-login-success", callback);
   }
 });
-process.argv.reduce((acc, arg) => {
-  const match = arg.match(/^--([^=]+)=(.*)$/);
-  if (match) acc[match[1]] = match[2];
-  return acc;
-}, {});
