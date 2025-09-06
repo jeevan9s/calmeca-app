@@ -9,6 +9,7 @@ export default function Dashboard() {
   return (
     <div id="dashboard-page" className="min-h-screen bg-black/30">
       <Layout />
+      <h1> yo</h1>
     </div>
   )
 }
