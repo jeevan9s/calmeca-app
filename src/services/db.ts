@@ -34,6 +34,14 @@ export interface CalendarEvent {
     color: string;
 }
 
+export interface MicrosoftFile {
+  id: string;
+  name: string;
+  mimeType: string;
+  size: number;
+  createdOn: Date;
+  lastModified: Date;
+}
 
 
 // class declartin & dexie 
@@ -42,13 +50,15 @@ export class CalmecaDB extends Dexie {
     courses!: Table<Course, string>;
     tasks!: Table<Task, string>;
     calendarEvents!: Table<CalendarEvent, string>;
+    microsoftFiles!: Table<MicrosoftFile, string>
 
     constructor() {
         super('CalmecaDB');
         this.version(1).stores({
             courses: 'id, name, type, color, archived, updatedOn, updatedFrom, endsOn',
             tasks: 'id, title, courseId, type, deadline, completed, color',
-            calendarEvents: 'id, title, date, source, sourceId, color'
+            calendarEvents: 'id, title, date, source, sourceId, color',
+            microsoftFiles: 'id, name, mimeType, size, createdOn, lastModified'
         });
     }
 }

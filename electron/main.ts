@@ -10,10 +10,8 @@ import {
   initializeTokenPath,
   getTokenPath,
 } from '../src/services/integrations-utils/google/googleAuth'
-import { exportTextFeatureGDrive, importDriveFile } from '@/services/integrations-utils/google/googleService'
-import { AIContentRequest, exportType, exportResponse } from '@/services/db'
 import { parseArgs } from 'util'
-import { generateFromDrive } from '@/services/integrations-utils/cloudGen'
+
 
 const require = createRequire(import.meta.url)
 const __filename = fileURLToPath(import.meta.url)
@@ -178,7 +176,7 @@ ipcMain.handle('start-google-login', async () => {
 
       authWindow.on('closed', () => {
         authWindow = null
-        reject(new Error('User closed the login window'))
+        reject(new Error('login window closed'))
       })
 
       const clientId = process.env.G_CLIENT_ID
@@ -186,7 +184,7 @@ ipcMain.handle('start-google-login', async () => {
       const redirectUri = process.env.G_REDIRECT_URI
 
       if (!clientId || !clientSecret || !redirectUri) {
-        reject(new Error('Missing OAuth configuration'))
+        reject(new Error('missing OAuth configuration'))
         authWindow?.close()
         return
       }
@@ -208,14 +206,14 @@ ipcMain.handle('start-google-login', async () => {
         }
 
         if (!code) {
-          reject(new Error('No code found in redirect URL'))
+          reject(new Error('no code found in redirect URL'))
           authWindow?.close()
           return
         }
 
-        console.log('Exchanging token with code:', code)
-        console.log('Client ID:', clientId)
-        console.log('Redirect URI:', redirectUri)
+        // console.log('exchanging token with code:', code)
+        // console.log('Client ID:', clientId)
+        // console.log('Redirect URI:', redirectUri)
 
         try {
           const { tokens } = await oauth2Client.getToken({
@@ -233,7 +231,6 @@ ipcMain.handle('start-google-login', async () => {
           const oauth2 = google.oauth2({version: 'v2', auth: oauth2Client})
           const {data} = await oauth2.userinfo.get()
 
-          // Emit login success event to renderer
           if (win) {
             win.webContents.send('google-login-success', {
               user: {
@@ -292,105 +289,4 @@ ipcMain.handle('google-logout', async () => {
 })
 
 
-// GOOGLE IMPORT/EXPORT HANDLERS
-ipcMain.handle(
-  'drive-export-text',
-  async (
-    _event,
-    args: { content: string; filename: string; type: exportType }
-  ): Promise<exportResponse> => {
-    try {
-      const { content, filename, type } = args;
-      const res = await exportTextFeatureGDrive(content, filename, type);
-      console.log('file exported: ', filename);
-      return {
-        success: true,
-        fileId: res.fileId,
-        name: res.name,
-        driveUrl: res.driveUrl,
-      };
-    } catch (error) {
-      console.error('Export error:', error);
-      return { success: false, error: (error as Error).message };
-    }
-  }
-);
 
-ipcMain.handle('drive-import-file', async (_event, fileId: string) => {
-  try {
-    const res = await importDriveFile(fileId)
-
-    console.log("Imported file:", res.name) 
-    return {
-      success: true,
-      name: res.name,
-      content: res.content,
-    }
-  } catch (error) {
-    console.log("Import error: ", error)
-    return { success: false, error: (error as Error).message }
-  }
-})
-
-// drive picka
-ipcMain.handle('open-google-picker', async () => {
-  const apiKey = process.env.G_API_KEY ?? ''
-  const token = (await getAuthClient())?.credentials.access_token ?? ''
-  // console.log('Google Picker API Key:', apiKey);
-  // console.log('Google Picker OAuth Token:', token);
-
-  const pickerWindow = new BrowserWindow({
-    width: 600,
-    height: 600,
-    modal: true,
-    backgroundColor: '#121212',
-    parent: BrowserWindow.getFocusedWindow() ?? undefined,
-    show: false,
-    autoHideMenuBar: true,
-    icon: path.join(__dirname, '..', 'assets', 'taskbar.png'),
-    webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
-      contextIsolation: true,
-      nodeIntegration: false,
-      webSecurity: false,
-    },
-  })
-
-
-await pickerWindow.loadURL('http://localhost:3000/picker.html')
-
-
-  await pickerWindow.webContents.executeJavaScript(`
-    window.pickerConfig = {
-      apiKey: ${JSON.stringify(apiKey)},
-      token: ${JSON.stringify(token)}
-    };
-  `)
-
-  pickerWindow.show()
-
-  return new Promise((resolve, reject) => {
-    const handleMessage = (_event: any, fileId: string) => {
-      resolve(fileId)
-      pickerWindow.close()
-    }
-
-    ipcMain.once('google-picker-file-id', handleMessage)
-
-    pickerWindow.on('closed', () => {
-      ipcMain.removeListener('google-picker-file-id', handleMessage)
-      reject(new Error('Picker window closed without selection'))
-    })
-  })
-})
-
-// ai generated content handler 
-ipcMain.handle('generate-ai-content', async (_event, args: AIContentRequest) => {
-  const { type, content, options } = args;
-  try {
-    const result = await generateFromDrive(type, content, options);
-    return { success: true, result };
-  } catch (error) {
-    return { success: false, error: (error as Error).message };
-  }
-});

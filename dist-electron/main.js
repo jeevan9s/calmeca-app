@@ -4,7 +4,7 @@ import path from "path";
 import require$$1$1 from "tty";
 import require$$1$2 from "util";
 import require$$0$4 from "os";
-import require$$0$5, { Buffer as Buffer$1 } from "buffer";
+import require$$0$5 from "buffer";
 import require$$1$3 from "string_decoder";
 import require$$4$1 from "node:zlib";
 import require$$1$5 from "node:events";
@@ -15,14 +15,10 @@ import require$$0$7 from "crypto";
 import fs from "fs";
 import require$$6$1 from "querystring";
 import require$$1$4 from "node:net";
-import stream from "stream";
+import require$$13 from "stream";
 import { createRequire } from "module";
 import { google } from "googleapis";
 import dotenv from "dotenv";
-import mammoth from "mammoth";
-import { PDFDocument, StandardFonts } from "pdf-lib";
-import { Document, Paragraph, TextRun, Packer } from "docx";
-import OpenAI from "openai";
 var commonjsGlobal = typeof globalThis !== "undefined" ? globalThis : typeof window !== "undefined" ? window : typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : {};
 function getDefaultExportFromCjs(x) {
   return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, "default") ? x["default"] : x;
@@ -1314,8 +1310,8 @@ function requireSupportsColor() {
     }
     return min2;
   }
-  function getSupportLevel(stream2) {
-    const level = supportsColor(stream2, stream2 && stream2.isTTY);
+  function getSupportLevel(stream) {
+    const level = supportsColor(stream, stream && stream.isTTY);
     return translateLevel(level);
   }
   supportsColor_1 = {
@@ -5485,8 +5481,8 @@ function requireUnpipe() {
   if (hasRequiredUnpipe) return unpipe_1;
   hasRequiredUnpipe = 1;
   unpipe_1 = unpipe;
-  function hasPipeDataListeners(stream2) {
-    var listeners = stream2.listeners("data");
+  function hasPipeDataListeners(stream) {
+    var listeners = stream.listeners("data");
     for (var i = 0; i < listeners.length; i++) {
       if (listeners[i].name === "ondata") {
         return true;
@@ -5494,25 +5490,25 @@ function requireUnpipe() {
     }
     return false;
   }
-  function unpipe(stream2) {
-    if (!stream2) {
+  function unpipe(stream) {
+    if (!stream) {
       throw new TypeError("argument stream is required");
     }
-    if (typeof stream2.unpipe === "function") {
-      stream2.unpipe();
+    if (typeof stream.unpipe === "function") {
+      stream.unpipe();
       return;
     }
-    if (!hasPipeDataListeners(stream2)) {
+    if (!hasPipeDataListeners(stream)) {
       return;
     }
     var listener;
-    var listeners = stream2.listeners("close");
+    var listeners = stream.listeners("close");
     for (var i = 0; i < listeners.length; i++) {
       listener = listeners[i];
       if (listener.name !== "cleanup" && listener.name !== "onclose") {
         continue;
       }
-      listener.call(stream2);
+      listener.call(stream);
     }
   }
   return unpipe_1;
@@ -5547,12 +5543,12 @@ function requireRawBody() {
       });
     }
   }
-  function getRawBody(stream2, options, callback) {
+  function getRawBody(stream, options, callback) {
     var done = callback;
     var opts = options || {};
-    if (stream2 === void 0) {
+    if (stream === void 0) {
       throw new TypeError("argument stream is required");
-    } else if (typeof stream2 !== "object" || stream2 === null || typeof stream2.on !== "function") {
+    } else if (typeof stream !== "object" || stream === null || typeof stream.on !== "function") {
       throw new TypeError("argument stream must be a stream");
     }
     if (options === true || typeof options === "string") {
@@ -5574,22 +5570,22 @@ function requireRawBody() {
     var limit = bytes2.parse(opts.limit);
     var length = opts.length != null && !isNaN(opts.length) ? parseInt(opts.length, 10) : null;
     if (done) {
-      return readStream(stream2, encoding2, length, limit, wrap(done));
+      return readStream(stream, encoding2, length, limit, wrap(done));
     }
     return new Promise(function executor(resolve, reject) {
-      readStream(stream2, encoding2, length, limit, function onRead(err, buf) {
+      readStream(stream, encoding2, length, limit, function onRead(err, buf) {
         if (err) return reject(err);
         resolve(buf);
       });
     });
   }
-  function halt(stream2) {
-    unpipe(stream2);
-    if (typeof stream2.pause === "function") {
-      stream2.pause();
+  function halt(stream) {
+    unpipe(stream);
+    if (typeof stream.pause === "function") {
+      stream.pause();
     }
   }
-  function readStream(stream2, encoding2, length, limit, callback) {
+  function readStream(stream, encoding2, length, limit, callback) {
     var complete = false;
     var sync = true;
     if (limit !== null && length !== null && length > limit) {
@@ -5600,13 +5596,13 @@ function requireRawBody() {
         type: "entity.too.large"
       }));
     }
-    var state = stream2._readableState;
-    if (stream2._decoder || state && (state.encoding || state.decoder)) {
+    var state = stream._readableState;
+    if (stream._decoder || state && (state.encoding || state.decoder)) {
       return done(createError(500, "stream encoding should not be set", {
         type: "stream.encoding.set"
       }));
     }
-    if (typeof stream2.readable !== "undefined" && !stream2.readable) {
+    if (typeof stream.readable !== "undefined" && !stream.readable) {
       return done(createError(500, "stream is not readable", {
         type: "stream.not.readable"
       }));
@@ -5619,11 +5615,11 @@ function requireRawBody() {
       return done(err);
     }
     var buffer = decoder ? "" : [];
-    stream2.on("aborted", onAborted);
-    stream2.on("close", cleanup);
-    stream2.on("data", onData);
-    stream2.on("end", onEnd);
-    stream2.on("error", onEnd);
+    stream.on("aborted", onAborted);
+    stream.on("close", cleanup);
+    stream.on("data", onData);
+    stream.on("end", onEnd);
+    stream.on("error", onEnd);
     sync = false;
     function done() {
       var args = new Array(arguments.length);
@@ -5639,7 +5635,7 @@ function requireRawBody() {
       function invokeCallback() {
         cleanup();
         if (args[0]) {
-          halt(stream2);
+          halt(stream);
         }
         callback.apply(null, args);
       }
@@ -5686,11 +5682,11 @@ function requireRawBody() {
     }
     function cleanup() {
       buffer = null;
-      stream2.removeListener("aborted", onAborted);
-      stream2.removeListener("data", onData);
-      stream2.removeListener("end", onEnd);
-      stream2.removeListener("error", onEnd);
-      stream2.removeListener("close", cleanup);
+      stream.removeListener("aborted", onAborted);
+      stream.removeListener("data", onData);
+      stream.removeListener("end", onEnd);
+      stream.removeListener("error", onEnd);
+      stream.removeListener("close", cleanup);
     }
   }
   function tryRequireAsyncHooks() {
@@ -5731,13 +5727,13 @@ function requireRead() {
   function read(req, res, next, parse2, debug, options) {
     var length;
     var opts = options;
-    var stream2;
+    var stream;
     var encoding2 = opts.encoding !== null ? opts.encoding : null;
     var verify = opts.verify;
     try {
-      stream2 = contentstream(req, debug, opts.inflate);
-      length = stream2.length;
-      stream2.length = void 0;
+      stream = contentstream(req, debug, opts.inflate);
+      length = stream.length;
+      stream.length = void 0;
     } catch (err) {
       return next(err);
     }
@@ -5750,7 +5746,7 @@ function requireRead() {
       }));
     }
     debug("read body");
-    getBody(stream2, opts, function(error, body) {
+    getBody(stream, opts, function(error, body) {
       if (error) {
         var _error;
         if (error.type === "encoding.unsupported") {
@@ -5761,9 +5757,9 @@ function requireRead() {
         } else {
           _error = createError(400, error);
         }
-        if (stream2 !== req) {
+        if (stream !== req) {
           req.unpipe();
-          stream2.destroy();
+          stream.destroy();
         }
         dump(req, function onfinished() {
           next(createError(400, _error));
@@ -5811,9 +5807,9 @@ function requireRead() {
       req.length = length;
       return req;
     }
-    var stream2 = createDecompressionStream(encoding2, debug);
-    req.pipe(stream2);
-    return stream2;
+    var stream = createDecompressionStream(encoding2, debug);
+    req.pipe(stream);
+    return stream;
   }
   function createDecompressionStream(encoding2, debug) {
     switch (encoding2) {
@@ -16486,7 +16482,7 @@ function requireSend() {
   var parseRange = requireRangeParser();
   var path$1 = path;
   var statuses2 = requireStatuses();
-  var Stream = stream;
+  var Stream = require$$13;
   var util = require$$1$2;
   var extname = path$1.extname;
   var join = path$1.join;
@@ -16805,21 +16801,21 @@ function requireSend() {
     }
     next();
   };
-  SendStream.prototype.stream = function stream2(path2, options) {
+  SendStream.prototype.stream = function stream(path2, options) {
     var self2 = this;
     var res = this.res;
-    var stream3 = fs$1.createReadStream(path2, options);
-    this.emit("stream", stream3);
-    stream3.pipe(res);
+    var stream2 = fs$1.createReadStream(path2, options);
+    this.emit("stream", stream2);
+    stream2.pipe(res);
     function cleanup() {
-      stream3.destroy();
+      stream2.destroy();
     }
     onFinished2(res, cleanup);
-    stream3.on("error", function onerror(err) {
+    stream2.on("error", function onerror(err) {
       cleanup();
       self2.onStatError(err);
     });
-    stream3.on("end", function onend() {
+    stream2.on("end", function onend() {
       self2.emit("end");
     });
   };
@@ -17547,24 +17543,24 @@ function requireServeStatic() {
       if (path2 === "/" && originalUrl.pathname.substr(-1) !== "/") {
         path2 = "";
       }
-      var stream2 = send(req, path2, opts);
-      stream2.on("directory", onDirectory);
+      var stream = send(req, path2, opts);
+      stream.on("directory", onDirectory);
       if (setHeaders) {
-        stream2.on("headers", setHeaders);
+        stream.on("headers", setHeaders);
       }
       if (fallthrough) {
-        stream2.on("file", function onFile() {
+        stream.on("file", function onFile() {
           forwardError = true;
         });
       }
-      stream2.on("error", function error(err) {
+      stream.on("error", function error(err) {
         if (forwardError || !(err.statusCode < 500)) {
           next(err);
           return;
         }
         next();
       });
-      stream2.pipe(res);
+      stream.pipe(res);
     };
   }
   function collapseLeadingSlashes(str) {
@@ -17703,43 +17699,6 @@ function getTokenPath() {
   }
   return tokenPath;
 }
-function loadSavedTokens() {
-  try {
-    const token_path = getTokenPath();
-    if (fs.existsSync(token_path)) {
-      const tokenData = fs.readFileSync(token_path, "utf-8");
-      if (!tokenData.trim()) return null;
-      return JSON.parse(tokenData);
-    }
-    return null;
-  } catch {
-    return null;
-  }
-}
-async function getAuthClient() {
-  if (!client_secret) {
-    throw new Error("Missing G_CLIENT_SECRET in environment variables");
-  }
-  const oauth2Client = new google.auth.OAuth2({
-    clientId: client_id,
-    clientSecret: client_secret,
-    redirectUri: redirect_uri
-  });
-  const savedTokens = loadSavedTokens();
-  if (savedTokens) {
-    oauth2Client.setCredentials(savedTokens);
-    try {
-      await oauth2Client.getAccessToken();
-      return oauth2Client;
-    } catch {
-      try {
-        clearSavedTokens();
-      } catch {
-      }
-    }
-  }
-  throw new Error("No valid login session, please authenticate.");
-}
 async function authenticateWithGoogle() {
   if (!client_secret) {
     throw new Error("Missing G_CLIENT_SECRET in environment variables");
@@ -17776,348 +17735,9 @@ const googleAuth = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.definePr
   __proto__: null,
   authenticateWithGoogle,
   clearSavedTokens,
-  getAuthClient,
   getTokenPath,
-  initializeTokenPath,
-  loadSavedTokens
+  initializeTokenPath
 }, Symbol.toStringTag, { value: "Module" }));
-const require$2 = createRequire(import.meta.url);
-const pdfParse = require$2("pdf-parse");
-const SUPPORTED_MIME_TYPES = {
-  "text/plain": "txt",
-  "text/markdown": "md",
-  "application/json": "json",
-  "text/csv": "csv",
-  "application/pdf": "pdf",
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "docx",
-  "application/msword": "doc"
-};
-function streamToBuffer(stream2) {
-  return new Promise((resolve, reject) => {
-    const chunks = [];
-    stream2.on("data", (chunk) => chunks.push(chunk));
-    stream2.on("end", () => resolve(Buffer$1.concat(chunks)));
-    stream2.on("error", reject);
-  });
-}
-async function importDriveFile(fileId) {
-  const auth = await getAuthClient();
-  const drive = google.drive({ version: "v3", auth });
-  const { data: fileMeta } = await drive.files.get({
-    fileId,
-    fields: "id, name, mimeType"
-  });
-  const mimeType = fileMeta.mimeType || "";
-  const name = fileMeta.name || "Unnamed file";
-  if (!(mimeType in SUPPORTED_MIME_TYPES)) {
-    throw new Error(`Unsupported file type: ${mimeType}`);
-  }
-  const response2 = await drive.files.get(
-    { fileId, alt: "media" },
-    { responseType: "stream" }
-  );
-  const fileBuffer = await streamToBuffer(response2.data);
-  let content = "";
-  switch (mimeType) {
-    case "application/pdf":
-      content = (await pdfParse(fileBuffer)).text;
-      break;
-    case "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
-      content = (await mammoth.extractRawText({ buffer: fileBuffer })).value;
-      break;
-    case "application/msword":
-      throw new Error("Legacy .doc format is not supported. Please use .docx format.");
-    default:
-      content = fileBuffer.toString("utf8");
-  }
-  return {
-    id: fileMeta.id,
-    name,
-    mimeType,
-    usedFor: "other",
-    createdOn: /* @__PURE__ */ new Date(),
-    content
-  };
-}
-async function exportTextFeatureGDrive(content, filename, exportType2) {
-  const auth = await getAuthClient();
-  const drive = google.drive({ version: "v3", auth });
-  let buffer;
-  let mimeType;
-  filename = path.basename(filename, path.extname(filename));
-  switch (exportType2) {
-    case "md":
-    case "txt":
-      buffer = Buffer$1.from(content, "utf-8");
-      mimeType = exportType2 === "md" ? "text/markdown" : "text/plain";
-      filename += `.${exportType2}`;
-      break;
-    case "json":
-      buffer = Buffer$1.from(JSON.stringify({ content }, null, 2), "utf-8");
-      mimeType = "application/json";
-      filename += `.json`;
-      break;
-    case "pdf":
-      {
-        const pdfDoc = await PDFDocument.create();
-        const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
-        const fontSize = 12;
-        const lineHeight = fontSize + 5;
-        const margin = 30;
-        const textLines = content.split("\n");
-        let page = pdfDoc.addPage();
-        const { width: _, height } = page.getSize();
-        let y = height - margin;
-        for (const line of textLines) {
-          if (y < margin + lineHeight) {
-            page = pdfDoc.addPage();
-            y = height - margin;
-          }
-          page.drawText(line, {
-            x: margin,
-            y,
-            size: fontSize,
-            font
-          });
-          y -= lineHeight;
-        }
-        const pdfBytes = await pdfDoc.save();
-        buffer = Buffer$1.from(pdfBytes);
-        mimeType = "application/pdf";
-        filename += ".pdf";
-      }
-      break;
-    case "docx":
-      {
-        const doc = new Document({
-          sections: [{
-            children: [
-              new Paragraph({
-                children: [
-                  new TextRun(content)
-                ]
-              })
-            ]
-          }]
-        });
-        const docBuffer = await Packer.toBuffer(doc);
-        buffer = Buffer$1.from(docBuffer);
-        mimeType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
-        filename += ".docx";
-      }
-      break;
-    default:
-      throw new Error(`Unsupported export type: ${exportType2}`);
-  }
-  const fileMetadata = {
-    name: filename,
-    mimeType,
-    parents: ["root"]
-  };
-  const media = {
-    mimeType,
-    body: stream.Readable.from(buffer)
-  };
-  const res = await drive.files.create({
-    requestBody: fileMetadata,
-    media,
-    fields: "id, name"
-  });
-  if (!res.data.id) {
-    throw new Error("Failed to upload file to Google Drive");
-  }
-  await drive.permissions.create({
-    fileId: res.data.id,
-    requestBody: { role: "reader", type: "anyone" }
-  });
-  const driveUrl = `https://drive.google.com/file/d/${res.data.id}/view`;
-  return { fileId: res.data.id, name: res.data.name ?? filename, driveUrl };
-}
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
-});
-async function callChatCompletion(messages, maxTokens = 300) {
-  var _a;
-  const response2 = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
-    messages,
-    max_tokens: maxTokens,
-    temperature: 0.5
-  });
-  return ((_a = response2.choices[0].message.content) == null ? void 0 : _a.trim()) ?? "";
-}
-async function generateSummary(text) {
-  const messages = [
-    {
-      role: "system",
-      content: "You are a helpful assistant that summarizes academic text like notes and lecture transcripts concisely. You start off each summary with a highlights/key takeaways section, and then a proper detailed summary of the topics."
-    },
-    {
-      role: "user",
-      content: `Summarize the following:
-
-${text}`
-    }
-  ];
-  const result = await callChatCompletion(messages, 500);
-  try {
-    return result;
-  } catch {
-    return "";
-  }
-}
-async function generateFlashcards(text) {
-  const messages = [
-    {
-      role: "system",
-      content: `You are a flashcard generator. You must return ONLY a valid JSON array of objects with "term" and "definition" properties. 
-
-example format:
-[
-    {"term": "Key Concept", "definition": "Clear explanation of the concept"},
-    {"term": "Important Term", "definition": "Definition with context"}
-]`
-    },
-    {
-      role: "user",
-      content: `Create flashcards from the following content:
-
-${text}`
-    }
-  ];
-  try {
-    const result = await callChatCompletion(messages, 1e3);
-    let cleanedResult = result.trim();
-    if (cleanedResult.startsWith("```json")) {
-      cleanedResult = cleanedResult.replace(/```json\n?/, "").replace(/\n?```$/, "");
-    } else if (cleanedResult.startsWith("```")) {
-      cleanedResult = cleanedResult.replace(/```\n?/, "").replace(/\n?```$/, "");
-    }
-    const jsonStart = cleanedResult.indexOf("[");
-    const jsonEnd = cleanedResult.lastIndexOf("]");
-    if (jsonStart !== -1 && jsonEnd !== -1 && jsonEnd > jsonStart) {
-      cleanedResult = cleanedResult.substring(jsonStart, jsonEnd + 1);
-    }
-    const parsed = JSON.parse(cleanedResult);
-    if (!Array.isArray(parsed)) {
-      return [];
-    }
-    const validFlashcards = parsed.filter((card) => {
-      return card && typeof card === "object" && typeof card.term === "string" && typeof card.definition === "string" && card.term.trim() !== "" && card.definition.trim() !== "";
-    });
-    return validFlashcards;
-  } catch (error) {
-    return [];
-  }
-}
-async function generateQuiz(text, quizType, length) {
-  let instruction = "";
-  switch (quizType) {
-    case "multiple-choice":
-      instruction = length ? `Generate exactly ${length} multiple-choice questions` : "Generate 5-8 multiple-choice questions based on the content.";
-      break;
-    case "true-false":
-      instruction = length ? `Generate exactly ${length} true-false questions` : "Generate 5-8 true/false questions based on the content.";
-      break;
-    case "short-answer":
-      instruction = length ? `Generate exactly ${length} short-answer questions` : "Generate 3-5 short-answer questions based on the content.";
-      break;
-    case "mixed":
-      if (length) {
-        const perType = Math.floor(length / 3);
-        instruction = `Generate a mixed quiz with:
-        - ${perType} multiple-choice
-        - ${perType} true/false
-        - ${length - 2 * perType} short-answer questions based on the content.`;
-      } else {
-        instruction = "Generate a mixed quiz with 3 multiple-choice, 3 true/false, and 2 short-answer questions.";
-      }
-      break;
-  }
-  const messages = [
-    {
-      role: "system",
-      content: `You generate academic quiz questions. You must respond with ONLY a valid JSON array, no other text.
-
-Each question object must have:
-- "type": "multiple-choice" OR "true-false" OR "short-answer"
-- "question": the question text
-- "correctAnswer": the correct answer
-- "options": array of 4 choices (only for multiple-choice)
-
-Example format:
-[
-  {
-    "type": "multiple-choice",
-    "question": "What is the capital of France?",
-    "options": ["London", "Berlin", "Paris", "Madrid"],
-    "correctAnswer": "Paris"
-  },
-  {
-    "type": "true-false",
-    "question": "The Earth is flat.",
-    "correctAnswer": "false"
-  }
-]
-
-Return ONLY the JSON array, no other text.`
-    },
-    {
-      role: "user",
-      content: `${instruction}
-
-Generate quiz questions based on the following content:
-
-${text}`
-    }
-  ];
-  console.log("Sending to OpenAI:", {
-    instruction,
-    contentLength: text.length,
-    contentPreview: text.substring(0, 100) + "..."
-  });
-  const result = await callChatCompletion(messages, 2e3);
-  console.log("OpenAI raw response:", result);
-  console.log("Response length:", result.length);
-  try {
-    const parsed = JSON.parse(result);
-    console.log("Parsed successfully:", parsed);
-    return parsed;
-  } catch (error) {
-    console.error("JSON parse error:", error);
-    console.error("Raw response that failed to parse:", result);
-    const jsonMatch = result.match(/\[[\s\S]*\]/);
-    if (jsonMatch) {
-      try {
-        console.log("Trying to parse extracted JSON:", jsonMatch[0]);
-        const extracted = JSON.parse(jsonMatch[0]);
-        console.log("Extracted JSON parsed successfully:", extracted);
-        return extracted;
-      } catch (extractError) {
-        console.error("Failed to parse extracted JSON:", extractError);
-      }
-    }
-    return [];
-  }
-}
-async function generateFromDrive(type2, content, options) {
-  switch (type2) {
-    case "summary":
-      const summary = await generateSummary(content);
-      console.log("summary generated");
-      return summary;
-    case "flashcards":
-      const flashcards = await generateFlashcards(content);
-      console.log("flashcards generated");
-      return flashcards;
-    case "quiz":
-      const quiz = await generateQuiz(content, (options == null ? void 0 : options.quizType) || "mixed", options == null ? void 0 : options.length);
-      console.log("quiz generated");
-      return quiz;
-    default:
-      throw new Error("Unsupported generation type");
-  }
-}
 const require$1 = createRequire(import.meta.url);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -18253,13 +17873,13 @@ ipcMain.handle("start-google-login", async () => {
       });
       authWindow.on("closed", () => {
         authWindow = null;
-        reject(new Error("User closed the login window"));
+        reject(new Error("login window closed"));
       });
       const clientId = process.env.G_CLIENT_ID;
       const clientSecret = process.env.G_CLIENT_SECRET;
       const redirectUri = process.env.G_REDIRECT_URI;
       if (!clientId || !clientSecret || !redirectUri) {
-        reject(new Error("Missing OAuth configuration"));
+        reject(new Error("missing OAuth configuration"));
         authWindow == null ? void 0 : authWindow.close();
         return;
       }
@@ -18276,13 +17896,10 @@ ipcMain.handle("start-google-login", async () => {
           return;
         }
         if (!code) {
-          reject(new Error("No code found in redirect URL"));
+          reject(new Error("no code found in redirect URL"));
           authWindow == null ? void 0 : authWindow.close();
           return;
         }
-        console.log("Exchanging token with code:", code);
-        console.log("Client ID:", clientId);
-        console.log("Redirect URI:", redirectUri);
         try {
           const { tokens } = await oauth2Client.getToken({
             code,
@@ -18347,87 +17964,5 @@ ipcMain.handle("google-logout", async () => {
     }
     console.error(message);
     return { success: false, error: message };
-  }
-});
-ipcMain.handle(
-  "drive-export-text",
-  async (_event, args) => {
-    try {
-      const { content, filename, type: type2 } = args;
-      const res = await exportTextFeatureGDrive(content, filename, type2);
-      console.log("file exported: ", filename);
-      return {
-        success: true,
-        fileId: res.fileId,
-        name: res.name,
-        driveUrl: res.driveUrl
-      };
-    } catch (error) {
-      console.error("Export error:", error);
-      return { success: false, error: error.message };
-    }
-  }
-);
-ipcMain.handle("drive-import-file", async (_event, fileId) => {
-  try {
-    const res = await importDriveFile(fileId);
-    console.log("Imported file:", res.name);
-    return {
-      success: true,
-      name: res.name,
-      content: res.content
-    };
-  } catch (error) {
-    console.log("Import error: ", error);
-    return { success: false, error: error.message };
-  }
-});
-ipcMain.handle("open-google-picker", async () => {
-  var _a;
-  const apiKey = process.env.G_API_KEY ?? "";
-  const token = ((_a = await getAuthClient()) == null ? void 0 : _a.credentials.access_token) ?? "";
-  const pickerWindow = new BrowserWindow({
-    width: 600,
-    height: 600,
-    modal: true,
-    backgroundColor: "#121212",
-    parent: BrowserWindow.getFocusedWindow() ?? void 0,
-    show: false,
-    autoHideMenuBar: true,
-    icon: path.join(__dirname, "..", "assets", "taskbar.png"),
-    webPreferences: {
-      preload: path.join(__dirname, "preload.js"),
-      contextIsolation: true,
-      nodeIntegration: false,
-      webSecurity: false
-    }
-  });
-  await pickerWindow.loadURL("http://localhost:3000/picker.html");
-  await pickerWindow.webContents.executeJavaScript(`
-    window.pickerConfig = {
-      apiKey: ${JSON.stringify(apiKey)},
-      token: ${JSON.stringify(token)}
-    };
-  `);
-  pickerWindow.show();
-  return new Promise((resolve, reject) => {
-    const handleMessage = (_event, fileId) => {
-      resolve(fileId);
-      pickerWindow.close();
-    };
-    ipcMain.once("google-picker-file-id", handleMessage);
-    pickerWindow.on("closed", () => {
-      ipcMain.removeListener("google-picker-file-id", handleMessage);
-      reject(new Error("Picker window closed without selection"));
-    });
-  });
-});
-ipcMain.handle("generate-ai-content", async (_event, args) => {
-  const { type: type2, content, options } = args;
-  try {
-    const result = await generateFromDrive(type2, content, options);
-    return { success: true, result };
-  } catch (error) {
-    return { success: false, error: error.message };
   }
 });
