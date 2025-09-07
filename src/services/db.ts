@@ -4,6 +4,8 @@ import Dexie, { Table } from 'dexie'
 export interface Course {
     id: string;
     name: string;
+    code: string;
+    professor: string;
     description?: string;
     color: string;
     type: string; // lecture, tutorial, project
@@ -55,7 +57,7 @@ export class CalmecaDB extends Dexie {
     constructor() {
         super('CalmecaDB');
         this.version(1).stores({
-            courses: 'id, name, type, color, archived, updatedOn, updatedFrom, endsOn',
+            courses: 'id, name, type, color, archived, updatedOn, updatedFrom, endsOn, professor, code',
             tasks: 'id, title, courseId, type, deadline, completed, color',
             calendarEvents: 'id, title, date, source, sourceId, color',
             microsoftFiles: 'id, name, mimeType, size, createdOn, lastModified'
