@@ -6,21 +6,32 @@ export interface Course {
     name: string;
     code: string;
     professor: string;
+    courseEmail?: string;
+    profEmail?: string;
     description?: string;
-    color: string;
-    type: string; // lecture, tutorial, project
+    color?: string;
+    type?: 'lecture-tutorial' | 'project-studio' | 'lab';
     createdOn: Date;
     endsOn: Date;
-    archived: boolean;
+    archived?: boolean;
     updatedOn: Date;
     updatedFrom?: 'calendar' | 'assignment' | 'other';
+    officeHours?: OfficeHour[];
+}
+
+export interface Contact {
+  id: string;
+  name: string;
+  email: string;
+  role: 'professor' | 'TA' | 'student' | 'other';
+  courseId?: string;
 }
 
 export interface Task {
     id: string;
     courseId: string;
     title: string;
-    type: 'Homework' | 'Lab' | 'Exam' | 'Project' | 'Report';
+    type: 'homework' | 'lab' | 'exam' | 'project' | 'report' | 'quiz';
     deadline: Date;
     completed: boolean;
     color: string;
@@ -29,10 +40,11 @@ export interface Task {
 export interface CalendarEvent {
     id: string;
     title: string;
+    description?: string;
     date: Date;
     source: string;
     sourceId: string;
-    tags?: string[];
+    type?: 'deadline' | 'meeting' | 'exam';
     color: string;
 }
 
@@ -43,6 +55,15 @@ export interface MicrosoftFile {
   size: number;
   createdOn: Date;
   lastModified: Date;
+}
+
+export interface OfficeHour {
+    days?: string[];
+    startTime?: string;
+    endTime?: string;
+    location?: string;
+    byAppointment: boolean;
+    
 }
 
 
@@ -57,7 +78,7 @@ export class CalmecaDB extends Dexie {
     constructor() {
         super('CalmecaDB');
         this.version(1).stores({
-            courses: 'id, name, type, color, archived, updatedOn, updatedFrom, endsOn, professor, code',
+            courses: 'id, name, type, color, archived, updatedOn, updatedFrom, endsOn, professor, courseEmail, profEmail, code',
             tasks: 'id, title, courseId, type, deadline, completed, color',
             calendarEvents: 'id, title, date, source, sourceId, color',
             microsoftFiles: 'id, name, mimeType, size, createdOn, lastModified'

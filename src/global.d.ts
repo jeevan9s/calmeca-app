@@ -22,6 +22,9 @@ declare global {
       removeLoginSuccessListener: (callback: (event: IpcRendererEvent, data: any) => void) => void;
       onMicrosoftLoginSuccess: (callback: (event: IpcRendererEvent, data: any) => void) => void;
       removeMicrosoftLoginSuccessListener: (callback: (event: IpcRendererEvent, data: any) => void) => void;
+      readPDF: (filePath: string) => Promise<{ success: boolean; text?: string; error?: string }>;
+      extractCourse: (text: string) => Promise<{ success: boolean; course?: any; error?: string }>;
+      extractCourseFromPDF: (filePath: string) => Promise<{ success: boolean; course?: any; error?: string }>;
     };
   }
 }
