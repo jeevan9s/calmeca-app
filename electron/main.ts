@@ -150,7 +150,7 @@ ipcMain.on('close', () => {
   if (win) win.close()
 })
 
-// GOOGLE, MICROSOFT, NLP handlers
+// GOOGLE, MICROS, NLP handlers
 registerGoogleHandlers(win!);
 registerMicrosoftHandlers(win!);
 registerNLPHandlers(win!);
