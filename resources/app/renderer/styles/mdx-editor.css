@@ -1,0 +1,155 @@
+/* Custom MDX Editor Dark Theme with Cyclable Toolbar */
+.mdx-editor-dark .mdxeditor-toolbar {
+    background-color: #18181b !important; /* zinc-900 */
+    border-bottom: 1px solid #27272a !important; /* zinc-800 */
+    padding: 8px 12px !important;
+    min-height: 44px !important;
+}
+
+.mdx-editor-dark .mdxeditor-toolbar button {
+    background-color: #27272a !important; /* zinc-800 */
+    color: #ffffff !important;
+    border: 1px solid #3f3f46 !important; /* zinc-700 */
+    border-radius: 8px !important;
+    padding: 10px 14px !important;
+    font-size: 13px !important;
+    min-height: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all 0.2s ease !important;
+    margin: 0 2px !important;
+}
+
+.mdx-editor-dark .mdxeditor-toolbar button:hover {
+    background-color: #3f3f46 !important; /* zinc-700 */
+    border-color: #52525b !important; /* zinc-600 */
+    transform: scale(1.05) !important;
+}
+
+.mdx-editor-dark .mdxeditor-toolbar button[data-state="on"] {
+    background-color: #2563eb !important; /* blue-600 */
+    border-color: #1d4ed8 !important; /* blue-700 */
+    color: #ffffff !important;
+}
+
+.mdx-editor-dark .mdxeditor-toolbar select {
+    background-color: #27272a !important; /* zinc-800 */
+    color: #ffffff !important;
+    border: 1px solid #3f3f46 !important; /* zinc-700 */
+    border-radius: 8px !important;
+    padding: 6px 10px !important;
+    font-size: 13px !important;
+    min-height: 32px !important;
+    height: 32px !important;
+    margin: 0 2px !important;
+}
+
+.mdx-editor-dark .mdxeditor-toolbar select:hover {
+    background-color: #3f3f46 !important; /* zinc-700 */
+}
+
+.mdx-editor-dark .mdxeditor-toolbar .mdxeditor-separator {
+    background-color: #3f3f46 !important; /* zinc-700 */
+    height: 20px !important;
+    width: 1px !important;
+    margin: 0 8px !important;
+}
+
+/* Icons - bigger and white */
+.mdx-editor-dark .mdxeditor-toolbar button svg {
+    width: 16px !important;
+    height: 16px !important;
+    color: #ffffff !important;
+    fill: currentColor !important;
+    stroke: currentColor !important;
+}
+
+.mdx-editor-dark .mdxeditor-toolbar button:hover svg {
+    color: #ffffff !important;
+}
+
+.mdx-editor-dark .mdxeditor-toolbar button[data-state="on"] svg {
+    color: #ffffff !important;
+}
+
+/* Compact button groups */
+.mdx-editor-dark .mdxeditor-toolbar [role="group"] {
+    gap: 4px !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+/* Toolbar layout - full width with navigation */
+.mdx-editor-dark .mdxeditor-toolbar {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+}
+
+/* Navigation buttons styling */
+.mdx-editor-dark .mdxeditor-toolbar > div button {
+    background-color: transparent !important;
+    border: none !important;
+    color: #ffffff !important;
+    padding: 4px !important;
+    border-radius: 4px !important;
+    min-width: auto !important;
+    width: auto !important;
+    height: auto !important;
+    min-height: auto !important;
+    margin: 0 !important;
+}
+
+.mdx-editor-dark .mdxeditor-toolbar > div button:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    transform: none !important;
+}
+
+/* Dropdown menus */
+.mdx-editor-dark [data-radix-popper-content-wrapper] {
+    background-color: #18181b !important; /* zinc-900 */
+    border: 1px solid #27272a !important; /* zinc-800 */
+    border-radius: 8px !important;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3) !important;
+}
+
+.mdx-editor-dark [data-radix-popper-content-wrapper] button {
+    color: #ffffff !important;
+    background-color: transparent !important;
+    border: none !important;
+    padding: 8px 12px !important;
+    text-align: left !important;
+    width: 100% !important;
+    font-size: 13px !important;
+    min-height: 28px !important;
+}
+
+.mdx-editor-dark [data-radix-popper-content-wrapper] button:hover {
+    background-color: #27272a !important; /* zinc-800 */
+}
+
+/* Editor content area */
+.mdx-editor-dark .mdxeditor {
+    background-color: #09090b !important; /* zinc-950 */
+    color: #ffffff !important;
+}
+
+.mdx-editor-dark .mdxeditor-rich-text-editor {
+    background-color: #09090b !important; /* zinc-950 */
+    color: #ffffff !important;
+}
+
+/* Grey placeholder text */
+.mdx-editor-dark .mdxeditor-rich-text-editor::before {
+    color: #6b7280 !important; /* gray-500 */
+    opacity: 0.8 !important;
+}
+
+.mdx-editor-dark .mdxeditor-rich-text-editor[data-placeholder]:before {
+    color: #6b7280 !important; /* gray-500 */
+    opacity: 0.8 !important;
+}

@@ -1,0 +1,64 @@
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@radix-ui/react-tooltip";
+import { Paperclip } from "react-feather";
+import { useState } from "react";
+
+interface FileUploadTooltipProps {
+  setCourseData: (data: Partial<any>) => void; 
+}
+
+export default function FileUploadTooltip({ setCourseData }: FileUploadTooltipProps) {
+  const [pdfFile, setPdfFile] = useState<File | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleUpload = async (file: File) => {
+    setPdfFile(file);
+    setIsLoading(true);
+
+    try {
+      if (!(window as any).electronAPI?.extractCourseFromPDF) {
+        console.error("electronAPI.extractCourseFromPDF is not available");
+        return;
+      }
+
+      const result = await (window as any).electronAPI.extractCourseFromPDF(file.path);
+
+      if (result?.success && result.course) {
+        setCourseData(result.course);
+      } else {
+        console.error(result?.error || "Unknown error during PDF extraction");
+      }
+    } catch (err) {
+      console.error("Error extracting course from PDF:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <label className="flex h-6 w-6 items-center justify-center text-white hover:bg-gray-600/30 cursor-pointer rounded-full">
+            <input
+              type="file"
+              accept=".pdf"
+              className="hidden"
+              onChange={(e) => e.target.files && handleUpload(e.target.files[0])}
+            />
+            {isLoading ? (
+              <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
+            ) : (
+              <Paperclip size={16} />
+            )}
+          </label>
+        </TooltipTrigger>
+        <TooltipContent
+          side="left"
+          className="bg-zinc-800 text-white/90 rounded-xl text-xs font-dm p-2 mr-1 font-thin"
+        >
+          beta NLP syllabi extraction
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+}
