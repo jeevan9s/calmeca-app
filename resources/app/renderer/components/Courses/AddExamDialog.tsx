@@ -48,15 +48,12 @@ export default function AddDatesDialog({
   const handlePdfUpload = async (file: File) => {
     setIsPdfLoading(true);
     try {
-      if (window.electronAPI) {
-        const arrayBuffer = await file.arrayBuffer();
-        const uint8Array = new Uint8Array(arrayBuffer);
-        const base64String = btoa(String.fromCharCode(...uint8Array));
-        const result = await window.electronAPI.extractCourseFromPDF(base64String);
-        if (result.success) {
-          const data = result.course;
-          // Handle extracted data if needed
-        }
+      const arrayBuffer = await file.arrayBuffer();
+      const uint8Array = new Uint8Array(arrayBuffer);
+      const base64String = btoa(String.fromCharCode(...uint8Array));
+      const result = await extractCourseFromPDF(base64String);
+      if (result.success) {
+        const data = result.course;
       }
     } catch (err) {
       console.error(err);
@@ -112,13 +109,11 @@ export default function AddDatesDialog({
         });
       }
 
-      if (window.electronAPI) {
-        await Promise.all(
-          events.map((evt) =>
-            addCalendarEvent(evt.summary, evt.start, evt.end, "exam", evt.allDay ?? false)
-          )
-        );
-      }
+      await Promise.all(
+        events.map((evt) =>
+          addCalendarEvent(evt.summary, evt.start, evt.end, "exam", evt.allDay ?? false)
+        )
+      );
 
       onClose();
     } catch (err) {

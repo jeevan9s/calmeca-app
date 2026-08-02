@@ -1,6 +1,7 @@
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@radix-ui/react-tooltip";
 import { Paperclip } from "react-feather";
 import { useState } from "react";
+import { extractCourseFromPDF } from "@/services/platform";
 
 interface FileUploadTooltipProps {
   setCourseData: (data: Partial<any>) => void; 
@@ -15,12 +16,10 @@ export default function FileUploadTooltip({ setCourseData }: FileUploadTooltipPr
     setIsLoading(true);
 
     try {
-      if (!(window as any).electronAPI?.extractCourseFromPDF) {
-        console.error("electronAPI.extractCourseFromPDF is not available");
-        return;
-      }
-
-      const result = await (window as any).electronAPI.extractCourseFromPDF(file.path);
+      const arrayBuffer = await file.arrayBuffer();
+      const uint8Array = new Uint8Array(arrayBuffer);
+      const base64String = btoa(String.fromCharCode(...uint8Array));
+      const result = await extractCourseFromPDF(base64String);
 
       if (result?.success && result.course) {
         setCourseData(result.course);

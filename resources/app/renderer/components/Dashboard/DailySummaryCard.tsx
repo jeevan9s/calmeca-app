@@ -11,7 +11,7 @@ export default function DailySummaryCard() {
 
   const fetchCounts = async () => {
     try {
-      const events: any[] = await (window as any).electronAPI.fetchGoogleCalendarEvents();
+      const events: any[] = await fetchGoogleCalendarEvents();
 
       const startOfToday = new Date();
       startOfToday.setHours(0, 0, 0, 0);

@@ -94,6 +94,21 @@ export const getRelativeTimeStamp = (timestamp: Date | null): string => {
     return `Last edited ${diffDays} day${diffDays !== 1 ? "s" : ""}`;
 }
 
+export const colorPalette = [
+  "#8B0000",
+  "#2F4F4F",
+  "#191970",
+  "#006400",
+  "#8B4513",
+  "#4B0082",
+  "#2E8B57",
+  "#B8860B",
+  "#800080",
+  "#1E90FF",
+  "#CD853F",
+  "#228B22",
+];
+
 export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
 }

@@ -4,7 +4,7 @@ import Layout from "@/renderer/components/Layout";
 import { ScrollArea } from "@/components/scroll-area";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
-
+import { fetchGoogleCalendarEvents } from "@/services/platform";
 import EventsCard from "@/renderer/components/Dashboard/EventsCard";
 import CoursesCard from "@/renderer/components/Dashboard/CoursesCard";
 import ClubsCard from "@/renderer/components/Dashboard/ClubsCard";
@@ -27,7 +27,7 @@ export default function Dashboard() {
 
   const fetchEvents = async () => {
     try {
-      const fetchedEvents: CalendarEvent[] = await (window as any).electronAPI.fetchGoogleCalendarEvents(
+      const fetchedEvents: CalendarEvent[] = await fetchGoogleCalendarEvents(
         "24xxc calendar schedule"
       );
 

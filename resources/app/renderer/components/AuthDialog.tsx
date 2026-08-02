@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, easeInOut } from "framer-motion";
 import { ChevronRight } from "react-feather";
+import { getLoggedInUser, startGoogleLogin, googleLogout } from "@/services/platform";
 
 type AuthDialogProps = {
   isAuthDialogOpen: boolean;
@@ -17,7 +18,7 @@ export default function AuthDialog({ isAuthDialogOpen, setIsAuthDialogOpen }: Au
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const currentUser = await (window as any).electronAPI.getLoggedInUser();
+        const currentUser = await getLoggedInUser();
         if (currentUser) setUser(currentUser);
       } catch (err) {
         console.error("Failed to fetch logged-in user:", err);
@@ -35,8 +36,8 @@ export default function AuthDialog({ isAuthDialogOpen, setIsAuthDialogOpen }: Au
   const handleLogin = async () => {
     setLoading(true);
     try {
-      const res = await (window as any).electronAPI.startGoogleLogin();
-      setUser(res.user);
+      const res = await startGoogleLogin();
+      if (res?.user) setUser(res.user);
       setIsAuthDialogOpen(false);
     } catch (err) {
       console.error("Login failed:", err);
@@ -47,7 +48,7 @@ export default function AuthDialog({ isAuthDialogOpen, setIsAuthDialogOpen }: Au
 
   const handleLogout = async () => {
     try {
-      await (window as any).electronAPI.googleLogout();
+      await googleLogout();
       setUser(null);
     } catch (err) {
       console.error("Logout failed:", err);

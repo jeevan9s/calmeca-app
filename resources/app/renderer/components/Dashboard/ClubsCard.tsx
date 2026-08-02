@@ -50,7 +50,7 @@ export default function ClubsCard() {
   useEffect(() => {
     const loadEvents = async () => {
       try {
-        const fetched = await (window as any).electronAPI.fetchGoogleCalendarEvents("designTeams");
+        const fetched = await fetchGoogleCalendarEvents("designTeams");
         if (!fetched || fetched.length === 0) {
           setEvents([]);
           return;

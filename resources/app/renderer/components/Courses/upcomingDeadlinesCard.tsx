@@ -21,6 +21,7 @@ import {
 } from "@/components/dialog";
 import { ExternalLink } from "react-feather";
 import { db, CalendarEvent } from "@/services/db";
+import { fetchGoogleCalendarEvents } from "@/services/platform";
 
 interface UpcomingCourseEventsCardProps {
   courseTitle: string;
@@ -64,7 +65,7 @@ export default function UpcomingCourseEventsCard({
     const fetchEvents = async () => {
       setLoading(true);
       try {
-        const allEvents = await window.electronAPI.fetchGoogleCalendarEvents();
+        const allEvents = await fetchGoogleCalendarEvents();
         const now = new Date();
         const future = new Date();
         future.setDate(future.getDate() + upcomingDays);

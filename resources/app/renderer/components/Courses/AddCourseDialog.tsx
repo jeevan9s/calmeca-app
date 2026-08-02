@@ -10,6 +10,7 @@ import CourseFormFields from "./CourseFormFields";
 import DateTimePicker from "./DatePickerComponent";
 import ColorPickerField from "./ColourPickerField";
 import { addCalendarEvent } from "@/lib/helpers/calendarHelpers";
+import { extractCourseFromPDF } from "@/services/platform";
 import { IconPicker } from "@/components/ui/icon-picker";
 
 interface AddCourseDialogProps {
@@ -154,19 +155,17 @@ export default function AddCourseDialog({
   const handlePdfUpload = async (file: File) => {
     setIsPdfLoading(true);
     try {
-      if (window.electronAPI) {
-        const arrayBuffer = await file.arrayBuffer();
-        const uint8Array = new Uint8Array(arrayBuffer);
-        const base64String = btoa(String.fromCharCode(...uint8Array));
-        const result = await window.electronAPI.extractCourseFromPDF(base64String);
-        if (result.success) {
-          const data = result.course;
-          if (data.title) setTitle(data.title);
-          if (data.code) setCode(data.code);
-          if (data.professor) setProfessor(data.professor);
-          if (data.profEmail) setProfEmail(data.profEmail);
-          if (data.credits) setCredits(data.credits);
-        }
+      const arrayBuffer = await file.arrayBuffer();
+      const uint8Array = new Uint8Array(arrayBuffer);
+      const base64String = btoa(String.fromCharCode(...uint8Array));
+      const result = await extractCourseFromPDF(base64String);
+      if (result.success) {
+        const data = result.course;
+        if (data.title) setTitle(data.title);
+        if (data.code) setCode(data.code);
+        if (data.professor) setProfessor(data.professor);
+        if (data.profEmail) setProfEmail(data.profEmail);
+        if (data.credits) setCredits(data.credits);
       }
     } catch (err) {
       console.error(err);
@@ -241,19 +240,17 @@ export default function AddCourseDialog({
         events.push({ summary: `${title} - Final Exam`, start: finalExam.start, end: finalExam.end });
       }
 
-      if (window.electronAPI) {
-        await Promise.all(
-          events.map((evt) =>
-            addCalendarEvent(
-              evt.summary,
-              evt.start,
-              evt.end,
-              evt.summary.toLowerCase().includes("exam") ? "exam" : "deadline",
-              evt.allDay ?? false
-            )
+      await Promise.all(
+        events.map((evt) =>
+          addCalendarEvent(
+            evt.summary,
+            evt.start,
+            evt.end,
+            evt.summary.toLowerCase().includes("exam") ? "exam" : "deadline",
+            evt.allDay ?? false
           )
-        );
-      }
+        )
+      );
 
       onClose();
     } catch (err) {

@@ -101,7 +101,7 @@ export default function UpcomingExamsCard() {
 
         let calendarExams: ExamItem[] = [];
         try {
-          const calendarEvents: CalendarEvent[] = await (window as any).electronAPI.fetchGoogleCalendarEvents();
+          const calendarEvents: CalendarEvent[] = await fetchGoogleCalendarEvents();
           
           if (calendarEvents && calendarEvents.length > 0) {
             const keywordRegex = /(exam|midterm|quiz|test|final)/i;

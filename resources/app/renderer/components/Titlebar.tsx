@@ -73,18 +73,10 @@ export default function TitleBar({
   }, []);
 
   useEffect(() => {
-    const onMax = () => setisMaximized(true);
-    const onUnmax = () => setisMaximized(false);
-
-    window.electronAPI.onMaximized(onMax);
-    window.electronAPI.onNotMaximized(onUnmax);
-
     const handleResize = () => setWindowWidth(window.innerWidth);
     window.addEventListener("resize", handleResize);
 
     return () => {
-      window.electronAPI.offMaximized(onMax);
-      window.electronAPI.offNotMaximized(onUnmax);
       window.removeEventListener("resize", handleResize);
     };
   }, []);
@@ -221,29 +213,21 @@ export default function TitleBar({
         <div className="flex items-center border-l border-neutral-700 ml-5">
           <button
             id="minimize"
-            onClick={() => window.electronAPI.minimize()}
+            onClick={() => Neutralino?.window?.minimize()}
             className="w-5 h-5 flex items-center justify-center hover:bg-neutral-800 rounded transition drag-exclude"
           >
             <Minus color="white" size={16} strokeWidth={2} />
           </button>
           <button
             id="maximize"
-            onClick={() =>
-              isMaximized
-                ? window.electronAPI.restore()
-                : window.electronAPI.maximize()
-            }
+            onClick={() => Neutralino?.window?.maximize()}
             className="w-5 h-5 flex items-center justify-center hover:bg-neutral-800 rounded transition drag-exclude"
           >
-            {isMaximized ? (
-              <PiCopy color="white" size={16} />
-            ) : (
-              <Square color="white" size={13} strokeWidth={2} />
-            )}
+            <Square color="white" size={13} strokeWidth={2} />
           </button>
           <button
             id="close"
-            onClick={() => window.electronAPI.close()}
+            onClick={() => Neutralino?.app?.exit()}
             className="w-5 h-5 flex items-center justify-center drag-exclude"
           >
             <X color="white" size={16} strokeWidth={2} />

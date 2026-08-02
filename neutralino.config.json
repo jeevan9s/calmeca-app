@@ -42,7 +42,7 @@
       "alwaysOnTop": false,
       "icon": "/resources/public/taskbar.png",
       "enableInspector": true,
-      "borderless": false,
+      "borderless": true,
       "maximize": false,
       "hidden": false,
       "resizable": true,
