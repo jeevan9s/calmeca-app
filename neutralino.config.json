@@ -16,7 +16,8 @@
   "nativeAllowList": [
     "app.*",
     "os.*",
-    "debug.log"
+    "debug.log",
+    "window.*"
   ],
   "globalVariables": {
     "TEST1": "Hello",
@@ -54,12 +55,19 @@
       },
       "nativeBlockList": [
         "filesystem.*"
+      ], 
+            "nativeAllowList": [
+        "app.*",
+        "os.*", 
+        "window.*"
       ]
     },
     "cloud": {
       "url": "/resources/#cloud",
       "nativeAllowList": [
-        "app.*"
+        "app.*",
+        "os.*", 
+        "window.*"
       ]
     },
     "chrome": {

@@ -131,7 +131,7 @@ export default function TitleBar({
               onClick={() => setIsLocked(false)}
             >
               <img
-                src="assets/taskbar.png"
+                src="../../public/taskbar.png"
                 alt="Logo"
                 className="h-4 w-4 transition-transform duration-200 hover:scale-110"
               />
@@ -213,22 +213,22 @@ export default function TitleBar({
         <div className="flex items-center border-l border-neutral-700 ml-5">
           <button
             id="minimize"
-            onClick={() => Neutralino?.window?.minimize()}
-            className="w-5 h-5 flex items-center justify-center hover:bg-neutral-800 rounded transition drag-exclude"
+            onClick={async () => Neutralino?.window?.minimize()}
+            className="w-5 h-5 flex items-center justify-center hover:bg-neutral-800 rounded transition drag-exclude cursor-pointer"
           >
             <Minus color="white" size={16} strokeWidth={2} />
           </button>
           <button
             id="maximize"
             onClick={() => Neutralino?.window?.maximize()}
-            className="w-5 h-5 flex items-center justify-center hover:bg-neutral-800 rounded transition drag-exclude"
+            className="w-5 h-5 flex items-center justify-center hover:bg-neutral-800 rounded transition drag-exclude cursor-pointer"
           >
             <Square color="white" size={13} strokeWidth={2} />
           </button>
           <button
             id="close"
-            onClick={() => Neutralino?.app?.exit()}
-            className="w-5 h-5 flex items-center justify-center drag-exclude"
+            onClick={async () => Neutralino?.app?.exit()}
+            className="w-5 h-5 flex items-center justify-center drag-exclude cursor-pointer"
           >
             <X color="white" size={16} strokeWidth={2} />
           </button>
