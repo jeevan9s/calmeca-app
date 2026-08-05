@@ -164,7 +164,7 @@ export default function UpcomingExamsCard() {
 
   return (
     <motion.div whileHover={{ scale: 1.01, y: -2 }} transition={{ duration: 0.2 }} className="rounded-lg flex-1">
-      <Card className="h-44 sm:h-48 bg-zinc-400/10 w-full rounded-lg">
+      <Card className="h-44 sm:h-48 bg-zinc-400/10 w-full rounded-xl">
         <CardHeader>
           <CardTitle className="font-nun">midterms & exams</CardTitle>
           <CardDescription className="text-white/50 font-dm">upcoming exams</CardDescription>

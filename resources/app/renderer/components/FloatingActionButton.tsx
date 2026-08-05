@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Plus } from "react-feather";
+import { Plus } from "lucide-react";
 import { useState } from "react";
 import QuickActionDialog from "./QuickActionDialog";
 
@@ -11,25 +11,21 @@ export interface FloatingActionButtonProps {
 
 export default function FloatingActionButton({ courseId }: FloatingActionButtonProps) {
   const [open, setOpen] = useState(false);
+
   return (
     <>
       <motion.button
-        initial={{ scale: 0, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ delay: 0.8, duration: 0.3 }}
-        whileHover={{
-          scale: 1.1,
-          rotate: 5,
-          boxShadow: "0 10px 25px rgba(255, 255, 255, 0.2)",
-        }}
-        whileTap={{ scale: 0.9 }}
-        className="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-white text-black shadow-lg hover:bg-white hover:text-black flex items-center justify-center transition-all"
         onClick={() => setOpen(true)}
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        whileHover={{ rotate: 180 }}
+        whileTap={{ scale: 0.9 }}
+        transition={{ type: "spring", stiffness: 260, damping: 20 }}
+        className="fixed bottom-6 right-6 z-50 inline-flex h-14 w-14 items-center justify-center rounded-full bg-white text-black shadow-lg cursor-pointer"
       >
-        <motion.div animate={{ rotate: 0 }} whileHover={{ rotate: 90 }} transition={{ duration: 0.2 }}>
-          <Plus className="w-6 h-6 text-black" />
-        </motion.div>
+        <Plus className="h-6 w-6 text-black" strokeWidth={2.5} />
       </motion.button>
+
       <QuickActionDialog open={open} onClose={() => setOpen(false)} courseId={courseId} />
     </>
   );

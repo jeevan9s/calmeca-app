@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import Titlebar from '../../components/Titlebar'
 import "@/renderer/styles/landing.css"
 export default function Landing() {
   const navigate = useNavigate()
@@ -33,23 +32,7 @@ export default function Landing() {
 
   return (
     <>
-      <div id = "landing-page" className="bg-black/30" ref={titlebarRef}>
-   <Titlebar
-  solidBackground={false}
-  isHovered={isHovered}
-  setIsHovered={setIsHovered}
-  isLocked={isLocked}
-  setIsLocked={setIsLocked}
-  disableButton={true}
-  isCalendarHovered={false}
-  isCalendarLocked={false}
-  setIsCalendarHovered={() => {}}
-  setIsCalendarLocked={() => {}}
-  isAlertsOpen={false}
-  isQuickNavOpen={false}
-  ontoggleAlerts={() => {}}
-  ontoggleQuickNav={() => {}}
-/>
+      <div id = "landing-page" className="bg-black/70" ref={titlebarRef}>
       </div>
 
       <AnimatePresence
@@ -60,9 +43,8 @@ export default function Landing() {
         {!isExiting && (
           <div
             onMouseDown={handleMouseStart}
-            // onKeyDown={handleKeyStart}
             tabIndex={0}
-            className="flex flex-col h-screen items-center justify-center cursor-pointer outline-none shadow-lg bg-black/30"
+            className="flex flex-col h-screen items-center justify-center cursor-pointer outline-none shadow-lg bg-black/70"
           >
             <motion.div
               className="flex flex-col items-center outline-none"

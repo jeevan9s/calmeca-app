@@ -45,7 +45,7 @@ export default function DailySummaryCard() {
 
   return (
     <motion.div whileHover={{ scale: 1.01 }} transition={{ duration: 0.2 }}>
-      <Card className="bg-[#0f0f10ff] w-full rounded-lg p-2 flex flex-col min-h-[0px]">
+      <Card className="bg-[#0f0f10ff] w-full rounded-xl p-2 flex flex-col min-h-[0px]">
         <CardHeader>
           <CardTitle className="text-sm font-raleway mr- text-white lowercase">daily summary
           </CardTitle>

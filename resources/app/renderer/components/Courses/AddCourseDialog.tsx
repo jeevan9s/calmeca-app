@@ -11,7 +11,6 @@ import DateTimePicker from "./DatePickerComponent";
 import ColorPickerField from "./ColourPickerField";
 import { addCalendarEvent } from "@/lib/helpers/calendarHelpers";
 import { extractCourseFromPDF } from "@/services/platform";
-import { IconPicker } from "@/components/ui/icon-picker";
 
 interface AddCourseDialogProps {
   isOpen: boolean;
@@ -289,7 +288,6 @@ export default function AddCourseDialog({
                       {isEditing ? "edit an existing course" : "add a new course"}
                     </Dialog.Title>
                     <div className="flex gap-2 items-center">
-                      <IconPicker value={courseIcon as any} onValueChange={setCourseIcon} />
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <label className="flex h-6 w-6 items-center justify-center rounded-md text-white hover:bg-gray-600/30 cursor-pointer">

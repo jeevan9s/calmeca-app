@@ -45,7 +45,6 @@ export default function Dashboard() {
       setEvents(filteredEvents);
     } catch (err) {
       console.error('Google Calendar fetch failed:', err);
-      // Fallback to empty events array when calendar auth fails
       setEvents([]);
     } finally {
       setLoading(false);
@@ -79,7 +78,7 @@ return (
           <motion.div className="flex flex-col flex-1 gap-5">
             <div className="mb-4">
               <motion.h2
-                className="font-dm text-neutral-400 text-sm"
+                className="font-dm text-neutral-400 text-sm ml-1"
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.1, duration: 0.4 }}
@@ -87,7 +86,7 @@ return (
                 {formattedHeaderDate}
               </motion.h2>
               <motion.h1
-                className="font-nun font-bold text-2xl sm:text-3xl lg:text-4xl"
+                className="font-dm font-bold text-2xl sm:text-3xl lg:text-4xl"
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.2, duration: 0.4 }}

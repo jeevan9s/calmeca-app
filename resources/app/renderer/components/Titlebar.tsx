@@ -12,10 +12,6 @@ import {
 import "@/renderer/styles/tb.css";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import {
-  getLastEditedTime,
-  getRelativeTimeStamp,
-} from "../../services/utilityServicies";
 import { Link } from "react-router-dom";
 import { RiHomeLine } from "react-icons/ri";
 
@@ -55,22 +51,7 @@ export default function TitleBar({
   const [isMaximized, setisMaximized] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
-  const [lastEdited, setLastEdited] = useState<Date | null>(null);
   const [relativeTime, setRelativeTime] = useState("");
-
-  useEffect(() => {
-    const fetchAndUpdate = async () => {
-      const timestamp = await getLastEditedTime();
-      setLastEdited(timestamp);
-      setRelativeTime(getRelativeTimeStamp(timestamp));
-    };
-
-    fetchAndUpdate();
-
-    const interval = setInterval(fetchAndUpdate, 60000);
-
-    return () => clearInterval(interval);
-  }, []);
 
   useEffect(() => {
     const handleResize = () => setWindowWidth(window.innerWidth);
@@ -99,7 +80,7 @@ export default function TitleBar({
   return (
     <motion.div
       id="titlebar"
-      className={`relative z-10 w-full h-8 flex items-center justify-between ${
+      className={`relative z-10 w-full h-8 mt-2 flex items-center justify-between ${
         outline ? "outline outline-1 outline-solid outline-neutral-800" : ""
       }`}
       initial={{ backgroundColor: "rgba(0,0,0,0)", paddingLeft: 0 }}
@@ -214,21 +195,21 @@ export default function TitleBar({
           <button
             id="minimize"
             onClick={async () => Neutralino?.window?.minimize()}
-            className="w-5 h-5 flex items-center justify-center hover:bg-neutral-800 rounded transition drag-exclude cursor-pointer"
+            className="w-10 h-10 flex items-center justify-center hover:bg-neutral-800 rounded transition drag-exclude cursor-pointer"
           >
             <Minus color="white" size={16} strokeWidth={2} />
           </button>
           <button
             id="maximize"
             onClick={() => Neutralino?.window?.maximize()}
-            className="w-5 h-5 flex items-center justify-center hover:bg-neutral-800 rounded transition drag-exclude cursor-pointer"
+            className="w-10 h-10 flex items-center justify-center hover:bg-neutral-800 rounded transition drag-exclude cursor-pointer"
           >
             <Square color="white" size={13} strokeWidth={2} />
           </button>
           <button
             id="close"
             onClick={async () => Neutralino?.app?.exit()}
-            className="w-5 h-5 flex items-center justify-center drag-exclude cursor-pointer"
+            className="w-10 h-10 flex items-center justify-center rounded transition drag-exclude cursor-pointer"
           >
             <X color="white" size={16} strokeWidth={2} />
           </button>

@@ -4,8 +4,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "neu:dev": "neu run",
-    "dev:desktop": "node ./scripts/dev-neutralino.js"
+    "neu:dev": "neu run"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.10",
