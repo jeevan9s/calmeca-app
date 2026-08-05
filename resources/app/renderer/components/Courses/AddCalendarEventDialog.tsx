@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState, type FormEvent } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
 import { Input } from '@/components/input';

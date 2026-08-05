@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent } from "@/components/dialog";
 import { Calendar, BookOpen, Plus, Clock } from "react-feather";
@@ -25,14 +25,14 @@ export default function QuickActionDialog({ courseId, open, onClose }: QuickAddD
   const [finalExam, setFinalExam] = useState<{ start: Date | null; end: Date | null } | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
 
-  React.useEffect(() => {
-    if (!open) {
-      setShowTask(false);
-      setShowExam(false);
-      setShowCourse(false);
-      setShowCalendarEvent(false);
-    }
-  }, [open]);
+useEffect(() => {
+  if (!open) {
+    setShowTask(false);
+    setShowExam(false);
+    setShowCourse(false);
+    setShowCalendarEvent(false);
+  }
+}, [open]);
 
   const handleClose = () => {
     setShowTask(false);

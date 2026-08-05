@@ -3,10 +3,10 @@
 import { useState, useEffect } from "react";
 import { Course } from "@/services/db";
 import { Edit2 } from "lucide-react";
+import { DynamicIcon, IconName } from 'lucide-react/dynamic';
 import AddCourseDialog from "./AddCourseDialog";
 import AddDatesDialog from "./AddExamDialog";
 import { format, differenceInDays, differenceInCalendarDays } from "date-fns";
-import * as LucideIcons from "lucide-react";
 
 interface CourseHeaderProps {
   course: Course;
@@ -50,11 +50,11 @@ export default function CourseHeader({ course, onUpdateCourse }: CourseHeaderPro
 
   const iconName =
     typeof course.icon === "string"
-      ? course.icon.charAt(0).toUpperCase() + course.icon.slice(1)
+      ? course.icon.includes("-")
+        ? course.icon.toLowerCase()
+        : course.icon.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase()
       : null;
-  const IconComponent = iconName && typeof LucideIcons[iconName as keyof typeof LucideIcons] === "function"
-    ? (LucideIcons[iconName as keyof typeof LucideIcons] as React.ComponentType<any>)
-    : null;
+  const courseIconElement = iconName ? <DynamicIcon name={iconName as IconName} size={12} className="text-white w-8 h-8 flex-shrink-0 mt-1" /> : null;
 
   const getNextExamInfo = () => {
     const now = new Date();
@@ -86,7 +86,7 @@ export default function CourseHeader({ course, onUpdateCourse }: CourseHeaderPro
     >
       <div className="flex flex-col gap-2 max-w-[60%]">
        <div className="flex items-center gap-3">
-  {IconComponent && <IconComponent size={12} className="text-white w-8 h-8 flex-shrink-0 mt-1" />}
+  {courseIconElement}
   <h1 className="text-4xl font-nun font-bold leading-tight break-words">
     {course.title}
   </h1>

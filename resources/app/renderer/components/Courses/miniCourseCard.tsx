@@ -3,7 +3,7 @@
 import { Course } from "@/services/db";
 import { motion, useMotionValue, useTransform, useSpring } from "framer-motion";
 import { useState } from "react";
-import * as LucideIcons from "lucide-react";
+import { DynamicIcon, IconName } from 'lucide-react/dynamic';
 import { useNavigate } from "react-router-dom";
 
 
@@ -39,9 +39,11 @@ export default function MiniCourseCard({ name, code, color, course }: MiniCourse
 
   const iconName =
     typeof course.icon === "string"
-      ? course.icon.charAt(0).toUpperCase() + course.icon.slice(1)
+      ? course.icon.includes("-")
+        ? course.icon.toLowerCase()
+        : course.icon.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase()
       : null;
-  const IconComponent = iconName ? LucideIcons[iconName as keyof typeof LucideIcons] : null;
+  const courseIconElement = iconName ? <DynamicIcon name={iconName as IconName} size={16} className="text-white" /> : null;
 
   return (
     <motion.div

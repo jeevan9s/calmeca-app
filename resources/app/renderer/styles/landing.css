@@ -14,7 +14,6 @@ html, body {
   overflow-y: hidden;
   width: 100vw;
   height: 100vh;
-  background: transparent;
   user-select: none;
 }
 

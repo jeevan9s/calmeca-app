@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import * as React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Trash2, Check, X } from 'react-feather';
 import { SubTask } from '@/services/db';

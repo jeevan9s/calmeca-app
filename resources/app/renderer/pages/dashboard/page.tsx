@@ -68,7 +68,7 @@ const formattedHeaderDate = todayDate.toLocaleDateString("en-US", {
 
 
 return (
-  <div className="min-h-screen bg-zinc-950/70 text-white w-full overflow-hidden">
+  <div className="min-h-screen bg-zinc-900 text-white w-full overflow-hidden">
     <Layout>
       <ScrollArea className="h-screen p-4">
         <motion.div

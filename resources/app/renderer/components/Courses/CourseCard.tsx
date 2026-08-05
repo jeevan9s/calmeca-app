@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, type MouseEvent } from "react";
 import { Course, courseTypeLabels } from "@/services/db";
 import { format, differenceInDays } from "date-fns";
-import { Calendar, GraduationCap, Edit2, Trash2, Archive } from "lucide-react";
+import { Calendar, GraduationCap, Edit2, Trash2, Archive, MoreHorizontal } from "lucide-react";
+import { DynamicIcon, IconName } from 'lucide-react/dynamic';
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from "framer-motion";
-import * as LucideIcons from "lucide-react";
 
 
 interface CourseCardProps {
@@ -19,10 +19,12 @@ interface CourseCardProps {
 export default function CourseCard({ course, onEdit, onDelete, onArchive }: CourseCardProps) {
   if (!course) return null;
 
-  const iconName = course.icon && typeof course.icon === "string"
-    ? course.icon.charAt(0).toUpperCase() + course.icon.slice(1)
+  const iconName = typeof course.icon === "string"
+    ? course.icon.includes("-")
+      ? course.icon.toLowerCase()
+      : course.icon.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase()
     : null;
-  const IconComponent = iconName ? (LucideIcons[iconName as keyof typeof LucideIcons] || null) : null;
+  const courseIconElement = iconName ? <DynamicIcon name={iconName as IconName} size={16} className="text-white" /> : null;
 
   const [showPopup, setShowPopup] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -106,12 +108,12 @@ export default function CourseCard({ course, onEdit, onDelete, onArchive }: Cour
         onClick={() => navigate(`/courses/${course.id}`)}
       >
         <div className="absolute top-3 right-3 flex items-center gap-2">
-          {IconComponent && <IconComponent size={16} className="text-white" />}
+          {courseIconElement}
           <button
             onClick={(e) => { e.stopPropagation(); setShowPopup(prev => !prev); }}
             className="p-2 hover:bg-zinc-600/40 rounded-xl transition-colors z-50"
           >
-            <LucideIcons.MoreHorizontal size={16} className="text-white" />
+            <MoreHorizontal size={16} className="text-white" />
           </button>
         </div>
 

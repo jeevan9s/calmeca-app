@@ -23,7 +23,7 @@ export default function FloatingActionButton({ courseId }: FloatingActionButtonP
           boxShadow: "0 10px 25px rgba(255, 255, 255, 0.2)",
         }}
         whileTap={{ scale: 0.9 }}
-        className="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-white/80 text-black shadow-lg hover:bg-white hover:text-black flex items-center justify-center transition-all"
+        className="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-white text-black shadow-lg hover:bg-white hover:text-black flex items-center justify-center transition-all"
         onClick={() => setOpen(true)}
       >
         <motion.div animate={{ rotate: 0 }} whileHover={{ rotate: 90 }} transition={{ duration: 0.2 }}>

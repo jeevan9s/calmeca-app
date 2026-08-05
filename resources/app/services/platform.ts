@@ -35,25 +35,25 @@ export async function addGoogleCalendarEvent(
   end: string,
   allDay = false,
   recurrence = 'none'
-// ) {
-//   return apiRequest('/api/calendar/events', {
-//     method: 'POST',
-//     headers: { 'Content-Type': 'application/json' },
-//     body: JSON.stringify({ summary, start, end, allDay, recurrence }),
-//   });
-// }
+) {
+  return apiRequest('/api/calendar/events', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ summary, start, end, allDay, recurrence }),
+  });
+}
 
-// export async function deleteGoogleCalendarEvent(eventId: string) {
-//   return apiRequest(`/api/calendar/events/${encodeURIComponent(eventId)}`, {
-//     method: 'DELETE',
-//   });
-// }
+export async function deleteGoogleCalendarEvent(eventId: string) {
+  return apiRequest(`/api/calendar/events/${encodeURIComponent(eventId)}`, {
+    method: 'DELETE',
+  });
+}
 
-// export async function extractCourseFromPDF(base64: string) {
-//   const result = await apiRequest('/api/pdf/extract', {
-//     method: 'POST',
-//     headers: { 'Content-Type': 'application/json' },
-//     body: JSON.stringify({ pdf: base64 }),
-//   });
-//   return result ?? { success: false, error: 'Unavailable' };
-// }
+export async function extractCourseFromPDF(base64: string) {
+  const result = await apiRequest('/api/pdf/extract', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ pdf: base64 }),
+  });
+  return result ?? { success: false, error: 'Unavailable' };
+}
