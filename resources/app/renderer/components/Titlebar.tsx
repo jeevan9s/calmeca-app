@@ -141,7 +141,7 @@ export default function TitleBar({
                 }`}
                 color="white"
                 size={18}
-                strokeWidth={0.9}
+                strokeWidth={1}
               />
               <ChevronsRight
                 className={`sidebar-icon absolute transition-transform duration-200 hover:scale-110 ${
@@ -149,15 +149,15 @@ export default function TitleBar({
                 }`}
                 color="white"
                 size={18}
-                strokeWidth={2.25}
+                strokeWidth={1}
               />
             </button>
           )}
 
           <Link to="/dashboard">
             <button id="home" className="drag-exclude mt-[6px] cursor-pointer">
-              <LayoutGrid            
-                strokeWidth={0.84}
+              <LayoutDashboard           
+                strokeWidth={0.8}
                 size={19}
                 color="white" />
             </button>
@@ -180,7 +180,7 @@ export default function TitleBar({
               if (ontoggleAuth) ontoggleAuth();
             }}
           >
-            <User color="white" size={16} strokeWidth={2} />
+            <User color="white" size={16} strokeWidth={1} />
           </button>
 
           <button
@@ -190,7 +190,7 @@ export default function TitleBar({
               if (ontoggleQuickNav) ontoggleQuickNav();
             }}
           >
-            <Hexagon color="white" size={16} strokeWidth={2} />
+            <Hexagon color="white" size={16} strokeWidth={1} />
           </button>
         </div>
         <div className="flex items-center border-l border-neutral-700 ml-5">
@@ -199,21 +199,21 @@ export default function TitleBar({
             onClick={async () => Neutralino?.window?.minimize()}
             className="w-10 h-10 flex items-center justify-center hover:bg-neutral-800 rounded transition drag-exclude cursor-pointer"
           >
-            <Minus color="white" size={16} strokeWidth={2} />
+            <Minus color="white" size={16} strokeWidth={1} />
           </button>
           <button
             id="maximize"
             onClick={() => Neutralino?.window?.maximize()}
             className="w-10 h-10 flex items-center justify-center hover:bg-neutral-800 rounded transition drag-exclude cursor-pointer"
           >
-            <Square color="white" size={13} strokeWidth={2} />
+            <Square color="white" size={13} strokeWidth={1} />
           </button>
           <button
             id="close"
             onClick={async () => Neutralino?.app?.exit()}
             className="w-10 h-10 flex items-center justify-center rounded transition drag-exclude cursor-pointer"
           >
-            <X color="white" size={16} strokeWidth={2} />
+            <X color="white" size={16} strokeWidth={1} />
           </button>
         </div>
       </div>

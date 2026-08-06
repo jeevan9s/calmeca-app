@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useCallback, type MouseEvent } from "react";
 import { Course, courseTypeLabels } from "@/services/db";
 import { format, differenceInDays } from "date-fns";
-import { Calendar, GraduationCap, Edit2, Trash2, Archive, MoreHorizontal } from "lucide-react";
+import { Calendar, GraduationCap, Edit2, Trash2, Archive, MoreHorizontal, LucideTrash2 } from "lucide-react";
 import { DynamicIcon, IconName } from 'lucide-react/dynamic';
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from "framer-motion";
@@ -104,7 +104,7 @@ export default function CourseCard({ course, onEdit, onDelete, onArchive }: Cour
         exit={{ opacity: 0, y: -20 }}
         whileHover={{ scale: 1.03 }}
         whileTap={{ scale: 0.97 }}
-        className="relative bg-zinc-800 rounded-xl p-4 h-[14.5em] w-72 cursor-pointer transition-colors overflow-visible m-2"
+        className="relative bg-zinc-800 rounded-xl p-4 h-[12.5em] w-64 cursor-pointer transition-colors overflow-visible m-2"
         onClick={() => navigate(`/courses/${course.id}`)}
       >
         <div className="absolute top-3 right-3 flex items-center gap-2">
@@ -123,7 +123,7 @@ export default function CourseCard({ course, onEdit, onDelete, onArchive }: Cour
             <p className="text-gray-300 text-sm font-semibold font-dm mb-2">{course.code || ""}</p>
             {course.type && (
               <div className="flex items-center gap-1 mb-2">
-                <LucideIcons.GraduationCap size={12} className="text-gray-500" />
+                <GraduationCap size={12} className="text-gray-500" />
                 <span className="text-gray-300 text-xs font-thin font-dm">{courseTypeLabels[course.type]}</span>
               </div>
             )}
@@ -131,7 +131,7 @@ export default function CourseCard({ course, onEdit, onDelete, onArchive }: Cour
             {course.description && <p className="text-gray-500 text-xs font-dm">{course.description}</p>}
             <div className="space-y-1 mb-2 mt-4">
               <div className="flex items-center gap-2 text-gray-500 text-xs font-dm">
-                <LucideIcons.Calendar size={10} />
+                <Calendar size={10} />
                 {course.endsOn && !isNaN(new Date(course.endsOn).getTime())
                   ? <span>ends {format(new Date(course.endsOn), "MMM dd")}</span>
                   : <span>ends N/A</span>}
@@ -160,13 +160,13 @@ export default function CourseCard({ course, onEdit, onDelete, onArchive }: Cour
             className="bg-zinc-700 rounded-xl border border-zinc-600 shadow-lg overflow-visible z-50"
           >
             <button onClick={handleEdit} className="flex items-center gap-2 px-3 py-2 text-sm text-gray-300 hover:bg-zinc-600 hover:text-white w-full text-left transition-colors">
-              <LucideIcons.Edit2 size={14} /> edit
+              <Edit2 size={14} /> edit
             </button>
             <button onClick={handleArchive} className="flex items-center gap-2 px-3 py-2 text-sm text-yellow-400 hover:bg-zinc-600 hover:text-yellow-300 w-full text-left transition-colors">
-              <LucideIcons.Archive size={14} /> archive
+              <Archive size={14} /> archive
             </button>
             <button onClick={handleDelete} className="flex items-center gap-2 px-3 py-2 text-sm text-red-400 hover:bg-zinc-600 hover:text-red-300 w-full text-left transition-colors">
-              <LucideIcons.Trash2 size={14} /> delete
+              <Trash2 size={14} /> delete
             </button>
           </motion.div>
         )}

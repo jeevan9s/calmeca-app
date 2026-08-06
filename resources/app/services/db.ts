@@ -29,9 +29,6 @@ export interface Course {
     finalExamEndDate?: Date;
     archived?: boolean;
     updatedOn: Date;
-    updatedFrom?: 'calendar' | 'assignment' | 'other';
-    officeHours?: OfficeHour[];
-    // homepage?: CourseHomepage; // TODO: Define CourseHomepage interface
     links?: { title: string; url: string }[];
     notes?: string;
     announcements?: string[];
@@ -91,17 +88,6 @@ export interface CalendarEvent {
     summary: string;
     color?: string;
 }
-
-export interface MicrosoftFile {
-    id: string;
-    name: string;
-    mimeType: string;
-    size: number;
-    createdOn: Date;
-    lastModified: Date;
-}
-
-
 
 export interface OfficeHour {
     days?: string[];

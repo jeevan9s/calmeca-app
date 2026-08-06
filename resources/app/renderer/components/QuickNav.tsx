@@ -4,7 +4,7 @@ import { motion, easeInOut } from 'framer-motion'
 import '@/renderer/styles/quicknav.css'
 import { ChevronRight, Home, Book, Folder } from 'react-feather'
 import { RiHomeLine } from 'react-icons/ri'
-import { LayoutGrid } from 'lucide-react'
+import { LayoutDashboard, LayoutGrid } from 'lucide-react'
 
 type QuickNavProps = {
   isQuickNavOpen: boolean
@@ -70,7 +70,7 @@ export default function QuickNav({ isQuickNavOpen, setIsQuickNavOpen }: QuickNav
           onClick={() => handleNavigate('/dashboard')}
           className="flex flex-col items-center gap-2 p-3 bg-white/5 hover:bg-white/10 rounded-xl transition-colors cursor-pointer"
         >
-          <LayoutGrid size={20} className="text-white" />
+          <LayoutDashboard size={20} className="text-white" />
           <span className="text-xs text-white font-dm">dashboard</span>
         </motion.button>
         
