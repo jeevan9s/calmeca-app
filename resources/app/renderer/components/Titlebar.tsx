@@ -1,11 +1,10 @@
-import { PiCopy } from "react-icons/pi";
 import {
   ChevronsRight,
   Minus,
   X,
   Square,
+  Copy,
   Menu,
-  Bell,
   Hexagon,
   User,
 } from "react-feather";
@@ -13,8 +12,7 @@ import "@/renderer/styles/tb.css";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { RiHomeLine } from "react-icons/ri";
-import { Box, LayoutDashboard, LayoutFreeform, LayoutGrid, LayoutTemplate } from "lucide-react";
+import { LayoutDashboard } from "lucide-react";
 
 type TitleBarProps = {
   solidBackground?: boolean;
@@ -43,7 +41,6 @@ export default function TitleBar({
   setIsLocked,
   ontoggleQuickNav,
   ontoggleAuth,
-  ontoggleAlerts,
   disableButton,
   disableHoverZones = false,
   solidBackground = false,
@@ -52,7 +49,7 @@ export default function TitleBar({
   const [isMaximized, setisMaximized] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
-  const [relativeTime, setRelativeTime] = useState("");
+  const [relativeTime] = useState("");
 
   useEffect(() => {
     const handleResize = () => setWindowWidth(window.innerWidth);
@@ -62,13 +59,6 @@ export default function TitleBar({
       window.removeEventListener("resize", handleResize);
     };
   }, []);
-
-  const shouldShowHoverZone =
-    windowWidth >= 640 &&
-    !isAlertsOpen &&
-    !isQuickNavOpen &&
-    !isAuthDialogOpen &&
-    !disableHoverZones;
 
   let paddingLeft = 0;
   if (isLocked) {
@@ -156,7 +146,7 @@ export default function TitleBar({
 
           <Link to="/dashboard">
             <button id="home" className="drag-exclude mt-[6px] cursor-pointer">
-              <LayoutDashboard           
+              <LayoutDashboard 
                 strokeWidth={0.8}
                 size={19}
                 color="white" />
@@ -196,21 +186,50 @@ export default function TitleBar({
         <div className="flex items-center border-l border-neutral-700 ml-5">
           <button
             id="minimize"
-            onClick={async () => Neutralino?.window?.minimize()}
+            onClick={async () => {
+              try {
+                await Neutralino.window.minimize();
+              } catch (err) {
+                console.error(err);
+              }
+            }}
             className="w-10 h-10 flex items-center justify-center hover:bg-neutral-800 rounded transition drag-exclude cursor-pointer"
           >
             <Minus color="white" size={16} strokeWidth={1} />
           </button>
           <button
             id="maximize"
-            onClick={() => Neutralino?.window?.maximize()}
+            onClick={async () => {
+              try {
+                const maximized = await Neutralino.window.isMaximized();
+                if (maximized) {
+                  await Neutralino.window.unmaximize();
+                  setisMaximized(false);
+                } else {
+                  await Neutralino.window.maximize();
+                  setisMaximized(true);
+                }
+              } catch (err) {
+                console.error(err);
+              }
+            }}
             className="w-10 h-10 flex items-center justify-center hover:bg-neutral-800 rounded transition drag-exclude cursor-pointer"
           >
-            <Square color="white" size={13} strokeWidth={1} />
+            {isMaximized ? (
+              <Copy color="white" size={12} strokeWidth={1} className="rotate-180 scale-x-[-1]" />
+            ) : (
+              <Square color="white" size={13} strokeWidth={1} />
+            )}
           </button>
           <button
             id="close"
-            onClick={async () => Neutralino?.app?.exit()}
+            onClick={async () => {
+              try {
+                await Neutralino.app.exit();
+              } catch (err) {
+                console.error(err);
+              }
+            }}
             className="w-10 h-10 flex items-center justify-center rounded transition drag-exclude cursor-pointer"
           >
             <X color="white" size={16} strokeWidth={1} />

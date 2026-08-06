@@ -21,6 +21,7 @@ import {
 import { toast } from "sonner";
 import { dummyCourses } from "@/lib/dummy";
 import { useNavigate } from "react-router-dom";
+import FloatingActionButton from "@/renderer/components/FloatingActionButton";
 
 export default function CourseOverviewPage() {
   const [courses, setCourses] = useState<Course[]>([]);
@@ -428,6 +429,8 @@ export default function CourseOverviewPage() {
             </div>
           </div>
         )}
+              <FloatingActionButton />
+        
       </Layout>
     </div>
   );

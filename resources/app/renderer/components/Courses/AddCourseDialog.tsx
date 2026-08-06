@@ -85,7 +85,6 @@ export default function AddCourseDialog({
           setDescription(latest.description || "");
           setColor(latest.color || "#8B0000");
 
-          // Always load both start and end for midterms
           setMidterms(
             (latest.midterms && latest.midterms.length > 0)
               ? latest.midterms.map(mt => ({
