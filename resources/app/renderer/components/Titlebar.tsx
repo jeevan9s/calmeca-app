@@ -14,6 +14,7 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { RiHomeLine } from "react-icons/ri";
+import { Box, LayoutDashboard, LayoutFreeform, LayoutGrid, LayoutTemplate } from "lucide-react";
 
 type TitleBarProps = {
   solidBackground?: boolean;
@@ -80,7 +81,7 @@ export default function TitleBar({
   return (
     <motion.div
       id="titlebar"
-      className={`relative z-10 w-full h-8 mt-2 flex items-center justify-between ${
+      className={`relative z-10 w-full h-8 flex items-center justify-between ${
         outline ? "outline outline-1 outline-solid outline-neutral-800" : ""
       }`}
       initial={{ backgroundColor: "rgba(0,0,0,0)", paddingLeft: 0 }}
@@ -154,9 +155,10 @@ export default function TitleBar({
           )}
 
           <Link to="/dashboard">
-            <button id="home" className="drag-exclude">
-              <RiHomeLine            
-                strokeWidth={0.05}
+            <button id="home" className="drag-exclude mt-[6px] cursor-pointer">
+              <LayoutGrid            
+                strokeWidth={0.84}
+                size={19}
                 color="white" />
             </button>
           </Link>

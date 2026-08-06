@@ -16,12 +16,12 @@ export default function FloatingActionButton({ courseId }: FloatingActionButtonP
     <>
       <motion.button
         onClick={() => setOpen(true)}
-        initial={{ opacity: 0, scale: 0.8 }}
+        initial={{ opacity: 0, scale: 0.5 }}
         animate={{ opacity: 1, scale: 1 }}
         whileHover={{ rotate: 180 }}
         whileTap={{ scale: 0.9 }}
         transition={{ type: "spring", stiffness: 260, damping: 20 }}
-        className="fixed bottom-6 right-6 z-50 inline-flex h-14 w-14 items-center justify-center rounded-full bg-white text-black shadow-lg cursor-pointer"
+        className="fixed bottom-6 right-6 z-50 inline-flex h-14 w-14 items-center justify-center rounded-full bg-white/80 text-black shadow-lg cursor-pointer"
       >
         <Plus className="h-6 w-6 text-black" strokeWidth={2.5} />
       </motion.button>
