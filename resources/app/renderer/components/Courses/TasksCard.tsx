@@ -132,7 +132,7 @@ export default function TasksCard({ courseTitle, courseId }: { courseTitle: stri
           
           <CardHeader className="flex flex-row items-left justify-between gap-2 flex-nowrap">
             <div className="flex flex-col">
-              <CardTitle className="font-nun">tasks</CardTitle>
+              <CardTitle className="font-dm">tasks</CardTitle>
               <CardDescription className="text-white/50 font-dm">
                 task organization
                 {overdueTasks.length > 0 && (
@@ -232,7 +232,7 @@ export default function TasksCard({ courseTitle, courseId }: { courseTitle: stri
 
                     <DialogContent className="bg-zinc-900 border-none text-white rounded-[1em]">
                       <DialogHeader>
-                        <DialogTitle className="text-lg font-nun leading-tight">{task.title}</DialogTitle>
+                        <DialogTitle className="text-lg font-dm leading-tight">{task.title}</DialogTitle>
                         <DialogDescription className="text-neutral-400 text-sm font-dm">
                           {task.deadline ? `due: ${getDeadlineLabel(task)}` : "no deadline set"}
                         </DialogDescription>

@@ -78,7 +78,7 @@ export default function SubtaskComponent({
   return (
     <div className="mt-4 space-y-2">
       <div className="flex items-center justify-between">
-        <h4 className="text-sm font-medium text-gray-300 font-nun">subtasks</h4>
+        <h4 className="text-sm font-medium text-gray-300 font-dm">subtasks</h4>
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}

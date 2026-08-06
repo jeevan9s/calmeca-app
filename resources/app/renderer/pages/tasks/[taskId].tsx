@@ -200,7 +200,7 @@ export default function TaskHomepage() {
                                         <Circle className="h-6 w-6 text-white/60 hover:text-white" />
                                     )}
                                 </button>
-                                <h1 className={`text-3xl font-bold font-nun ${
+                                <h1 className={`text-3xl font-bold font-dm ${
                                     task.completed 
                                         ? 'text-white/60 line-through' 
                                         : task.deadline && isOverdue(task.deadline)
@@ -259,7 +259,7 @@ export default function TaskHomepage() {
                         className="space-y-4"
                     >
                         <div className="flex items-center justify-between">
-                            <h2 className="text-xl font-semibold text-white font-nun flex items-center gap-2">
+                            <h2 className="text-xl font-semibold text-white font-dm flex items-center gap-2">
                                 <FileText className="h-5 w-5" />
                                 notes
                             </h2>
@@ -330,7 +330,7 @@ export default function TaskHomepage() {
                         className="space-y-4"
                     >
                         <div className="flex items-center justify-between">
-                            <h2 className="text-xl font-semibold text-white font-nun">
+                            <h2 className="text-xl font-semibold text-white font-dm">
                                 subtasks ({subtasks.length})
                             </h2>
                             <motion.button

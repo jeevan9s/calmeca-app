@@ -84,7 +84,7 @@ export default function MiniCourseCard({ name, code, color, course }: MiniCourse
         <p className="text-[10px] tracking-wide font-light text-neutral-400 uppercase font-dm truncate">
           {name}
         </p>
-        <p className="text-xl text-white mt-1 font-nun tracking-tight truncate">
+        <p className="text-xl text-white mt-1 font-dm tracking-tight truncate">
           {code}
         </p>
       </div>

@@ -148,7 +148,7 @@ export default function AddDatesDialog({
               >
                 <Dialog.Panel className="w-full max-w-md transform rounded-xl bg-neutral-900 p-6 text-left shadow-xl transition-all">
                   <div className="flex items-center justify-between">
-                    <Dialog.Title className="text-lg text-white font-nun font-semibold">
+                    <Dialog.Title className="text-lg text-white font-dm font-semibold">
                       {`${existingCourse.title} - Important Dates`}
                     </Dialog.Title>
                     <Tooltip>

@@ -33,7 +33,7 @@ export default function CoursesCard() {
     <motion.div whileHover={{ scale: 1.01, y: -2 }} transition={{ duration: 0.2 }}>
       <Card className="bg-zinc-400/10 h-80 sm:h-84 flex flex-col rounded-xl">
         <CardHeader>
-          <CardTitle className="font-nun">courses</CardTitle>
+          <CardTitle className="font-dm">courses</CardTitle>
           <CardDescription className="text-white/50 font-dm">currently taking</CardDescription>
         </CardHeader>
         <CardContent className="flex-1 flex flex-wrap gap-2 overflow-auto">

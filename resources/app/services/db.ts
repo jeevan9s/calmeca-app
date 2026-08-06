@@ -29,9 +29,8 @@ export interface Course {
     finalExamEndDate?: Date;
     archived?: boolean;
     updatedOn: Date;
-    links?: { title: string; url: string }[];
-    notes?: string;
-    announcements?: string[];
+    reources: Resource[]; 
+    tasks: Task[]; 
 }
 
 export type CourseType = 'lecture' | 'studio' | 'lab';
@@ -50,16 +49,24 @@ export interface Contact {
     courseId?: string;
 }
 
+export type TaskType = 
+  | "default" 
+  | "problem set" 
+  | "lab" 
+  | "project task" 
+  | "report" 
+  | "tutorial exercise" 
+  | "custom";
+
+
 export interface Task {
     id: string;
     courseId: string;
     title: string;
-    type: 'default'| 'homework' | 'lab' | 'exam' | 'project task' | 'report' | 'quiz' | 'tutorial exercise' | 'custom' | 'problem set' ;
+    type: TaskType;
     deadline: Date;
     completed: boolean;
     color: string;
-    description?: string;
-    notes?: string;
     googleCalendarEventId?: string;
 }
 

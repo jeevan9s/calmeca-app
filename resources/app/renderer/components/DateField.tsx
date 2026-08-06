@@ -1,40 +1,49 @@
-"use client";
+"use client"
 
-import { useEffect, useRef, useState } from "react";
-import { ChevronDownIcon, ClockIcon } from "lucide-react";
+import { useEffect, useState, useRef } from "react";
+import { format } from "date-fns";
+import { Label } from "@/components/label";
 import { Button } from "@/components/button";
 import { Calendar } from "@/components/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/popover";
-import { Label } from "@/components/label";
-import { format } from "date-fns";
+import { ChevronDownIcon, ClockIcon } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 
-interface DateTimePickerProps {
-  selected: Date | null;
-  onChange: (date: Date) => void;
-  label: string;
-  allDay?: boolean;
-}
 
-// one option every 15 minutes, e.g. "12:00 AM", "12:15 AM", ... "11:45 PM"
+const DATE_FORMAT = "dd/MM/yy";
+
 const TIME_OPTIONS = Array.from({ length: 24 * 4 }, (_, i) => {
   const hours = Math.floor(i / 4);
   const minutes = (i % 4) * 15;
   return { hours, minutes, label: format(new Date(2000, 0, 1, hours, minutes), "h:mm a") };
 });
 
-export default function DateTimePicker({
+interface EventDateTimeFieldProps {
+  id: "start" | "end";
+  label: string;
+  selected: Date | null;
+  onChange: (date: Date) => void;
+  allDay: boolean;
+  activePicker: string | null;
+  setActivePicker: (id: string | null) => void;
+}
+
+export function EventDateTimeField({
+  id,
+  label,
   selected,
   onChange,
-  label,
-  allDay = false,
-}: DateTimePickerProps) {
-  // internal draft so we always have a valid Date to render/merge against,
-  // even before the user has picked anything
+  allDay,
+  activePicker,
+  setActivePicker,
+}: EventDateTimeFieldProps) {
   const [draft, setDraft] = useState<Date>(selected || new Date());
-  const [dateOpen, setDateOpen] = useState(false);
-  const [timeOpen, setTimeOpen] = useState(false);
   const activeTimeRef = useRef<HTMLButtonElement>(null);
+
+  const dateKey = `${id}-date`;
+  const timeKey = `${id}-time`;
+  const dateOpen = activePicker === dateKey;
+  const timeOpen = activePicker === timeKey;
 
   useEffect(() => {
     if (selected) setDraft(selected);
@@ -45,6 +54,16 @@ export default function DateTimePicker({
       activeTimeRef.current?.scrollIntoView({ block: "center" });
     }
   }, [timeOpen]);
+
+  const handleDateOpenChange = (next: boolean) => {
+    if (next) setActivePicker(dateKey);
+    else if (activePicker === dateKey) setActivePicker(null);
+  };
+
+  const handleTimeOpenChange = (next: boolean) => {
+    if (next) setActivePicker(timeKey);
+    else if (activePicker === timeKey) setActivePicker(null);
+  };
 
   const mergeDateWithTime = (date: Date, hours: number, minutes: number) => {
     const merged = new Date(date);
@@ -59,35 +78,33 @@ export default function DateTimePicker({
       : mergeDateWithTime(date, draft.getHours(), draft.getMinutes());
     setDraft(next);
     onChange(next);
-    setDateOpen(false);
+    setActivePicker(null);
   };
 
   const handleTimeSelect = (hours: number, minutes: number) => {
     const next = mergeDateWithTime(draft, hours, minutes);
     setDraft(next);
     onChange(next);
-    setTimeOpen(false);
+    setActivePicker(null);
   };
 
   const hasDate = selected instanceof Date && !isNaN(selected.getTime());
 
   return (
-    <div className="flex flex-col gap-2 w-full sm:w-auto">
-      <Label className="text-sm text-white/80 font-dm font-medium">
-        {label}
-      </Label>
+    <div className="flex flex-col gap-2 w-full">
+      <Label className="text-sm text-white/80 font-dm font-medium">{label}</Label>
 
-      <div className="flex items-center gap-2">
-        <Popover open={dateOpen} onOpenChange={setDateOpen}>
+      <div className="flex flex-col gap-2 w-full">
+        <Popover open={dateOpen} onOpenChange={handleDateOpenChange}>
           <PopoverTrigger asChild>
             <Button
               variant="outline"
               className="group cursor-pointer flex items-center justify-between gap-2 bg-zinc-800 border border-zinc-700 rounded-xl text-white font-dm
-                         h-12 px-4 flex-1 transition-colors duration-150 hover:bg-zinc-700 hover:text-white
+                         h-12 px-4 w-full transition-colors duration-150 hover:bg-zinc-700 hover:text-white
                          focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none"
             >
               <span className={hasDate ? "text-white" : "text-white/40"}>
-                {hasDate ? format(draft, "EEE, MMM dd") : "select date"}
+                {hasDate ? format(draft, DATE_FORMAT) : "select date"}
               </span>
               <ChevronDownIcon
                 size={16}
@@ -136,23 +153,23 @@ export default function DateTimePicker({
           {!allDay && (
             <motion.div
               key="time-selector"
-              initial={{ opacity: 0, width: 0 }}
-              animate={{ opacity: 1, width: "auto" }}
-              exit={{ opacity: 0, width: 0 }}
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.2, ease: "easeInOut" }}
-              className="overflow-hidden shrink-0"
+              className="overflow-hidden"
             >
-              <Popover open={timeOpen} onOpenChange={setTimeOpen}>
+              <Popover open={timeOpen} onOpenChange={handleTimeOpenChange}>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
                     aria-label={`${label} time`}
                     className="group cursor-pointer flex items-center justify-between gap-1.5 bg-zinc-800 border border-zinc-700 rounded-xl text-white font-dm
-                               h-12 px-3 w-[7.5rem] transition-colors duration-150 hover:bg-zinc-700 hover:text-white
+                               h-12 px-4 w-full transition-colors duration-150 hover:bg-zinc-700 hover:text-white
                                focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none"
                   >
                     <ClockIcon size={14} className="text-white/40 shrink-0" />
-                    <span className={`text-sm truncate ${hasDate ? "text-white" : "text-white/40"}`}>
+                    <span className={`text-sm flex-1 text-left truncate ${hasDate ? "text-white" : "text-white/40"}`}>
                       {hasDate ? format(draft, "h:mm a") : "--:--"}
                     </span>
                     <ChevronDownIcon
@@ -163,7 +180,7 @@ export default function DateTimePicker({
                 </PopoverTrigger>
                 <PopoverContent
                   align="start"
-                  className="w-32 p-1.5 bg-zinc-900 border border-zinc-700 rounded-xl text-white shadow-2xl max-h-64 overflow-y-auto"
+                  className="w-[--radix-popover-trigger-width] p-1.5 bg-zinc-900 border border-zinc-700 rounded-xl text-white shadow-2xl max-h-64 overflow-y-auto"
                 >
                   <div className="flex flex-col gap-0.5">
                     {TIME_OPTIONS.map(({ hours, minutes, label: timeLabel }) => {

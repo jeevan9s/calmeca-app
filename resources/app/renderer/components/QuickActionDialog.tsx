@@ -206,6 +206,7 @@ export default function QuickActionDialog({
           isOpen={showTask}
           onClose={handleClose}
           onTaskAdded={handleClose}
+          outsideCourseOrigin={true}
           courseId={courseId || ""}
         />
       )}

@@ -166,7 +166,7 @@ export default function UpcomingExamsCard() {
     <motion.div whileHover={{ scale: 1.01, y: -2 }} transition={{ duration: 0.2 }} className="rounded-lg flex-1">
       <Card className="h-44 sm:h-48 bg-zinc-400/10 w-full rounded-xl">
         <CardHeader>
-          <CardTitle className="font-nun">midterms & exams</CardTitle>
+          <CardTitle className="font-dm">midterms & exams</CardTitle>
           <CardDescription className="text-white/50 font-dm">upcoming exams</CardDescription>
         </CardHeader>
 
@@ -197,7 +197,7 @@ export default function UpcomingExamsCard() {
 
                     <DialogContent className="bg-zinc-900 border-none text-white rounded-[1em]">
                       <DialogHeader>
-                        <DialogTitle className="text-lg font-bold font-nun">{exam.title}</DialogTitle>
+                        <DialogTitle className="text-lg font-bold font-dm">{exam.title}</DialogTitle>
                         <DialogDescription className="text-neutral-400 text-sm font-dm">
                           <div className="space-y-1">
                             <p><span className="font-semibold">Course:</span> {exam.courseName}</p>

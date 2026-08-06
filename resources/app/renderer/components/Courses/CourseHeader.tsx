@@ -87,7 +87,7 @@ export default function CourseHeader({ course, onUpdateCourse }: CourseHeaderPro
       <div className="flex flex-col gap-2 max-w-[60%]">
        <div className="flex items-center gap-3">
   {courseIconElement}
-  <h1 className="text-4xl font-nun font-bold leading-tight break-words">
+  <h1 className="text-4xl font-dm font-bold leading-tight break-words">
     {course.title}
   </h1>
 </div>

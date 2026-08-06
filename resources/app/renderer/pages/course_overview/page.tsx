@@ -175,7 +175,7 @@ export default function CourseOverviewPage() {
       <div className="min-h-screen w-full bg-zinc-950/70 text-white">
         <Layout>
           <div className="px-4 flex flex-col gap-y-1 mb-3">
-            <h1 className="font-nun font-bold text-2xl sm:text-3xl lg:text-4xl">
+            <h1 className="font-dm font-bold text-2xl sm:text-3xl lg:text-4xl">
               course overview
             </h1>
             <h2 className="font-dm text-neutral-400 text-sm">
@@ -274,7 +274,7 @@ export default function CourseOverviewPage() {
             </div>
             {courses.length === 0 ? (
               <>
-                <p className="font-nun font-semibold text-lg text-white mb-1">
+                <p className="font-dm font-semibold text-lg text-white mb-1">
                   no courses yet
                 </p>
                 <p className="text-neutral-400 text-sm mb-5 max-w-xs">
@@ -289,7 +289,7 @@ export default function CourseOverviewPage() {
               </>
             ) : (
               <>
-                <p className="font-nun font-semibold text-lg text-white mb-1">
+                <p className="font-dm font-semibold text-lg text-white mb-1">
                   no matches found
                 </p>
                 <p className="text-neutral-400 text-sm">
@@ -325,7 +325,7 @@ export default function CourseOverviewPage() {
                   className="group flex items-center gap-4 px-4 py-3 rounded-2xl border border-zinc-800 bg-zinc-900/60 hover:bg-zinc-800/60 hover:border-zinc-700 transition-colors cursor-pointer"
                 >
                   <div className="shrink-0 w-11 h-11 rounded-xl bg-zinc-800 border border-zinc-700/80 flex items-center justify-center">
-                    <span className="font-nun font-semibold font-mp text-xs text-neutral-300">
+                    <span className="font-dm font-semibold font-mp text-xs text-neutral-300">
                       {initials || "?"}
                     </span>
                   </div>
@@ -406,7 +406,7 @@ export default function CourseOverviewPage() {
               <div className="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center mb-4">
                 <Trash2 size={18} className="text-red-400" />
               </div>
-              <p className="font-nun font-semibold text-white text-lg mb-1">
+              <p className="font-dm font-semibold text-white text-lg mb-1">
                 delete {pendingDelete.title}?
               </p>
               <p className="text-neutral-400 text-sm mb-5">

@@ -70,7 +70,7 @@ export default function ResourceBay({ course, className }: ResourceBayProps) {
     >
       <Card className="bg-zinc-400/10 h-80 sm:h-[17em] flex flex-col rounded-lg w-full">
         <CardHeader>
-          <CardTitle className="font-nun">resources</CardTitle>
+          <CardTitle className="font-dm">resources</CardTitle>
           <CardDescription className="text-white/50 font-dm">
             useful links & course materials
           </CardDescription>

@@ -94,7 +94,7 @@ export default function UpcomingCourseEventsCard({
     <motion.div className="w-full" whileHover={{ scale: 1.01, y: -2 }} transition={{ duration: 0.2 }}>
       <Card className="bg-[#0f0f10ff] flex flex-col rounded-[1em] w-full min-h-[24rem]">
         <CardHeader>
-          <CardTitle className="font-nun leading-tight">{courseTitle} - upcoming events</CardTitle>
+          <CardTitle className="font-dm leading-tight">{courseTitle} - upcoming events</CardTitle>
           <CardDescription className="font-dm text-white/50">
             events for the week
           </CardDescription>

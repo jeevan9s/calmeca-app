@@ -5,49 +5,61 @@ import { Dialog, Transition } from "@headlessui/react";
 import { Input } from "@/components/input";
 import { Label } from "@/components/label";
 import { Checkbox } from "@/components/checkbox";
-import DateTimePicker from "./DatePickerComponent";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/select";
+import { EventDateTimeField } from "../DateField";
 import { createTask, updateTask } from "@/services/core services/taskService";
 import { addCalendarEvent } from "@/lib/helpers/calendarHelpers";
 import { AnimatePresence, motion } from "framer-motion";
+import { TaskType } from "@/services/db";
 
-type CourseType =
-  | "default"
-  | "problem set"
-  | "homework"
-  | "lab"
-  | "project task"
-  | "report"
-  | "quiz"
-  | "tutorial exercise"
-  | "custom";
+interface TaskItem {
+  id?: string;
+  title?: string;
+  summary?: string;
+  deadline?: string | Date;
+  allDay?: boolean;
+  recurring?: boolean;
+  recurrence?: string;
+  type?: string;
+  courseId?: string;
+}
+
+interface CourseItem {
+  id: string;
+  name: string;
+}
+
+const taskTypeOptions: TaskType[] = [
+  "problem set",
+  "lab",
+  "project task",
+  "report",
+  "tutorial exercise",
+  "custom",
+];
 
 interface AddTaskDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onTaskAdded: () => void;
-  courseId: string;
-  taskToEdit?: any;
+  courseId?: string;
+  courses?: CourseItem[];
+  taskToEdit?: TaskItem;
+  outsideCourseOrigin?: boolean;
 }
 
-const courseTypeOptions: CourseType[] = [
-  "problem set",
-  "homework",
-  "lab",
-  "project task",
-  "report",
-  "quiz",
-  "tutorial exercise",
-  "custom",
-];
-
-const courseTypeLabels: Record<CourseType, string> = {
+const taskTypeLabels: Record<TaskType, string> = {
   default: "",
   "problem set": "problem set",
-  homework: "homework",
   lab: "lab",
   "project task": "project task",
   report: "report",
-  quiz: "quiz",
   "tutorial exercise": "tutorial exercise",
   custom: "custom",
 };
@@ -57,18 +69,24 @@ export default function AddTaskDialog({
   onClose,
   onTaskAdded,
   courseId,
+  courses = [],
   taskToEdit,
+  outsideCourseOrigin = false,
 }: AddTaskDialogProps) {
-
   const [title, setTitle] = useState("");
   const [summary, setSummary] = useState("");
-  const [deadline, setDeadline] = useState<Date | null>(null);
+  const [deadline, setDeadline] = useState<Date | null>(new Date());
   const [allDay, setAllDay] = useState(false);
   const [recurring, setRecurring] = useState(false);
   const [recurrence, setRecurrence] = useState<string>("none");
-  const [selectedType, setSelectedType] = useState<CourseType>("default");
+  const [customDays, setCustomDays] = useState("");
+  const [selectedType, setSelectedType] = useState<TaskType>("default");
   const [customType, setCustomType] = useState("");
+  const [selectedCourseId, setSelectedCourseId] = useState<string>(
+    courseId || "",
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [activePicker, setActivePicker] = useState<string | null>(null);
   const loadedTaskId = useRef<string | null>(null);
 
   useEffect(() => {
@@ -82,12 +100,14 @@ export default function AddTaskDialog({
       setAllDay(taskToEdit.allDay || false);
       setRecurring(taskToEdit.recurring || false);
       setRecurrence(taskToEdit.recurrence || "none");
-      setSelectedType(taskToEdit.type as CourseType || "default");
+      setSelectedType((taskToEdit.type as TaskType) || "default");
       setCustomType(
-        taskToEdit.type && !courseTypeOptions.includes(taskToEdit.type as CourseType)
+        taskToEdit.type &&
+          !taskTypeOptions.includes(taskToEdit.type as TaskType)
           ? taskToEdit.type
-          : ""
+          : "",
       );
+      setSelectedCourseId(taskToEdit.courseId || courseId || "");
       loadedTaskId.current = taskToEdit.id;
     } else {
       setTitle("");
@@ -96,11 +116,13 @@ export default function AddTaskDialog({
       setAllDay(false);
       setRecurring(false);
       setRecurrence("none");
+      setCustomDays("");
       setSelectedType("default");
       setCustomType("");
+      setSelectedCourseId(courseId || "");
       loadedTaskId.current = null;
     }
-  }, [isOpen, taskToEdit?.id]);
+  }, [isOpen, taskToEdit, courseId]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -111,70 +133,65 @@ export default function AddTaskDialog({
         setAllDay(false);
         setRecurring(false);
         setRecurrence("none");
+        setCustomDays("");
         setSelectedType("default");
         setCustomType("");
+        setSelectedCourseId("");
+        setActivePicker(null);
         loadedTaskId.current = null;
       }, 300);
       return () => clearTimeout(timeoutId);
     }
   }, [isOpen]);
 
-  const isButtonDisabled = isSubmitting || !title.trim() || !deadline;
+  const effectiveCourseId = outsideCourseOrigin ? selectedCourseId : courseId;
+  const isButtonDisabled =
+    isSubmitting || !title.trim() || !deadline || !effectiveCourseId;
 
   const handleSubmit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (!title.trim() || !deadline) return;
+    if (!title.trim() || !deadline || !effectiveCourseId || isSubmitting)
+      return;
 
     setIsSubmitting(true);
 
     try {
-      if (taskToEdit) {
-        await updateTask(taskToEdit.id, {
-          title: title.trim(),
-          description: summary.trim(),
-          deadline,
+      const resolvedType =
+        selectedType === "custom"
+          ? (customType.trim() as TaskType) || "custom"
+          : selectedType;
 
-          type: selectedType === "custom" ? (customType.trim() as CourseType) || "custom" : selectedType,
+      if (taskToEdit?.id) {
+        await updateTask(taskToEdit.id, {
+          courseId: effectiveCourseId,
+          title: title.trim(),
+          deadline,
+          type: resolvedType,
         });
-        await addCalendarEvent(
-          title.trim(),
-          deadline,
-          deadline,
-          "deadline",
-          allDay,
-          recurrence
-        );
       } else {
         await createTask({
-          courseId,
+          courseId: effectiveCourseId,
           title: title.trim(),
-          description: summary.trim(),
           deadline,
-          type: selectedType === "custom" ? (customType.trim() as CourseType) || "custom" : selectedType,
+          type: resolvedType,
         });
-        await addCalendarEvent(
-          title.trim(),
-          deadline,
-          deadline,
-          "deadline",
-          allDay,
-          recurrence
-        );
       }
+
+      await addCalendarEvent(
+        title.trim(),
+        deadline,
+        deadline,
+        "deadline",
+        allDay,
+        recurrence,
+      );
+
+      onTaskAdded();
+      onClose();
     } catch (err) {
       console.error(err);
     } finally {
-      setTitle("");
-      setSummary("");
-      setDeadline(null);
-      setAllDay(false);
-      setRecurring(false);
-      setRecurrence("none");
-      setSelectedType("default");
-      setCustomType("");
       setIsSubmitting(false);
-      onTaskAdded();
-      onClose();
     }
   };
 
@@ -185,16 +202,18 @@ export default function AddTaskDialog({
     }
   };
 
-  const handleTypeChange = (type: CourseType) => {
+  const handleTypeChange = (type: TaskType) => {
     setSelectedType(type);
-    if (type === "homework" || type === "quiz" || type === "tutorial exercise") {
+    if (
+      type === "problem set" ||
+      type === "tutorial exercise" ||
+      type === "lab"
+    ) {
       setRecurring(true);
     } else if (type !== "custom") {
       setRecurring(false);
     }
   };
-
- 
 
   return (
     <Transition appear show={isOpen} as={Fragment}>
@@ -210,171 +229,265 @@ export default function AddTaskDialog({
         >
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" />
         </Transition.Child>
+
         <div className="fixed inset-0 overflow-y-auto">
-          <div className="flex min-h-full items-center justify-center p-4">
+          <div className="flex min-h-full items-stretch justify-end p-0">
             <Transition.Child
               as={Fragment}
               enter="ease-out duration-300"
-              enterFrom="opacity-0 scale-95"
-              enterTo="opacity-100 scale-100"
+              enterFrom="opacity-0 translate-x-full"
+              enterTo="opacity-100 translate-x-0"
               leave="ease-in duration-200"
-              leaveFrom="opacity-100 scale-100"
-              leaveTo="opacity-0 scale-95"
+              leaveFrom="opacity-100 translate-x-0"
+              leaveTo="opacity-0 translate-x-full"
             >
-              <Dialog.Panel className="w-full max-w-md transform rounded-xl bg-zinc-900 border border-zinc-800 p-6 text-left shadow-2xl transition-all">
-                <Dialog.Title className="text-xl text-white font-nun font-semibold mb-6">
-                  {taskToEdit ? "edit task" : "add new task"}
-                </Dialog.Title>
-                <form onSubmit={handleSubmit} onKeyPress={handleKeyPress}>
-                  <div className="space-y-6">
-                    <div className="space-y-2">
-                      <Label className="text-sm text-white/80 font-dm font-medium">
-                        task name <span className="text-red-400">*</span>
-                      </Label>
-                      <Input
-                        value={title}
-                        onChange={(e) => setTitle(e.target.value)}
-                        placeholder="enter task title"
-                        className="w-full bg-zinc-800 border border-zinc-700 rounded-xl text-white font-dm h-12 px-4 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all placeholder-white/40"
-                      />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label className="text-sm text-white/80 font-dm font-medium">
-                        description
-                      </Label>
-                      <Input
-                        value={summary}
-                        onChange={(e) => setSummary(e.target.value)}
-                        placeholder="optional description"
-                        className="w-full bg-zinc-800 border border-zinc-700 rounded-xl text-white font-dm h-12 px-4 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all placeholder-white/40"
-                      />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label className="text-sm text-white/80 font-dm font-medium">
-                        deadline <span className="text-red-400">*</span>
-                      </Label>
-                      <DateTimePicker
-                        selected={deadline}
-                        onChange={setDeadline}
-                        allDay={allDay}
-                        label="select date & time"
-                      />
-                    </div>
-                    <div className="space-y-3">
-                      <Label className="text-sm text-white/80 font-dm font-medium">
-                        task type
-                      </Label>
-                      <div className="grid grid-cols-2 gap-2">
-                        {courseTypeOptions.map((option) => (
-                          <label key={option} className="flex items-center gap-2 cursor-pointer p-3 rounded-xl bg-zinc-800/50 hover:bg-zinc-800 transition-colors border border-zinc-700/50">
-                            <input
-                              type="radio"
-                              name="courseType"
-                              value={option}
-                              checked={selectedType === option}
-                              onChange={() => handleTypeChange(option)}
-                              className="w-4 h-4 text-blue-500 bg-zinc-700 rounded-full border-zinc-600 focus:ring-blue-500 focus:ring-2"
-                            />
-                            <span className="text-sm text-white font-dm">{courseTypeLabels[option]}</span>
-                          </label>
-                        ))}
-                      </div>
-                      {selectedType === "custom" && (
+              <Dialog.Panel className="w-full max-w-md h-full min-h-screen transform rounded-l-2xl bg-zinc-900 border-l border-zinc-800 p-6 text-left shadow-2xl transition-all overflow-y-auto flex flex-col justify-between">
+                <div>
+                  <Dialog.Title className="text-xl text-white font-dm font-semibold mb-6">
+                    {taskToEdit ? "edit task" : "add task"}
+                  </Dialog.Title>
+                  <form onSubmit={handleSubmit} onKeyDown={handleKeyPress}>
+                    <div className="space-y-6">
+                      <div className="space-y-2">
+                        <Label className="text-sm text-white/80 font-dm font-medium">
+                          name <span className="text-red-400">*</span>
+                        </Label>
                         <Input
-                          value={customType}
-                          onChange={(e) => setCustomType(e.target.value)}
-                          placeholder="enter custom type"
-                          className="w-full bg-zinc-800 border rounded-xl border-zinc-700 text-white font-dm h-10 px-4 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all placeholder-white/40"
+                          value={title}
+                          onChange={(e) => setTitle(e.target.value)}
+                          placeholder="enter title"
+                          className="w-full bg-zinc-800 border border-zinc-700 rounded-xl text-white font-dm h-12 px-4 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all placeholder-white/40"
                         />
-                      )}
-                    </div>
-                    <div className="space-y-3">
-                      <Label className="text-sm text-white/80 font-dm font-medium">options</Label>
-                      <div className="flex items-center gap-6">
-                        <label className="flex items-center gap-2 cursor-pointer">
-                          <Checkbox
-                            checked={allDay}
-                            onCheckedChange={(checked) => setAllDay(!!checked)}
-                            className="border-zinc-600 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
-                          />
-                          <span className="text-white font-dm text-sm">all day</span>
-                        </label>
-                        <label className="flex items-center gap-2 cursor-pointer">
-                          <Checkbox
-                            checked={recurring}
-                            onCheckedChange={(checked) => setRecurring(!!checked)}
-                            className="border-zinc-600 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
-                          />
-                          <span className="text-white font-dm text-sm">recurring</span>
-                        </label>
                       </div>
-                      <AnimatePresence initial={false}>
-                        {recurring && (
-                          <motion.div
-                            key="recurring-options"
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: "auto" }}
-                            exit={{ opacity: 0, height: 0 }}
-                            transition={{ duration: 0.25, ease: "easeInOut" }}
-                            className="overflow-hidden bg-zinc-800/30 rounded-xl p-4 border border-zinc-700/50"
+                      {outsideCourseOrigin && (
+                        <div className="space-y-2">
+                          <Label className="text-sm text-white/80 mb-1 font-dm font-medium">
+                            course <span className="text-red-400">*</span>
+                          </Label>
+                          <Select
+                            value={selectedCourseId}
+                            onValueChange={setSelectedCourseId}
                           >
-                            <div className="flex items-center gap-3">
-                              <Label className="text-white font-dm text-sm font-medium">repeat:</Label>
-                              <select
-                                className="bg-zinc-800 border border-zinc-700 text-white rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none font-dm"
-                                value={recurrence}
-                                onChange={(e) => setRecurrence(e.target.value)}
+                            <SelectTrigger
+                              className="w-full h-12 border-none bg-zinc-800 rounded-xl font-dm text-white hover:bg-zinc-700 px-4 focus:ring-1 focus:ring-zinc-600"
+                              aria-label="Select course"
+                            >
+                              <SelectValue placeholder="select course" />
+                            </SelectTrigger>
+                            <SelectContent className="border-none rounded-xl mt-2 bg-zinc-900 text-white border-zinc-700 shadow-xl">
+                              <SelectItem
+                                value=""
+                                className="focus:bg-zinc-800 focus:text-white data-[highlighted]:bg-zinc-800 data-[highlighted]:text-white cursor-pointer rounded-xl"
                               >
-                                <option value="none">select frequency</option>
-                                <option value="daily">daily</option>
-                                <option value="weekly">weekly</option>
-                                <option value="monthly">monthly</option>
-                                <option value="custom">custom</option>
-                              </select>
-                              <AnimatePresence initial={false}>
-                                {recurrence === "custom" && (
-                                  <motion.div
-                                    key="custom-input"
-                                    initial={{ opacity: 0, width: 0 }}
-                                    animate={{ opacity: 1, width: "auto" }}
-                                    exit={{ opacity: 0, width: 0 }}
-                                    transition={{ duration: 0.25 }}
-                                    className="overflow-hidden"
-                                  >
-                                    <Input
-                                      type="number"
-                                      min={1}
-                                      placeholder="days"
-                                      className="w-20 bg-zinc-800 border border-zinc-700 text-white rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none font-dm"
-                                    />
-                                  </motion.div>
-                                )}
-                              </AnimatePresence>
-                            </div>
-                          </motion.div>
+                                select course
+                              </SelectItem>
+                              {courses.map((course) => (
+                                <SelectItem
+                                  key={course.id}
+                                  value={course.id}
+                                  className="focus:bg-zinc-800 focus:text-white data-[highlighted]:bg-zinc-800 data-[highlighted]:text-white cursor-pointer rounded-xl"
+                                >
+                                  {course.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      )}
+                      <div className="space-y-2">
+                        <Label className="text-sm text-white/80 font-dm font-medium">
+                          deadline <span className="text-red-400">*</span>
+                        </Label>
+                        <div className="bg-zinc-800/40 border border-zinc-700/60 rounded-xl p-3 focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 transition-all shadow-inner">
+                          <EventDateTimeField
+                            id="deadline"
+                            label={
+                              allDay
+                                ? "deadline date *"
+                                : "deadline date & time *"
+                            }
+                            selected={deadline}
+                            onChange={setDeadline}
+                            allDay={allDay}
+                            activePicker={activePicker}
+                            setActivePicker={setActivePicker}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-3 mb-1">
+                        <Label className="text-sm text-white/80 font-dm font-medium">
+                          type
+                        </Label>
+                        <div className="grid grid-cols-2 gap-2">
+                          {taskTypeOptions.map((option) => (
+                            <label
+                              key={option}
+                              className="flex items-center gap-2 mt-1 cursor-pointer p-3 rounded-xl bg-zinc-800/50 hover:bg-zinc-800 transition-colors border border-zinc-700/50"
+                            >
+                              <input
+                                type="radio"
+                                name="task type"
+                                value={option}
+                                checked={selectedType === option}
+                                onChange={() => handleTypeChange(option)}
+                                className="w-4 h-4 text-blue-500 bg-zinc-700 rounded-full border-zinc-600 focus:ring-blue-500 focus:ring-2"
+                              />
+                              <span className="text-sm text-white font-dm">
+                                {taskTypeLabels[option]}
+                              </span>
+                            </label>
+                          ))}
+                        </div>
+                        {selectedType === "custom" && (
+                          <Input
+                            value={customType}
+                            onChange={(e) => setCustomType(e.target.value)}
+                            placeholder="enter custom type"
+                            className="w-full bg-zinc-800 border rounded-xl border-zinc-700 text-white font-dm h-10 px-4 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all placeholder-white/40 mt-2"
+                          />
                         )}
-                      </AnimatePresence>
+                      </div>
+
+                      <div className="space-y-3">
+                        <Label className="text-sm text-white/80 font-dm font-medium">
+                          options
+                        </Label>
+                        <div className="flex items-center gap-6">
+                          <label className="flex items-center gap-2 cursor-pointer">
+                            <Checkbox
+                              checked={allDay}
+                              onCheckedChange={(checked) =>
+                                setAllDay(!!checked)
+                              }
+                              className="border-zinc-600 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
+                            />
+                            <span className="text-white font-dm text-sm">
+                              all day
+                            </span>
+                          </label>
+                          <label className="flex items-center gap-2 cursor-pointer">
+                            <Checkbox
+                              checked={recurring}
+                              onCheckedChange={(checked) =>
+                                setRecurring(!!checked)
+                              }
+                              className="border-zinc-600 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
+                            />
+                            <span className="text-white font-dm text-sm">
+                              recurring
+                            </span>
+                          </label>
+                        </div>
+                        <AnimatePresence initial={false}>
+                          {recurring && (
+                            <motion.div
+                              key="recurring-options"
+                              initial={{ opacity: 0, height: 0 }}
+                              animate={{ opacity: 1, height: "auto" }}
+                              exit={{ opacity: 0, height: 0 }}
+                              transition={{ duration: 0.25, ease: "easeInOut" }}
+                              className="overflow-hidden bg-zinc-800/30 rounded-xl p-4 border border-zinc-700/50"
+                            >
+                              <div className="flex items-center gap-3">
+                                <Label className="text-white font-dm text-sm font-medium">
+                                  repeat:
+                                </Label>
+                                <Select
+                                  value={recurrence}
+                                  onValueChange={setRecurrence}
+                                >
+                                  <SelectTrigger
+                                    className="w-full sm:w-40 border-none bg-zinc-800 rounded-xl font-dm text-white hover:bg-zinc-700 focus:ring-1 focus:ring-zinc-600"
+                                    aria-label="Select recurrence frequency"
+                                  >
+                                    <SelectValue placeholder="select frequency" />
+                                  </SelectTrigger>
+                                  <SelectContent className="border-none rounded-xl mt-2 bg-zinc-900 text-white border-zinc-700 shadow-xl">
+                                    <SelectItem
+                                      value="none"
+                                      className="focus:bg-zinc-800 focus:text-white data-[highlighted]:bg-zinc-800 data-[highlighted]:text-white cursor-pointer rounded-xl"
+                                    >
+                                      select frequency
+                                    </SelectItem>
+                                    <SelectItem
+                                      value="daily"
+                                      className="focus:bg-zinc-800 focus:text-white data-[highlighted]:bg-zinc-800 data-[highlighted]:text-white cursor-pointer rounded-xl"
+                                    >
+                                      daily
+                                    </SelectItem>
+                                    <SelectItem
+                                      value="weekly"
+                                      className="focus:bg-zinc-800 focus:text-white data-[highlighted]:bg-zinc-800 data-[highlighted]:text-white cursor-pointer rounded-xl"
+                                    >
+                                      weekly
+                                    </SelectItem>
+                                    <SelectItem
+                                      value="monthly"
+                                      className="focus:bg-zinc-800 focus:text-white data-[highlighted]:bg-zinc-800 data-[highlighted]:text-white cursor-pointer rounded-xl"
+                                    >
+                                      monthly
+                                    </SelectItem>
+                                    <SelectItem
+                                      value="custom"
+                                      className="focus:bg-zinc-800 focus:text-white data-[highlighted]:bg-zinc-800 data-[highlighted]:text-white cursor-pointer rounded-xl"
+                                    >
+                                      custom
+                                    </SelectItem>
+                                  </SelectContent>
+                                </Select>
+                                <AnimatePresence initial={false}>
+                                  {recurrence === "custom" && (
+                                    <motion.div
+                                      key="custom-input"
+                                      initial={{ opacity: 0, width: 0 }}
+                                      animate={{ opacity: 1, width: "auto" }}
+                                      exit={{ opacity: 0, width: 0 }}
+                                      transition={{ duration: 0.25 }}
+                                      className="overflow-hidden"
+                                    >
+                                      <Input
+                                        type="number"
+                                        min={1}
+                                        value={customDays}
+                                        onChange={(e) =>
+                                          setCustomDays(e.target.value)
+                                        }
+                                        placeholder="days"
+                                        className="w-20 bg-zinc-800 border border-zinc-700 text-white rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none font-dm"
+                                      />
+                                    </motion.div>
+                                  )}
+                                </AnimatePresence>
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex justify-end gap-3 pt-6 border-t border-zinc-800">
-                    <button
-                      type="button"
-                      onClick={onClose}
-                      className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-white rounded-xl font-dm text-sm transition-all duration-200 border border-zinc-700"
-                    >
-                      cancel
-                    </button>
-                    <button
-                      type="submit"
-                      disabled={isButtonDisabled}
-                      className="px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-zinc-700 disabled:cursor-not-allowed disabled:text-white/50 text-white rounded-xl font-dm text-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
-                    >
-                      {isSubmitting ? "saving..." : taskToEdit ? "update task" : "add task"}
-                    </button>
-                  </div>
-                </form>
+
+                    <div className="flex justify-end gap-3 pt-6 mt-6 border-t border-zinc-800">
+                      <button
+                        type="button"
+                        onClick={onClose}
+                        className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 text-zinc-300 hover:text-white rounded-xl font-dm text-sm transition-all duration-200 border border-zinc-700 cursor-pointer"
+                      >
+                        cancel
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={isButtonDisabled}
+                        className="px-6 py-2 bg-zinc-300 hover:bg-zinc-400 active:bg-zinc-500 text-zinc-900 hover:font-semibold cursor-pointer disabled:bg-zinc-700 disabled:cursor-not-allowed disabled:text-white/50 rounded-xl font-dm text-sm transition-all duration-200 hover:scale-105 active:scale-95 hover:shadow-lg disabled:hover:scale-100 disabled:hover:shadow-none"
+                      >
+                        {isSubmitting
+                          ? "saving..."
+                          : taskToEdit
+                            ? "update task"
+                            : "add task"}
+                      </button>
+                    </div>
+                  </form>
+                </div>
               </Dialog.Panel>
             </Transition.Child>
           </div>
