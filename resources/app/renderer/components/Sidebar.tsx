@@ -9,7 +9,7 @@ import {
   getLoggedInUser,
   startGoogleLogin,
   googleLogout,
-} from "@/services/platform";
+} from "@/services/google";
 import { Folder, LayoutDashboard } from "lucide-react";
 
 type sbProps = {

@@ -1,7 +1,7 @@
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@radix-ui/react-tooltip";
 import { Paperclip } from "react-feather";
 import { useState } from "react";
-import { extractCourseFromPDF } from "@/services/platform";
+import { extractCourseFromPDF } from "@/services/google";
 
 interface FileUploadTooltipProps {
   setCourseData: (data: Partial<any>) => void; 

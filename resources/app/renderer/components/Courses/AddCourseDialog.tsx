@@ -20,7 +20,7 @@ import CourseFormFields from "./CourseFormFields";
 import { EventDateTimeField } from "../DateField";
 import ColorPickerField from "./ColourPickerField";
 import { addCalendarEvent } from "@/lib/helpers/calendarHelpers";
-import { extractCourseFromPDF } from "@/services/platform";
+import { extractCourseFromPDF } from "@/services/google";
 
 interface AddCourseDialogProps {
   isOpen: boolean;

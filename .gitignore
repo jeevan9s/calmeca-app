@@ -15,3 +15,5 @@ neutralino.js
 *.log
 
 resources/js/
+
+.env

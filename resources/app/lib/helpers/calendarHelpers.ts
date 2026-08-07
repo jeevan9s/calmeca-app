@@ -1,4 +1,4 @@
-import { addGoogleCalendarEvent, deleteGoogleCalendarEvent } from "@/services/platform";
+import { addGoogleCalendarEvent, deleteGoogleCalendarEvent } from "@/services/google";
 
 export async function addCalendarEvent(
   summary: string,
@@ -13,6 +13,6 @@ export async function addCalendarEvent(
   return addGoogleCalendarEvent(summary, startStr, endStr, allDay, recurrence);
 }
 
-export async function deleteGoogleCalendarEvent(eventId: string) {
+export async function deleteGoogleCalendarEventID(eventId: string) {
   return deleteGoogleCalendarEvent(eventId);
 }

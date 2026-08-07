@@ -4,7 +4,7 @@ import Layout from "@/renderer/components/Layout";
 import { ScrollArea } from "@/components/scroll-area";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
-import { fetchGoogleCalendarEvents } from "@/services/platform";
+import { fetchGoogleCalendarEvents } from "@/services/google";
 import EventsCard from "@/renderer/components/Dashboard/EventsCard";
 import CoursesCard from "@/renderer/components/Dashboard/CoursesCard";
 import ClubsCard from "@/renderer/components/Dashboard/ClubsCard";

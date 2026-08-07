@@ -7,7 +7,7 @@ import {
   getLoggedInUser,
   startGoogleLogin,
   googleLogout,
-} from "@/services/platform";
+} from "@/services/google";
 import { Button } from "@/components/button";
 
 type AuthDialogProps = {

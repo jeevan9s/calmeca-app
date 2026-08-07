@@ -20,7 +20,7 @@ import {
 } from "@/components/dialog";
 import { ExternalLink, MapPin, CalendarX, AlertCircle, CalendarDays, Clock, ChevronRight } from "lucide-react";
 import { CalendarEvent } from "@/services/db";
-import { fetchGoogleCalendarEvents } from "@/services/platform";
+import { fetchGoogleCalendarEvents } from "@/services/google";
 
 interface UpcomingCourseEventsCardProps {
   courseTitle: string;

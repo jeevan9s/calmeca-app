@@ -22,6 +22,7 @@
   "include": [
     "resources/app",
     "resources/js",
-    "global.d.ts"
+    "global.d.ts", 
+    "vite-env.d.ts"
   ]
 }
