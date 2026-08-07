@@ -34,7 +34,7 @@ let cachedAccessToken: string | null = null;
 let cachedRefreshToken: string | null = null;
 
 async function refreshAccessToken(): Promise<boolean> {
-  if (!cachedAccessToken) return false;
+  if (!cachedRefreshToken) return false;
 
   try {
     const response = await fetch("https://oauth2.googleapis.com/token", {
@@ -76,7 +76,7 @@ async function refreshAccessToken(): Promise<boolean> {
 // native fetch wrapper for google calendar REST API
 export const apiRequest = async (path: string, init?: RequestInit) => {
   if (!cachedAccessToken) {
-    const refreshed = refreshAccessToken();
+    const refreshed = await refreshAccessToken();
     if (!refreshed) return null;
   }
 
