@@ -119,7 +119,26 @@ export const apiRequest = async (path: string, init?: RequestInit) => {
   }
 };
 
-export async function getLoggedInUser() {}
+export async function getLoggedInUser() {
+  if (!cachedAccessToken) return null;
+
+  try {
+    const res = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+      headers: { Authorization: `Bearer ${cachedAccessToken}` },
+    });
+
+    // token expired
+    if (!res.ok) {
+      const refreshed = refreshAccessToken();
+      if (!refreshed) return null;
+      return getLoggedInUser();
+    }
+
+    return await res.json(); // returns name, email, picture
+  } catch {
+    return null;
+  }
+}
 
 export async function startGoogleLogin() {}
 
