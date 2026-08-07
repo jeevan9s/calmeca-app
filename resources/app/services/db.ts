@@ -33,10 +33,11 @@ export interface Course {
     tasks: Task[]; 
 }
 
-export type CourseType = 'lecture' | 'studio' | 'lab';
+export type CourseType = 'lecture' | 'studio' | 'lab' | 'online';
 
 export const courseTypeLabels: Record<CourseType, string> = {
     'lecture': 'Lecture Based',
+    'online': 'Online',
     'studio': 'Studio Based',
     'lab': 'Lab Based',
 };
@@ -55,12 +56,16 @@ export type TaskType =
   | "lab" 
   | "project task" 
   | "report" 
-  | "tutorial exercise" 
+  | "tutorial" 
   | "custom";
 
 
 export interface Task {
     id: string;
+    summary?:string;
+    allDay?:boolean;
+    recurring?: boolean; 
+    reccurence: string; 
     courseId: string;
     title: string;
     type: TaskType;

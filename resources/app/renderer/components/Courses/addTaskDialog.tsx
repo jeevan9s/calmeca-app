@@ -16,19 +16,7 @@ import { EventDateTimeField } from "../DateField";
 import { createTask, updateTask } from "@/services/core services/taskService";
 import { addCalendarEvent } from "@/lib/helpers/calendarHelpers";
 import { AnimatePresence, motion } from "framer-motion";
-import { TaskType } from "@/services/db";
-
-interface TaskItem {
-  id?: string;
-  title?: string;
-  summary?: string;
-  deadline?: string | Date;
-  allDay?: boolean;
-  recurring?: boolean;
-  recurrence?: string;
-  type?: string;
-  courseId?: string;
-}
+import { Task, TaskType } from "@/services/db";
 
 interface CourseItem {
   id: string;
@@ -40,7 +28,7 @@ const taskTypeOptions: TaskType[] = [
   "lab",
   "project task",
   "report",
-  "tutorial exercise",
+  "tutorial",
   "custom",
 ];
 
@@ -50,7 +38,7 @@ interface AddTaskDialogProps {
   onTaskAdded: () => void;
   courseId?: string;
   courses?: CourseItem[];
-  taskToEdit?: TaskItem;
+  taskToEdit?: Task;
   outsideCourseOrigin?: boolean;
 }
 
@@ -60,7 +48,7 @@ const taskTypeLabels: Record<TaskType, string> = {
   lab: "lab",
   "project task": "project task",
   report: "report",
-  "tutorial exercise": "tutorial exercise",
+  "tutorial": "tutorial",
   custom: "custom",
 };
 
@@ -214,8 +202,7 @@ export default function AddTaskDialog({
       setRecurring(false);
     }
   };
-
-  return (
+return (
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-50" onClose={onClose}>
         <Transition.Child
@@ -248,20 +235,20 @@ export default function AddTaskDialog({
                   </Dialog.Title>
                   <form onSubmit={handleSubmit} onKeyDown={handleKeyPress}>
                     <div className="space-y-6">
-                      <div className="space-y-2">
-                        <Label className="text-sm text-white/80 font-dm font-medium">
+                      <div className="space-y-2.5">
+                        <Label className="block text-sm text-white/80 font-dm font-medium mb-2">
                           name <span className="text-red-400">*</span>
                         </Label>
                         <Input
                           value={title}
                           onChange={(e) => setTitle(e.target.value)}
                           placeholder="enter title"
-                          className="w-full bg-zinc-800 border border-zinc-700 rounded-xl text-white font-dm h-12 px-4 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all placeholder-white/40"
+                          className="w-full bg-zinc-800/50 hover:bg-zinc-800 transition-colors border border-zinc-700/50 rounded-xl text-white font-dm h-12 px-4 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all placeholder:text-gray-500"
                         />
                       </div>
                       {outsideCourseOrigin && (
-                        <div className="space-y-2">
-                          <Label className="text-sm text-white/80 mb-1 font-dm font-medium">
+                        <div className="space-y-2.5">
+                          <Label className="block text-sm text-white/80 font-dm font-medium mb-2">
                             course <span className="text-red-400">*</span>
                           </Label>
                           <Select
@@ -269,15 +256,14 @@ export default function AddTaskDialog({
                             onValueChange={setSelectedCourseId}
                           >
                             <SelectTrigger
-                              className="w-full h-12 border-none bg-zinc-800 rounded-xl font-dm text-white hover:bg-zinc-700 px-4 focus:ring-1 focus:ring-zinc-600"
-                              aria-label="Select course"
+                              className="w-full h-12 bg-zinc-800/50 hover:bg-zinc-800 transition-colors border border-zinc-700/50 rounded-xl font-dm text-white px-4 focus:ring-1 focus:ring-zinc-600 data-[placeholder]:text-gray-500"
                             >
-                              <SelectValue placeholder="select course" />
+                              <SelectValue placeholder="select course" className="placeholder:text-gray-500" />
                             </SelectTrigger>
                             <SelectContent className="border-none rounded-xl mt-2 bg-zinc-900 text-white border-zinc-700 shadow-xl">
                               <SelectItem
                                 value=""
-                                className="focus:bg-zinc-800 focus:text-white data-[highlighted]:bg-zinc-800 data-[highlighted]:text-white cursor-pointer rounded-xl"
+                                className="focus:bg-zinc-800 text-gray-500 data-[highlighted]:bg-zinc-800 cursor-pointer rounded-xl"
                               >
                                 select course
                               </SelectItem>
@@ -294,18 +280,15 @@ export default function AddTaskDialog({
                           </Select>
                         </div>
                       )}
-                      <div className="space-y-2">
-                        <Label className="text-sm text-white/80 font-dm font-medium">
-                          deadline <span className="text-red-400">*</span>
+                      <div className="">
+                        <Label className="block text-sm text-white/80 font-dm font-medium mb-2">
+                          {allDay ? "deadline date " : "deadline date & time "}
+                          <span className="text-red-400">*</span>
                         </Label>
-                        <div className="bg-zinc-800/40 border border-zinc-700/60 rounded-xl p-3 focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 transition-all shadow-inner">
+
+                        <div className="rounded-xl p-3 transition-all shadow-inner">
                           <EventDateTimeField
                             id="deadline"
-                            label={
-                              allDay
-                                ? "deadline date *"
-                                : "deadline date & time *"
-                            }
                             selected={deadline}
                             onChange={setDeadline}
                             allDay={allDay}
@@ -315,15 +298,15 @@ export default function AddTaskDialog({
                         </div>
                       </div>
 
-                      <div className="space-y-3 mb-1">
-                        <Label className="text-sm text-white/80 font-dm font-medium">
+                      <div className="space-y-2.5">
+                        <Label className="block text-sm text-white/80 font-dm font-medium mb-2">
                           type
                         </Label>
                         <div className="grid grid-cols-2 gap-2">
                           {taskTypeOptions.map((option) => (
                             <label
                               key={option}
-                              className="flex items-center gap-2 mt-1 cursor-pointer p-3 rounded-xl bg-zinc-800/50 hover:bg-zinc-800 transition-colors border border-zinc-700/50"
+                              className="flex items-center gap-2 cursor-pointer p-3 rounded-xl bg-zinc-800/50 hover:bg-zinc-800 transition-colors border border-zinc-700/50"
                             >
                               <input
                                 type="radio"
@@ -331,7 +314,7 @@ export default function AddTaskDialog({
                                 value={option}
                                 checked={selectedType === option}
                                 onChange={() => handleTypeChange(option)}
-                                className="w-4 h-4 text-blue-500 bg-zinc-700 rounded-full border-zinc-600 focus:ring-blue-500 focus:ring-2"
+                                className="w-4 h-4 text-blue-500 bg-zinc-900 rounded-full border-zinc-600 focus:ring-blue-500 focus:ring-2"
                               />
                               <span className="text-sm text-white font-dm">
                                 {taskTypeLabels[option]}
@@ -344,13 +327,13 @@ export default function AddTaskDialog({
                             value={customType}
                             onChange={(e) => setCustomType(e.target.value)}
                             placeholder="enter custom type"
-                            className="w-full bg-zinc-800 border rounded-xl border-zinc-700 text-white font-dm h-10 px-4 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all placeholder-white/40 mt-2"
+                            className="w-full bg-zinc-800/50 hover:bg-zinc-800 transition-colors border border-zinc-700/50 rounded-xl text-white font-dm h-10 px-4 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all placeholder:text-gray-500 mt-2"
                           />
                         )}
                       </div>
 
-                      <div className="space-y-3">
-                        <Label className="text-sm text-white/80 font-dm font-medium">
+                      <div className="space-y-2.5">
+                        <Label className="block text-sm text-white/80 font-dm font-medium mb-2">
                           options
                         </Label>
                         <div className="flex items-center gap-6">
@@ -387,7 +370,7 @@ export default function AddTaskDialog({
                               animate={{ opacity: 1, height: "auto" }}
                               exit={{ opacity: 0, height: 0 }}
                               transition={{ duration: 0.25, ease: "easeInOut" }}
-                              className="overflow-hidden bg-zinc-800/30 rounded-xl p-4 border border-zinc-700/50"
+                              className="overflow-hidden bg-zinc-800/30 rounded-xl p-4 border border-zinc-700/50 mt-3"
                             >
                               <div className="flex items-center gap-3">
                                 <Label className="text-white font-dm text-sm font-medium">

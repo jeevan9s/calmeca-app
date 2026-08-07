@@ -92,18 +92,18 @@ export function EventDateTimeField({
 
   return (
     <div className="flex flex-col gap-2 w-full">
-      <Label className="text-sm text-white/80 font-dm font-medium">{label}</Label>
+      <Label className="text-sm text-white font-dm font-thin">{label}</Label>
 
       <div className="flex flex-col gap-2 w-full">
         <Popover open={dateOpen} onOpenChange={handleDateOpenChange}>
           <PopoverTrigger asChild>
             <Button
               variant="outline"
-              className="group cursor-pointer flex items-center justify-between gap-2 bg-zinc-800 border border-zinc-700 rounded-xl text-white font-dm
+              className="group cursor-pointer flex items-center justify-between gap-2 bg-zinc-800/50 hover:bg-zinc-800 transition-colors border border-zinc-700/50 rounded-xl text-white font-dm
                          h-12 px-4 w-full transition-colors duration-150 hover:bg-zinc-700 hover:text-white
-                         focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none"
+                          focus:outline-none"
             >
-              <span className={hasDate ? "text-white" : "text-white/40"}>
+              <span className={hasDate ? "text-gray-500 text-sm" : "text-gray-500 text-sm"}>
                 {hasDate ? format(draft, DATE_FORMAT) : "select date"}
               </span>
               <ChevronDownIcon
@@ -164,12 +164,12 @@ export function EventDateTimeField({
                   <Button
                     variant="outline"
                     aria-label={`${label} time`}
-                    className="group cursor-pointer flex items-center justify-between gap-1.5 bg-zinc-800 border border-zinc-700 rounded-xl text-white font-dm
+                    className="group cursor-pointer flex items-center justify-between gap-1.5 bg-zinc-800/50 hover:bg-zinc-800 transition-colors border border-zinc-700/50 rounded-xl text-white font-dm
                                h-12 px-4 w-full transition-colors duration-150 hover:bg-zinc-700 hover:text-white
-                               focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none"
+                                focus:outline-none"
                   >
-                    <ClockIcon size={14} className="text-white/40 shrink-0" />
-                    <span className={`text-sm flex-1 text-left truncate ${hasDate ? "text-white" : "text-white/40"}`}>
+                    <ClockIcon size={14} className="text-gray-500 shrink-0" />
+                    <span className={`text-sm flex-1 text-left truncate ${hasDate ? "text-white text-sm" : "text-gray-500 text-sm"}`}>
                       {hasDate ? format(draft, "h:mm a") : "--:--"}
                     </span>
                     <ChevronDownIcon
@@ -195,7 +195,7 @@ export function EventDateTimeField({
                           className={`cursor-pointer w-full text-left px-2.5 py-1.5 rounded-lg text-sm font-dm transition-colors
                             ${
                               active
-                                ? "bg-blue-600 text-white font-semibold"
+                                ? "font-semibold"
                                 : "text-white/80 hover:bg-zinc-800 hover:text-white"
                             }`}
                         >

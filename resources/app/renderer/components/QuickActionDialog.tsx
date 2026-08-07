@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent } from "@/components/dialog";
-import { Calendar, BookOpen, Plus, Clock, Folder, X } from "react-feather";
+import { Calendar, BookOpen, Plus, Clock, Folder, X, FolderPlus } from "react-feather";
 import { motion, AnimatePresence } from "framer-motion";
 import AddTaskDialog from "./Courses/addTaskDialog";
 import AddExamDialog from "./Courses/AddExamDialog";
@@ -56,8 +56,13 @@ export default function QuickActionDialog({
     handleClose();
   };
 
+  const handleNavigateToCourses = () => {
+    navigate("/courses");
+    handleClose();
+  };
+
   const btnClass =
-    "flex items-center font-thin gap-1.5 bg-zinc-800 rounded-xl text-white font-dm h-8 text-xs cursor-pointer transition-colors duration-300 hover:bg-zinc-700 focus:ring-1 hover: focus:ring-zinc-500 focus:ring-opacity-50 px-2.5";
+    "flex items-center font-thin justify-center gap-1.5 bg-zinc-800 rounded-xl text-white font-dm h-9 text-xs cursor-pointer transition-colors duration-300 hover:bg-zinc-700 focus:ring-1 focus:ring-zinc-500 focus:ring-opacity-50 px-3 w-full";
 
   return (
     <Dialog
@@ -68,7 +73,7 @@ export default function QuickActionDialog({
     >
       <AnimatePresence>
         {!showTask && !showExam && !showCourse && !showCalendarEvent && (
-          <DialogContent className="bg-zinc-900 rounded-xl p-4 w-[300px] border-none outline-none shadow-xl [&>button]:hidden">
+          <DialogContent className="bg-zinc-900 rounded-xl p-4 w-[380px] border-none outline-none shadow-xl [&>button]:hidden">
             <motion.div
               initial={{ opacity: 0, scale: 0.9, y: -10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -99,103 +104,70 @@ export default function QuickActionDialog({
               </div>
 
               <motion.div
-                className="grid grid-cols-2 gap-2 mb-2.5"
+                className="grid grid-cols-3 gap-2 mb-2"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.2, duration: 0.3 }}
               >
                 <motion.button
-                  className={`${btnClass} justify-center`}
+                  className={btnClass}
                   onClick={() => setShowTask(true)}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.25, duration: 0.3 }}
                   whileHover={{ scale: 1.03, transition: { duration: 0.2 } }}
                   whileTap={{ scale: 0.97 }}
                 >
-                  <motion.div
-                    whileHover={{ rotate: 90 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <ListTodo className="w-3.5 h-3.5" />
-                  </motion.div>
-                  add task
+                  <ListTodo className="w-3.5 h-3.5 shrink-0" />
+                  <span className="truncate">add task</span>
                 </motion.button>
 
                 <motion.button
-                  className={`${btnClass} justify-center`}
-                  onClick={() => setShowExam(true)}
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.3, duration: 0.3 }}
-                  whileHover={{ scale: 1.03, transition: { duration: 0.2 } }}
-                  whileTap={{ scale: 0.97 }}
-                >
-                  <motion.div
-                    whileHover={{ rotate: 15 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <Clock className="w-3.5 h-3.5" />
-                  </motion.div>
-                  add deadline
-                </motion.button>
-
-                <motion.button
-                  className={`${btnClass} justify-center`}
+                  className={btnClass}
                   onClick={() => setShowCalendarEvent(true)}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.35, duration: 0.3 }}
                   whileHover={{ scale: 1.03, transition: { duration: 0.2 } }}
                   whileTap={{ scale: 0.97 }}
                 >
-                  <motion.div
-                    whileHover={{ scale: 1.1 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <Calendar className="w-3.5 h-3.5" />
-                  </motion.div>
-                  add event
+                  <Calendar className="w-3.5 h-3.5 shrink-0" />
+                  <span className="truncate">add event</span>
                 </motion.button>
 
-                <motion.button
-                  className={`${btnClass} justify-center`}
-                  onClick={handleNavigateToDashboard}
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.4, duration: 0.3 }}
-                  whileHover={{ scale: 1.03, transition: { duration: 0.2 } }}
-                  whileTap={{ scale: 0.97 }}
-                >
-                  <motion.div
-                    whileHover={{ rotateY: 180 }}
-                    transition={{ duration: 0.3 }}
+                {!courseId && (
+                  <motion.button
+                    className={btnClass}
+                    onClick={() => setShowCourse(true)}
+                    whileHover={{ scale: 1.03, transition: { duration: 0.2 } }}
+                    whileTap={{ scale: 0.97 }}
                   >
-                    <LayoutDashboard className="w-3.5 h-3.5" />
-                  </motion.div>
-                  dashboard
-                </motion.button>
+                    <FolderPlus className="w-3.5 h-3.5 shrink-0" />
+                    <span className="truncate">add course</span>
+                  </motion.button>
+                )}
               </motion.div>
 
-              {!courseId && (
+              <motion.div
+                className="grid grid-cols-2 gap-2"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3, duration: 0.3 }}
+              >
                 <motion.button
-                  className={`${btnClass} w-full justify-center mb-2.5`}
-                  onClick={() => setShowCourse(true)}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.45, duration: 0.3 }}
-                  whileHover={{ scale: 1.02, transition: { duration: 0.2 } }}
-                  whileTap={{ scale: 0.98 }}
+                  className={btnClass}
+                  onClick={handleNavigateToDashboard}
+                  whileHover={{ scale: 1.03, transition: { duration: 0.2 } }}
+                  whileTap={{ scale: 0.97 }}
                 >
-                  <motion.div
-                    whileHover={{ rotate: 90 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <Folder className="w-3.5 h-3.5" />
-                  </motion.div>
-                  add course
+                  <LayoutDashboard className="w-3.5 h-3.5 shrink-0" />
+                  <span className="truncate">dashboard</span>
                 </motion.button>
-              )}
+
+                <motion.button
+                  className={btnClass}
+                  onClick={handleNavigateToCourses}
+                  whileHover={{ scale: 1.03, transition: { duration: 0.2 } }}
+                  whileTap={{ scale: 0.97 }}
+                >
+                  <Folder className="w-3.5 h-3.5 shrink-0" />
+                  <span className="truncate">courses</span>
+                </motion.button>
+              </motion.div>
             </motion.div>
           </DialogContent>
         )}
@@ -208,28 +180,6 @@ export default function QuickActionDialog({
           onTaskAdded={handleClose}
           outsideCourseOrigin={true}
           courseId={courseId || ""}
-        />
-      )}
-
-      {showExam && courseId && (
-        <AddExamDialog
-          isOpen={showExam}
-          onClose={handleClose}
-          existingCourse={{
-            id: courseId,
-            title: "",
-            code: "",
-            professor: "",
-            createdOn: new Date(),
-            updatedOn: new Date(),
-            endsOn: new Date(),
-          }}
-          midterms={midterms}
-          setMidterms={setMidterms}
-          finalExam={finalExam}
-          setFinalExam={setFinalExam}
-          endDate={endDate}
-          setEndDate={setEndDate}
         />
       )}
 
