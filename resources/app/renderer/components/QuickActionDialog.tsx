@@ -4,7 +4,6 @@ import { Dialog, DialogContent } from "@/components/dialog";
 import { Calendar, BookOpen, Plus, Clock, Folder, X, FolderPlus } from "react-feather";
 import { motion, AnimatePresence } from "framer-motion";
 import AddTaskDialog from "./Courses/addTaskDialog";
-import AddExamDialog from "./Courses/AddExamDialog";
 import AddCourseDialog from "./Courses/AddCourseDialog";
 import AddCalendarEventDialog from "./Courses/AddCalendarEventDialog";
 import { LayoutDashboard, ListTodo } from "lucide-react";
@@ -64,15 +63,18 @@ export default function QuickActionDialog({
   const btnClass =
     "flex items-center font-thin justify-center gap-1.5 bg-zinc-800 rounded-xl text-white font-dm h-9 text-xs cursor-pointer transition-colors duration-300 hover:bg-zinc-700 focus:ring-1 focus:ring-zinc-500 focus:ring-opacity-50 px-3 w-full";
 
+  // Check if any sub-dialog is active
+  const isSubDialogOpen = showTask || showExam || showCourse || showCalendarEvent;
+
   return (
     <Dialog
-      open={open}
+      open={open && !isSubDialogOpen}
       onOpenChange={(v) => {
-        if (!v) handleClose();
+        if (!v && !isSubDialogOpen) handleClose();
       }}
     >
       <AnimatePresence>
-        {!showTask && !showExam && !showCourse && !showCalendarEvent && (
+        {!isSubDialogOpen && (
           <DialogContent className="bg-zinc-900 rounded-xl p-4 w-[380px] border-none outline-none shadow-xl [&>button]:hidden">
             <motion.div
               initial={{ opacity: 0, scale: 0.9, y: -10 }}

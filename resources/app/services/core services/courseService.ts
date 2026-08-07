@@ -58,9 +58,6 @@ export const updateCourse = async (
   return await db.courses.get(id);
 };
 
-
-
-
 export const archiveCourse = async (id: string) => {
     return  db.courses.update(id, {archived: true})
 }

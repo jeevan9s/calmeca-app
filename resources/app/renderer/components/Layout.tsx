@@ -65,7 +65,7 @@ export default function Layout({ disableHoverZones = false, children }: LayoutPr
   const isSidebarHovered = isHoveredButton || isHoveredMouse;
 
   return (
-    <div className="relative min-h-screen">
+    <div className="relative min-h-screen bg-zinc-950/70">
       <Titlebar
         isLocked={isLocked}
         isHovered={isSidebarHovered}

@@ -5,7 +5,7 @@ import { ReactNode } from 'react';
 export interface Resource {
     id: string;
     title: string;
-    link: string;
+    url: string;
     type?: "pdf" | "video" | "link" | "other";
 }
 
@@ -29,7 +29,7 @@ export interface Course {
     finalExamEndDate?: Date;
     archived?: boolean;
     updatedOn: Date;
-    reources: Resource[]; 
+    resources: Resource[]; 
     tasks: Task[]; 
 }
 
@@ -69,7 +69,7 @@ export interface Task {
     courseId: string;
     title: string;
     type: TaskType;
-    deadline: Date;
+    deadline?: Date;
     completed: boolean;
     color: string;
     googleCalendarEventId?: string;

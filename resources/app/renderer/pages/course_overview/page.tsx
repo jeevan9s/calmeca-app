@@ -4,7 +4,16 @@ import { useState, useEffect } from "react";
 import { Course } from "@/services/db";
 import CourseCard from "@/renderer/components/Courses/CourseCard";
 import AddCourseDialog from "@/renderer/components/Courses/AddCourseDialog";
-import { Plus, List, Grid, BookOpen, Trash2, Edit2, Archive, ChevronRight } from "react-feather";
+import {
+  Plus,
+  List,
+  Grid,
+  BookOpen,
+  Trash2,
+  Edit2,
+  Archive,
+  ChevronRight,
+} from "react-feather";
 import Layout from "@/renderer/components/Layout";
 import {
   getAllCourses,
@@ -44,35 +53,35 @@ export default function CourseOverviewPage() {
   } | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
 
-  // useEffect(() => {
-  //   const loadCourses = async () => {
-  //     try {
-  //       const allCourses = await getAllCourses();
-  //       setCourses(allCourses);
-  //     } catch {
-  //       toast.error("Error loading courses");
-  //     } finally {
-  //       setIsLoading(false);
-  //     }
-  //   };
-  //   loadCourses();
-  // }, []);
-
   useEffect(() => {
     const loadCourses = async () => {
       try {
-        // small delay so the skeleton state doesn't just flash
-        await new Promise((resolve) => setTimeout(resolve, 300));
-        setCourses(dummyCourses);
+        const allCourses = await getAllCourses();
+        setCourses(allCourses);
       } catch {
         toast.error("Error loading courses");
-        setCourses(dummyCourses);
       } finally {
         setIsLoading(false);
       }
     };
     loadCourses();
   }, []);
+
+  // useEffect(() => {
+  //   const loadCourses = async () => {
+  //     try {
+  //       // small delay so the skeleton state doesn't just flash
+  //       await new Promise((resolve) => setTimeout(resolve, 300));
+  //       setCourses(dummyCourses);
+  //     } catch {
+  //       toast.error("Error loading courses");
+  //       setCourses(dummyCourses);
+  //     } finally {
+  //       setIsLoading(false);
+  //     }
+  //   };
+  //   loadCourses();
+  // }, []);
 
   const handleAddCourse = (newCourse: Course) => {
     setCourses((prev) => [...prev, newCourse]);
@@ -172,7 +181,7 @@ export default function CourseOverviewPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen w-full bg-zinc-950/70 text-white">
+      <div className="min-h-screen w-full text-white">
         <Layout>
           <div className="px-4 flex flex-col gap-y-1 mb-3">
             <h1 className="font-dm font-bold text-2xl sm:text-3xl lg:text-4xl">
@@ -183,7 +192,7 @@ export default function CourseOverviewPage() {
             </h2>
           </div>
           <div className="px-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-            {Array.from({ length: 6 }).map((_, i) => (
+            {Array.from({ length: 9 }).map((_, i) => (
               <div
                 key={i}
                 className="h-40 rounded-2xl bg-zinc-800/60 animate-pulse border border-zinc-800"
@@ -196,7 +205,7 @@ export default function CourseOverviewPage() {
   }
 
   return (
-    <div className="min-h-screen w-full bg-zinc-900 text-white">
+    <div className="min-h-screen w-full bg-zinc-950/70 text-white">
       <Layout>
         <div className="px-4 flex flex-col gap-y-1 mb-5">
           <h1 className="font-dm font-bold text-2xl sm:text-3xl lg:text-4xl">
@@ -225,13 +234,22 @@ export default function CourseOverviewPage() {
                 <SelectValue placeholder="sort by" />
               </SelectTrigger>
               <SelectContent className="border-none rounded-xl mt-2 bg-zinc-900 text-white border-zinc-700 shadow-xl">
-                <SelectItem value="alpha" className="focus:bg-zinc-800 focus:text-white cursor-pointer rounded-xl">
+                <SelectItem
+                  value="alpha"
+                  className="focus:bg-zinc-800 focus:text-white cursor-pointer rounded-xl"
+                >
                   alphabetical
                 </SelectItem>
-                <SelectItem value="newest" className="focus:bg-zinc-800 focus:text-white cursor-pointer rounded-xl">
+                <SelectItem
+                  value="newest"
+                  className="focus:bg-zinc-800 focus:text-white cursor-pointer rounded-xl"
+                >
                   newest
                 </SelectItem>
-                <SelectItem value="oldest" className="focus:bg-zinc-800 focus:text-white cursor-pointer rounded-xl">
+                <SelectItem
+                  value="oldest"
+                  className="focus:bg-zinc-800 focus:text-white cursor-pointer rounded-xl"
+                >
                   oldest
                 </SelectItem>
               </SelectContent>
@@ -269,16 +287,14 @@ export default function CourseOverviewPage() {
 
         {filteredCourses.length === 0 ? (
           <div className="px-4 flex flex-col items-center justify-center mt-16 mb-8 text-center">
-            <div className="w-14 h-14 rounded-2xl bg-zinc-800 flex items-center justify-center mb-4">
-              <BookOpen size={24} className="text-neutral-400" />
-            </div>
             {courses.length === 0 ? (
               <>
                 <p className="font-dm font-semibold text-lg text-white mb-1">
                   no courses yet
                 </p>
                 <p className="text-neutral-400 text-sm mb-5 max-w-xs">
-                  add your first course to start tracking assignments, exams, and deadlines
+                  add your first course to start tracking assignments, exams,
+                  and deadlines
                 </p>
                 <button
                   onClick={handleAddCourseClick}
@@ -410,7 +426,8 @@ export default function CourseOverviewPage() {
                 delete {pendingDelete.title}?
               </p>
               <p className="text-neutral-400 text-sm mb-5">
-                this can't be undone. all associated assignments and dates will be removed.
+                this can't be undone. all associated assignments and dates will
+                be removed.
               </p>
               <div className="flex justify-end gap-2">
                 <button
@@ -429,8 +446,8 @@ export default function CourseOverviewPage() {
             </div>
           </div>
         )}
-              <FloatingActionButton />
-        
+
+        {!isDialogOpen && <FloatingActionButton />}
       </Layout>
     </div>
   );

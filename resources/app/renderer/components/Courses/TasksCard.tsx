@@ -13,24 +13,17 @@ import {
 } from "@/components/card";
 import { Button } from "@/components/button";
 import AddTaskDialog from "./addTaskDialog";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogTrigger,
-} from "@/components/dialog";
-import { Trash2, Edit2 } from "lucide-react";
-import { getTasks, toggleTaskCompletion, deleteTask, clearTasks } from "@/services/core services/taskService";
+import { Trash2, Edit2, AlertCircle, Plus, Filter, Check } from "lucide-react";
+import { getTasks, toggleTaskCompletion, deleteTask } from "@/services/core services/taskService";
 import { Task, SubTask } from "@/services/db";
 import { differenceInCalendarDays, format } from "date-fns";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/popover";
 import { Checkbox } from "@/components/checkbox";
-import SubtaskComponent from "../SubtaskComponent";
 import { getSubTasksByTask } from "@/services/core services/subtaskService";
 
-export default function TasksCard({ courseTitle, courseId }: { courseTitle: string; courseId: string }) {
+const MAX_TASKS_LIMIT = 100;
+
+export default function TasksCard({ courseTitle, courseId, code }: { courseTitle: string; courseId: string; code: string; }) {
   const navigate = useNavigate();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
@@ -43,11 +36,11 @@ export default function TasksCard({ courseTitle, courseId }: { courseTitle: stri
     setLoading(true);
     try {
       const fetchedTasks = await getTasks();
-      setTasks(fetchedTasks);
+      const courseTasks = fetchedTasks.filter(task => task.courseId === courseId);
+      setTasks(courseTasks);
       
-      // Load subtasks for each task
       const subtasksMap: Record<string, SubTask[]> = {};
-      for (const task of fetchedTasks) {
+      for (const task of courseTasks) {
         const subtasks = await getSubTasksByTask(task.id);
         subtasksMap[task.id] = subtasks;
       }
@@ -70,7 +63,7 @@ export default function TasksCard({ courseTitle, courseId }: { courseTitle: stri
     fetchTasks();
     const interval = setInterval(fetchTasks, 30000);
     return () => clearInterval(interval);
-  }, []);
+  }, [courseId]);
 
   const handleToggle = async (task: Task) => {
     await toggleTaskCompletion(task.id);
@@ -83,7 +76,8 @@ export default function TasksCard({ courseTitle, courseId }: { courseTitle: stri
   };
 
   const handleClear = async () => {
-    await clearTasks();
+    const courseTasks = tasks.filter(task => task.courseId === courseId);
+    await Promise.all(courseTasks.map(task => deleteTask(task.id)));
     fetchTasks();
   };
 
@@ -125,16 +119,25 @@ export default function TasksCard({ courseTitle, courseId }: { courseTitle: stri
     return true;
   });
 
+  const handleOpenAddDialog = () => {
+    if (tasks.length >= MAX_TASKS_LIMIT) {
+      alert(`Task limit reached. You cannot have more than ${MAX_TASKS_LIMIT} tasks per course.`);
+      return;
+    }
+    setTaskToEdit(null); 
+    setIsDialogOpen(true);
+  };
+
   return (
     <>
       <motion.div whileHover={{ scale: 1.01, y: -1 }} transition={{ duration: 0.2 }} className="rounded-xl w-full">
-        <Card className="h-[36em] bg-[#0f0f10ff] w-full rounded-xl flex flex-col">
+        <Card className="h-[36em] bg-[#0f0f10ff] w-full rounded-[1.25em] flex flex-col border border-zinc-800/60 shadow-sm">
           
-          <CardHeader className="flex flex-row items-left justify-between gap-2 flex-nowrap">
-            <div className="flex flex-col">
-              <CardTitle className="font-dm">tasks</CardTitle>
-              <CardDescription className="text-white/50 font-dm">
-                task organization
+          <CardHeader className="flex flex-row items-center justify-between gap-4 pb-4">
+            <div className="flex flex-col min-w-0">
+              <CardTitle className="font-dm text-base font-semibold leading-tight">tasks</CardTitle>
+              <CardDescription className="text-white/40 font-dm text-xs truncate">
+                organization for {code}
                 {overdueTasks.length > 0 && (
                   <span className="ml-2 px-2 py-0.5 bg-red-500/20 text-red-400 rounded-full text-xs">
                     {overdueTasks.length} overdue
@@ -142,133 +145,153 @@ export default function TasksCard({ courseTitle, courseId }: { courseTitle: stri
                 )}
               </CardDescription>
             </div>
-            <div className="relative w-full flex items-center h-10">
-              <div className="absolute left-0 flex items-center gap-2">
+
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <Button
+                className="flex items-center gap-1.5 cursor-pointer bg-zinc-800/50 hover:bg-zinc-800 border border-zinc-700/50 rounded-xl text-white font-dm text-sm h-9 px-3 transition-colors"
+                onClick={handleOpenAddDialog}
+              >
+                <Plus size={14} /> add task
+              </Button>
+
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button className="flex items-center cursor-pointer gap-1.5 bg-zinc-800/50 hover:bg-zinc-800 border border-zinc-700/50 rounded-xl text-white font-dm text-sm h-9 px-3 transition-colors">
+                    <Filter size={14} /> filter
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="bg-zinc-900 border border-zinc-800 p-2 rounded-xl w-44 shadow-xl">
+                  <div className="flex flex-col gap-1">
+                    {(["all", "completed", "pending", "today", "tomorrow", "overdue"] as const).map((type) => (
+                      <button
+                        key={type}
+                        onClick={() => setFilter(type)}
+                        className={`w-full text-left px-3 py-1.5 rounded-lg text-xs font-dm transition-colors ${
+                          filter === type 
+                            ? "bg-zinc-800 text-white font-medium" 
+                            : "text-zinc-400 hover:text-white hover:bg-zinc-800/50"
+                        }`}
+                      >
+                        {type}
+                      </button>
+                    ))}
+                  </div>
+                </PopoverContent>
+              </Popover>
+
+              {tasks.length > 0 && (
                 <Button
-                  className="flex items-center gap-2 sm:w-64 bg-zinc-800 rounded-xl text-white font-dm h-10 px-4 transition-transform duration-200 ease-in-out hover:scale-105 hover:shadow-lg hover:bg-zinc-700 hover:text-white focus:ring-2 focus:ring-zinc-500 focus:ring-opacity-50 active:scale-95"
-                  onClick={() => { setTaskToEdit(null); setIsDialogOpen(true); }}
-                >
-                  add task
-                </Button>
-                <Button
-                  className="bg-zinc-800 hover:bg-red-900 transition-transform duration-200 ease-in-out hover:scale-105 rounded-xl text-white font-dm h-10 px-3"
+                  className="bg-zinc-800/50 cursor-pointer hover:bg-red-950/50 border border-zinc-700/50 hover:border-red-900/50 text-zinc-400 hover:text-red-400 rounded-xl font-dm h-9 px-2.5 transition-colors text-xs"
                   onClick={handleClear}
+                  title="clear all tasks"
                 >
-                  clear tasks
+                  <Trash2 size={14} />
                 </Button>
-              </div>
-              <div className="absolute right-0">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button className="bg-zinc-800 rounded-xl text-white font-dm h-10 px-4 hover:bg-zinc-700">
-                      filter
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="bg-zinc-900 border-none p-2 rounded-xl w-56">
-                    <div className="flex flex-col gap-2">
-                      <Button variant={filter === "all" ? "default" : "outline"} className="bg-zinc-800 rounded-xl text-white font-dm w-full" onClick={() => setFilter("all")}>all</Button>
-                      <Button variant={filter === "completed" ? "default" : "outline"} className="bg-zinc-800 rounded-xl text-white font-dm w-full" onClick={() => setFilter("completed")}>completed</Button>
-                      <Button variant={filter === "pending" ? "default" : "outline"} className="bg-zinc-800 rounded-xl text-white font-dm w-full" onClick={() => setFilter("pending")}>pending</Button>
-                      <Button variant={filter === "today" ? "default" : "outline"} className="bg-zinc-800 rounded-xl text-white font-dm w-full" onClick={() => setFilter("today")}>today</Button>
-                      <Button variant={filter === "tomorrow" ? "default" : "outline"} className="bg-zinc-800 rounded-xl text-white font-dm w-full" onClick={() => setFilter("tomorrow")}>tomorrow</Button>
-                      <Button variant={filter === "overdue" ? "default" : "outline"} className="bg-red-800 rounded-xl text-white font-dm w-full" onClick={() => setFilter("overdue")}>overdue</Button>
-                    </div>
-                  </PopoverContent>
-                </Popover>
-              </div>
+              )}
             </div>
           </CardHeader>
-          <CardContent className="flex-1 p-2">
-            <ScrollArea className="h-full flex flex-col gap-2">
+
+          <CardContent className="flex-1 p-2 pt-0 overflow-hidden flex flex-col">
+            <ScrollArea className="h-full pr-1">
               {loading ? (
-                <p className="text-neutral-400 text-sm">loading...</p>
+                <div className="space-y-2">
+                  {[0, 1].map((i) => (
+                    <div key={i} className="border border-zinc-800 bg-zinc-800/30 p-3 rounded-xl animate-pulse space-y-2">
+                      <div className="h-3 w-32 bg-zinc-700/60 rounded" />
+                      <div className="h-2.5 w-20 bg-zinc-700/40 rounded" />
+                    </div>
+                  ))}
+                </div>
               ) : filteredTasks.length === 0 ? (
-                <p className="text-neutral-400 text-sm italic font-dm">no tasks yet</p>
+                <div className="flex flex-col items-center justify-center text-center gap-2 py-4 rounded-2xl border border-dashed border-zinc-800/80 h-full">
+                  <AlertCircle size={20} className="text-neutral-500" />
+                  <p className="text-neutral-400 text-sm font-dm">
+                    no tasks added yet
+                  </p>
+                </div>
               ) : (
-                filteredTasks.map((task) => (
-                  <Dialog key={task.id}>
-                    <div className="flex items-center gap-2">
-                      <Checkbox
-                        checked={task.completed}
-                        onCheckedChange={() => handleToggle(task)}
-                      />
-                      <motion.div
-                        initial={{ opacity: 0, y: 5 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.2 }}
-                        className={`flex-1 border p-2 rounded-xl hover:bg-zinc-800/50 cursor-pointer flex justify-between items-center ${
-                          isOverdue(task) 
-                            ? 'border-red-500/50 bg-red-500/5' 
-                            : 'border-zinc-700/50'
-                        }`}
-                        onClick={() => navigate(`/tasks/${task.id}`)}
-                      >
-                        <span className={`font-dm ${
+                <div className="space-y-2">
+                  {filteredTasks.map((task) => (
+                    <div 
+                      key={task.id} 
+                      onClick={() => handleToggle(task)}
+                      className={`flex items-center gap-2.5 border p-2.5 rounded-xl transition-all duration-200 group cursor-pointer ${
+                        task.completed 
+                          ? "bg-zinc-900/40 border-zinc-800/40 opacity-75 hover:opacity-100" 
+                          : "bg-zinc-800/30 hover:bg-zinc-800/60 border-zinc-800/80 hover:border-zinc-700"
+                      }`}
+                    >
+                      <div 
+                        role="checkbox"
+                        aria-checked={task.completed}
+                        tabIndex={0}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleToggle(task);
+                        }}
+                        className={`w-4 h-4 rounded-lg flex items-center justify-center transition-all duration-200 flex-shrink-0 cursor-pointer ${
                           task.completed 
-                            ? "line-through text-white/60" 
+                            ? "bg-white border border-white text-zinc-900 shadow-sm" 
+                            : "bg-zinc-900/50 border border-zinc-700/60 hover:border-zinc-600 text-transparent"
+                        }`}
+                      >
+                        <Check size={10} strokeWidth={3} className={`transition-transform duration-200 ${task.completed ? "scale-100 opacity-100" : "scale-50 opacity-0"}`} />
+                      </div>
+                      
+                      <div
+                        className="flex-1 cursor-pointer flex items-center justify-between min-w-0 gap-2"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/tasks/${task.id}`);
+                        }}
+                      >
+                        <span className={`font-dm text-sm truncate transition-colors duration-200 ${
+                          task.completed 
+                            ? "line-through text-white/40" 
                             : isOverdue(task)
-                              ? "text-red-300"
-                              : "text-white"
+                              ? "text-red-300 font-medium"
+                              : "text-white/90"
                         }`}>
                           {task.title}
                         </span>
-                        <span className={`text-xs ml-2 font-dm ${
-                          isOverdue(task) ? "text-red-400" : "text-white/60"
+                        <span className={`text-xs font-dm flex-shrink-0 ${
+                          isOverdue(task) ? "text-red-400 font-medium" : "text-white/40"
                         }`}>
                           {getDeadlineLabel(task)}
                         </span>
-                      </motion.div>
-                      <DialogTrigger asChild>
+                      </div>
+
+                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-7 w-7 p-0 text-zinc-400 hover:text-red-400 hover:bg-red-950/50 rounded-xl cursor-pointer"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(task);
+                          }}
+                          title="delete task"
+                        >
+                          <Trash2 size={13} />
+                        </Button>
+
                         <Button 
                           size="sm" 
-                          variant="outline"
-                          className="bg-zinc-800 border-zinc-600 text-white hover:bg-zinc-700 rounded-xl px-2 py-1 text-xs"
-                          onClick={(e) => e.stopPropagation()}
+                          variant="ghost"
+                          className="h-7 w-7 p-0 text-zinc-400 hover:text-white hover:bg-zinc-700/50 cursor-pointer rounded-xl"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setTaskToEdit(task);
+                            setIsDialogOpen(true);
+                          }}
+                          title="edit task"
                         >
-                          •••
+                          <Edit2 size={13} />
                         </Button>
-                      </DialogTrigger>
+                      </div>
                     </div>
-
-                    <DialogContent className="bg-zinc-900 border-none text-white rounded-[1em]">
-                      <DialogHeader>
-                        <DialogTitle className="text-lg font-dm leading-tight">{task.title}</DialogTitle>
-                        <DialogDescription className="text-neutral-400 text-sm font-dm">
-                          {task.deadline ? `due: ${getDeadlineLabel(task)}` : "no deadline set"}
-                        </DialogDescription>
-                      </DialogHeader>
-                      <div className="mt-4 space-y-2">
-                        {task.description && (
-                          <p className={`${task.completed ? "line-through " : "text-neutral-300"} text-sm`}>
-                            {task.description}
-                          </p>
-                        )}
-                        <SubtaskComponent
-                          taskId={task.id}
-                          courseId={task.courseId}
-                          subtasks={taskSubtasks[task.id] || []}
-                          onSubtasksChange={(subtasks) => handleSubtasksChange(task.id, subtasks)}
-                        />
-                      </div>
-                      <div className="mt-4 flex justify-between gap-2">
-                        <Button 
-                          className="flex items-center rounded-xl gap-1 font-dm text-sm bg-blue-700 hover:bg-blue-600 transition-transform duration-200 ease-in-out hover:scale-105" 
-                          onClick={() => navigate(`/tasks/${task.id}`)}
-                        >
-                          View Full Task
-                        </Button>
-                        <div className="flex gap-2">
-                          <Button className="flex items-center rounded-xl gap-1 font-dm text-sm bg-zinc-700 hover:bg-zinc-600 transition-transform duration-200 ease-in-out hover:scale-105" onClick={() => { setTaskToEdit(task); setIsDialogOpen(true); }}>
-                            <Edit2 size={14} /> edit
-                          </Button>
-                          <Button className="flex items-center gap-1 rounded-xl font-dm text-sm bg-red-700 transition-transform duration-200 ease-in-out hover:scale-105 hover:shadow-lg hover:bg-red-900" onClick={() => handleDelete(task)}>
-                            <Trash2 size={14} /> delete
-                          </Button>
-                        </div>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
-                ))
+                  ))}
+                </div>
               )}
             </ScrollArea>
           </CardContent>
@@ -277,10 +300,13 @@ export default function TasksCard({ courseTitle, courseId }: { courseTitle: stri
 
       <AddTaskDialog
         isOpen={isDialogOpen}
-        onClose={() => setIsDialogOpen(false)}
+        onClose={() => {
+          setIsDialogOpen(false);
+          setTaskToEdit(null);
+        }}
         onTaskAdded={fetchTasks}
         taskToEdit={taskToEdit ?? undefined}
-        courseId={taskToEdit?.courseId ?? courseId}
+        courseId={courseId}
       />
     </>
   );

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, Fragment } from "react";
 import { Dialog, Transition } from "@headlessui/react";
-import { Paperclip, Plus, Minus } from "react-feather";
+import { Paperclip, Plus, Minus, Trash2 } from "react-feather";
 import {
   Tooltip,
   TooltipTrigger,
@@ -14,6 +14,7 @@ import {
   addCourse,
   updateCourse,
   getCourseById,
+  deleteCourse,
 } from "@/services/core services/courseService";
 import CourseFormFields from "./CourseFormFields";
 import { EventDateTimeField } from "../DateField";
@@ -25,6 +26,7 @@ interface AddCourseDialogProps {
   isOpen: boolean;
   onAddCourse?: (course: Course) => void;
   onUpdateCourse?: (course: Course) => void;
+  onDeleteCourse?: (courseId: string) => void;
   onClose: () => void;
   existingCourse?: Course | null;
   midterms: { start: Date | null; end: Date | null }[];
@@ -43,6 +45,7 @@ export default function AddCourseDialog({
   isOpen,
   onAddCourse,
   onUpdateCourse,
+  onDeleteCourse,
   onClose,
   existingCourse,
   midterms,
@@ -63,6 +66,7 @@ export default function AddCourseDialog({
   const [description, setDescription] = useState("");
   const [courseIcon, setCourseIcon] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [isPdfLoading, setIsPdfLoading] = useState(false);
   const [credits, setCredits] = useState<number | null>(null);
   const [activePicker, setActivePicker] = useState<string | null>(null);
@@ -226,16 +230,23 @@ export default function AddCourseDialog({
     }
   };
 
+  const handleDelete = async () => {
+    if (!existingCourse) return;
+    if (!confirm("are you sure you want to delete this course?")) return;
+    setIsDeleting(true);
+    try {
+      await deleteCourse(existingCourse.id);
+      onDeleteCourse?.(existingCourse.id);
+      onClose();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   const handleSubmit = async () => {
-    if (
-      !title.trim() ||
-      !code.trim() ||
-      !professor.trim() ||
-      !endDate ||
-      credits === null ||
-      isNaN(credits)
-    )
-      return;
+    if (!title.trim() || !code.trim() || !endDate) return;
     setIsSubmitting(true);
 
     try {
@@ -449,12 +460,7 @@ export default function AddCourseDialog({
                                 <div className="flex-1 rounded-xl p-4 transition-all shadow-inner">
                                   <EventDateTimeField
                                     id={`midterm-${i}` as any}
-                                    label={
-                                      <>
-                                        midterm {i + 1} date & time{" "}
-                                        <span className="text-red-400">*</span>
-                                      </>
-                                    }
+                                    label={`midterm ${i + 1} date & time`}
                                     selected={mt.start}
                                     onChange={(date) => {
                                       const targetEnd = new Date(
@@ -521,12 +527,7 @@ export default function AddCourseDialog({
                           <div className="rounded-xl p-4 transition-all shadow-inner">
                             <EventDateTimeField
                               id="final-exam"
-                              label={
-                                <>
-                                  final exam date & time{" "}
-                                  <span className="text-red-400">*</span>
-                                </>
-                              }
+                              label="final exam date & time"
                               selected={finalExam?.start || null}
                               onChange={(date) => {
                                 const targetEnd = new Date(
@@ -569,8 +570,7 @@ export default function AddCourseDialog({
 
                               <div className="flex flex-col ">
                                 <label className="text-sm text-gray-400 mb-1 font-mp ">
-                                  credits{" "}
-                                  <span className="text-red-500">*</span>
+                                  credits
                                 </label>
                                 <input
                                   type="number"
@@ -593,18 +593,31 @@ export default function AddCourseDialog({
                     </div>
                   </div>
 
-                  <div className="flex justify-end pt-6 border-t border-zinc-800 mt-6">
+                  <div className="flex items-center justify-between pt-6 border-t border-zinc-800 mt-6">
+                    <div>
+                      {isEditing && (
+                        <button
+                          type="button"
+                          onClick={handleDelete}
+                          disabled={isDeleting || isSubmitting}
+                          className="flex items-center gap-1.5 px-4 py-2.5 bg-zinc-800/50 border border-zinc-700/50 border-red-500/20 rounded-xl font-dm text-sm font-medium text-zinc-400 cursor-pointer transition-all duration-200 ease-out transform will-change-transform hover:bg-red-500/20 hover:text-red-400 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          <Trash2 size={15} />
+                          {isDeleting ? "deleting..." : "delete course"}
+                        </button>
+                      )}
+                    </div>
+
                     <button
                       type="button"
                       onClick={handleSubmit}
                       disabled={
                         isSubmitting ||
+                        isDeleting ||
                         isPdfLoading ||
                         !title.trim() ||
                         !code.trim() ||
-                        !professor.trim() ||
-                        !endDate ||
-                        credits === null
+                        !endDate
                       }
                       className="px-6 py-2.5 bg-white hover:bg-gray-100 disabled:bg-zinc-700 disabled:text-zinc-500 disabled:cursor-not-allowed text-zinc-900 rounded-xl font-dm text-sm font-medium transition-all duration-200 hover:scale-105 hover:shadow-lg cursor-pointer"
                     >

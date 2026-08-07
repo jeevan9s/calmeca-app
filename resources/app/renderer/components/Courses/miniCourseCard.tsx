@@ -3,9 +3,8 @@
 import { Course } from "@/services/db";
 import { motion, useMotionValue, useTransform, useSpring } from "framer-motion";
 import { useState } from "react";
-import { DynamicIcon, IconName } from 'lucide-react/dynamic';
+import { DynamicIcon, IconName } from "lucide-react/dynamic";
 import { useNavigate } from "react-router-dom";
-
 
 interface MiniCourseCardProps {
   name: string;
@@ -14,7 +13,12 @@ interface MiniCourseCardProps {
   course: Course;
 }
 
-export default function MiniCourseCard({ name, code, color, course }: MiniCourseCardProps) {
+export default function MiniCourseCard({
+  name,
+  code,
+  color,
+  course,
+}: MiniCourseCardProps) {
   const [hovered, setHovered] = useState(false);
   const x = useMotionValue(0);
   const y = useMotionValue(0);
@@ -34,8 +38,7 @@ export default function MiniCourseCard({ name, code, color, course }: MiniCourse
     y.set(offsetY);
   }
 
-    const navigate = useNavigate();
-  
+  const navigate = useNavigate();
 
   const iconName =
     typeof course.icon === "string"
@@ -43,7 +46,9 @@ export default function MiniCourseCard({ name, code, color, course }: MiniCourse
         ? course.icon.toLowerCase()
         : course.icon.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase()
       : null;
-  const courseIconElement = iconName ? <DynamicIcon name={iconName as IconName} size={16} className="text-white" /> : null;
+  const courseIconElement = iconName ? (
+    <DynamicIcon name={iconName as IconName} size={16} className="text-white" />
+  ) : null;
 
   return (
     <motion.div
@@ -65,22 +70,20 @@ export default function MiniCourseCard({ name, code, color, course }: MiniCourse
       whileTap={{ scale: 0.97 }}
       onClick={() => navigate(`/courses/${course.id}`)}
     >
+      <div className="flex flex-row gap-2 absolute top-2 left-2">
+        <div
+          className="w-4 h-4 rounded-full bg-transparent"
+          style={{
+            backgroundColor: color,
+            boxShadow: hovered ? `0 0 12px ${color}80` : `0 0 4px ${color}40`,
+          }}
+        />
+      </div>
 
-<div className="flex flex-row gap-2 absolute top-2 left-2">
-  <div
-    className="w-4 h-4 rounded-full bg-transparent"
-    style={{
-      backgroundColor: color,
-      boxShadow: hovered ? `0 0 12px ${color}80` : `0 0 4px ${color}40`,
-    }}
-  />
-  {IconComponent && (
-    <IconComponent size={16} className="text-white" />
-  )}
-</div>
-
-
-      <div className="flex flex-col mt-auto" style={{ transform: "translateZ(40px)" }}>
+      <div
+        className="flex flex-col mt-auto"
+        style={{ transform: "translateZ(40px)" }}
+      >
         <p className="text-[10px] tracking-wide font-light text-neutral-400 uppercase font-dm truncate">
           {name}
         </p>

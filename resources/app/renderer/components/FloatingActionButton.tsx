@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Plus } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import QuickActionDialog from "./QuickActionDialog";
 
 export interface FloatingActionButtonProps {
@@ -11,6 +11,25 @@ export interface FloatingActionButtonProps {
 
 export default function FloatingActionButton({ courseId }: FloatingActionButtonProps) {
   const [open, setOpen] = useState(false);
+  const [isAnyDialogOpen, setIsAnyDialogOpen] = useState(false);
+
+  useEffect(() => {
+    const checkOpenDialogs = () => {
+      const dialogs = document.querySelectorAll('[role="dialog"], [data-state="open"]');
+      setIsAnyDialogOpen(dialogs.length > 0);
+    };
+
+    checkOpenDialogs();
+
+    const observer = new MutationObserver(checkOpenDialogs);
+    observer.observe(document.body, { childList: true, subtree: true, attributes: true });
+
+    return () => observer.disconnect();
+  }, []);
+
+  if (isAnyDialogOpen || open) {
+    return <QuickActionDialog open={open} onClose={() => setOpen(false)} courseId={courseId} />;
+  }
 
   return (
     <>

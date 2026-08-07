@@ -48,7 +48,7 @@ const taskTypeLabels: Record<TaskType, string> = {
   lab: "lab",
   "project task": "project task",
   report: "report",
-  "tutorial": "tutorial",
+  tutorial: "tutorial",
   custom: "custom",
 };
 
@@ -132,14 +132,11 @@ export default function AddTaskDialog({
     }
   }, [isOpen]);
 
-  const effectiveCourseId = outsideCourseOrigin ? selectedCourseId : courseId;
-  const isButtonDisabled =
-    isSubmitting || !title.trim() || !deadline || !effectiveCourseId;
+  const isButtonDisabled = isSubmitting || !title.trim();
 
   const handleSubmit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (!title.trim() || !deadline || !effectiveCourseId || isSubmitting)
-      return;
+    if (!title.trim() || isSubmitting) return;
 
     setIsSubmitting(true);
 
@@ -149,35 +146,43 @@ export default function AddTaskDialog({
           ? (customType.trim() as TaskType) || "custom"
           : selectedType;
 
-      if (taskToEdit?.id) {
-        await updateTask(taskToEdit.id, {
-          courseId: effectiveCourseId,
-          title: title.trim(),
-          deadline,
-          type: resolvedType,
-        });
-      } else {
-        await createTask({
-          courseId: effectiveCourseId,
-          title: title.trim(),
-          deadline,
-          type: resolvedType,
-        });
+      const payloadData: any = {
+        title: title.trim(),
+        deadline: deadline || undefined,
+        type: resolvedType,
+      };
+
+      const finalCourseId = selectedCourseId || courseId;
+      if (finalCourseId && finalCourseId.trim() !== "") {
+        payloadData.courseId = finalCourseId;
       }
 
-      await addCalendarEvent(
-        title.trim(),
-        deadline,
-        deadline,
-        "deadline",
-        allDay,
-        recurrence,
-      );
+      if (taskToEdit?.id) {
+        await updateTask(taskToEdit.id, payloadData);
+      } else {
+        await createTask(payloadData);
+      }
+
+      if (deadline) {
+        try {
+          await addCalendarEvent(
+            title.trim(),
+            deadline,
+            deadline,
+            "deadline",
+            allDay,
+            recurrence,
+          );
+        } catch (calendarErr) {
+          console.error("Calendar event error:", calendarErr);
+        }
+      }
 
       onTaskAdded();
       onClose();
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
+      alert(err.message || "Failed to save task. Please verify your course selection and try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -202,7 +207,8 @@ export default function AddTaskDialog({
       setRecurring(false);
     }
   };
-return (
+
+  return (
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-50" onClose={onClose}>
         <Transition.Child
@@ -249,16 +255,17 @@ return (
                       {outsideCourseOrigin && (
                         <div className="space-y-2.5">
                           <Label className="block text-sm text-white/80 font-dm font-medium mb-2">
-                            course <span className="text-red-400">*</span>
+                            course <span className="text-white/40 text-xs font-normal">(optional)</span>
                           </Label>
                           <Select
                             value={selectedCourseId}
                             onValueChange={setSelectedCourseId}
                           >
-                            <SelectTrigger
-                              className="w-full h-12 bg-zinc-800/50 hover:bg-zinc-800 transition-colors border border-zinc-700/50 rounded-xl font-dm text-white px-4 focus:ring-1 focus:ring-zinc-600 data-[placeholder]:text-gray-500"
-                            >
-                              <SelectValue placeholder="select course" className="placeholder:text-gray-500" />
+                            <SelectTrigger className="w-full h-12 bg-zinc-800/50 hover:bg-zinc-800 transition-colors border border-zinc-700/50 rounded-xl font-dm text-white px-4 focus:ring-1 focus:ring-zinc-600 data-[placeholder]:text-gray-500">
+                              <SelectValue
+                                placeholder="select course"
+                                className="placeholder:text-gray-500"
+                              />
                             </SelectTrigger>
                             <SelectContent className="border-none rounded-xl mt-2 bg-zinc-900 text-white border-zinc-700 shadow-xl">
                               <SelectItem
@@ -283,7 +290,9 @@ return (
                       <div className="">
                         <Label className="block text-sm text-white/80 font-dm font-medium mb-2">
                           {allDay ? "deadline date " : "deadline date & time "}
-                          <span className="text-red-400">*</span>
+                          <span className="text-white/40 text-xs font-normal">
+                            (optional)
+                          </span>
                         </Label>
 
                         <div className="rounded-xl p-3 transition-all shadow-inner">
@@ -331,7 +340,6 @@ return (
                           />
                         )}
                       </div>
-
                       <div className="space-y-2.5">
                         <Label className="block text-sm text-white/80 font-dm font-medium mb-2">
                           options

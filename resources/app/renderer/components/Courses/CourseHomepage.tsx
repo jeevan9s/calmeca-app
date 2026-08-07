@@ -23,7 +23,6 @@ interface CourseHomepageProps {
   courseId: string;
 }
 
-
 export default function CourseHomepage({
   course,
   onUpdateCourse,
@@ -89,10 +88,9 @@ export default function CourseHomepage({
             </motion.div>
           </motion.div>
         </ScrollArea>
-        {/* FAB for course-specific quick add */}
         <div className="pointer-events-none">
           <div className="pointer-events-auto">
-            {course.id && <FloatingActionButton courseId={course.id} />}
+            {course.id && <FloatingActionButton />}
           </div>
         </div>
       </Layout>
