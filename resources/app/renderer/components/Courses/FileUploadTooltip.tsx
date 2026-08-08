@@ -1,7 +1,6 @@
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@radix-ui/react-tooltip";
 import { Paperclip } from "react-feather";
 import { useState } from "react";
-import { extractCourseFromPDF } from "@/services/google";
 
 interface FileUploadTooltipProps {
   setCourseData: (data: Partial<any>) => void; 
@@ -19,13 +18,8 @@ export default function FileUploadTooltip({ setCourseData }: FileUploadTooltipPr
       const arrayBuffer = await file.arrayBuffer();
       const uint8Array = new Uint8Array(arrayBuffer);
       const base64String = btoa(String.fromCharCode(...uint8Array));
-      const result = await extractCourseFromPDF(base64String);
+      const result = null;
 
-      if (result?.success && result.course) {
-        setCourseData(result.course);
-      } else {
-        console.error(result?.error || "Unknown error during PDF extraction");
-      }
     } catch (err) {
       console.error("Error extracting course from PDF:", err);
     } finally {

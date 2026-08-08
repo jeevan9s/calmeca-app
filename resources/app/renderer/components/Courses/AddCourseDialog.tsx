@@ -20,7 +20,6 @@ import CourseFormFields from "./CourseFormFields";
 import { EventDateTimeField } from "../DateField";
 import ColorPickerField from "./ColourPickerField";
 import { addCalendarEvent } from "@/lib/helpers/calendarHelpers";
-import { extractCourseFromPDF } from "@/services/google";
 
 interface AddCourseDialogProps {
   isOpen: boolean;
@@ -205,31 +204,6 @@ export default function AddCourseDialog({
     }
   }, [isOpen]);
 
-  const handlePdfUpload = async (file: File) => {
-    setIsPdfLoading(true);
-    try {
-      const arrayBuffer = await file.arrayBuffer();
-      const uint8Array = new Uint8Array(arrayBuffer);
-      const base64String = btoa(String.fromCharCode(...uint8Array));
-      const result = await extractCourseFromPDF(base64String);
-      if (result.success) {
-        const data = result.course;
-        if (data.title) setTitle(data.title);
-        if (data.code) setCode(data.code);
-        if (data.professor) setProfessor(data.professor);
-        if (data.profEmail) setProfEmail(data.profEmail);
-        if (data.credits) setCredits(data.credits);
-      }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setIsPdfLoading(false);
-      const input =
-        document.querySelector<HTMLInputElement>('input[type="file"]');
-      if (input) input.value = "";
-    }
-  };
-
   const handleDelete = async () => {
     if (!existingCourse) return;
     if (!confirm("are you sure you want to delete this course?")) return;
@@ -398,16 +372,7 @@ export default function AddCourseDialog({
                             type="file"
                             accept=".pdf"
                             className="hidden"
-                            onChange={(e) =>
-                              e.target.files &&
-                              handlePdfUpload(e.target.files[0])
-                            }
                           />
-                          {isPdfLoading ? (
-                            <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
-                          ) : (
-                            <Paperclip size={18} />
-                          )}
                         </label>
                       </div>
                     </div>

@@ -7,7 +7,7 @@ import { Course } from "@/services/db";
 import "@/renderer/styles/sb.css";
 import {
   getLoggedInUser,
-  startGoogleLogin,
+  googleLogin,
   googleLogout,
 } from "@/services/google";
 import { Folder, LayoutDashboard } from "lucide-react";

@@ -3,11 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, easeInOut } from "framer-motion";
 import { ChevronRight } from "react-feather";
-import {
-  getLoggedInUser,
-  startGoogleLogin,
-  googleLogout,
-} from "@/services/google";
+import { getLoggedInUser, googleLogin, googleLogout } from "@/services/google";
 import { Button } from "@/components/button";
 
 type AuthDialogProps = {
@@ -50,12 +46,9 @@ export default function AuthDialog({
   const handleLogin = async () => {
     setLoading(true);
     try {
-      const res = await startGoogleLogin();
-      if (res?.user) setUser(res.user);
-      setIsAuthDialogOpen(false);
+      await googleLogin();
     } catch (err) {
       console.error("Login failed:", err);
-    } finally {
       setLoading(false);
     }
   };
@@ -131,7 +124,7 @@ export default function AuthDialog({
               className="w-full text-white/90 font-light transition rounded-xl cursor-pointer hover:scale-[1.02] bg-transparent hover:bg-neutral-800"
             >
               {loading ? (
-                "Signing in..."
+                "signing in..."
               ) : (
                 <>
                   sign in with{" "}

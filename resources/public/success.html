@@ -17,7 +17,8 @@
         box-sizing: border-box;
       }
 
-      html, body {
+      html,
+      body {
         height: 100%;
         width: 100%;
         background-color: rgb(12, 12, 12);
@@ -84,10 +85,14 @@
   </head>
   <body>
     <div id="page" role="main" aria-label="Login successful message">
-      <h1>login Successful :)</h1>
+      <h1>login Successful</h1>
       <p>
-        You can
-        <a href="#" onclick="closeWindow()" aria-label="Close window and continue using Calmeca">
+        you can
+        <a
+          href="#"
+          onclick="closeWindow()"
+          aria-label="Close window and continue using Calmeca"
+        >
           close this window
         </a>
         <i id="icon" data-lucide="log-out" aria-hidden="true"></i>
@@ -96,19 +101,25 @@
     </div>
     <script>
       lucide.createIcons();
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get("error")) {
+        document.querySelector("h1").innerText = "login failed";
+        document.querySelector("p").innerHTML = `
+      access was denied or an error occurred. you can 
+      <a href="#" onclick="closeWindow()">close this window</a>.
+    `;
+      }
+
       function closeWindow() {
         try {
-          if (window.electronAPI && window.electronAPI.close) {
-            window.electronAPI.close();
-          } else {
-            window.close();
-          }
+          window.close();
         } catch {
           window.close();
         }
       }
-      document.addEventListener('keydown', e => {
-        if (e.key === 'Escape' || e.key === 'Enter') closeWindow();
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" || e.key === "Enter") closeWindow();
       });
     </script>
   </body>
