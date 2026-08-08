@@ -5,13 +5,26 @@ import CourseOverviewPage from "./renderer/pages/course_overview/page";
 import CourseHomepageWrapper from "./renderer/components/Courses/CourseHomepageWrapper";
 import TaskHomepage from "./renderer/pages/tasks/[taskId]";
 import "./renderer/styles/App.css";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { initGoogleAuth } from "./services/google";
 
 export default function App() {
+  const [isAuthReady, setIsAuthReady] = useState(false);
+
   useEffect(() => {
-    initGoogleAuth();
+    // Block application route rendering until tokens are fully hydrated from physical storage
+    initGoogleAuth().then(() => {
+      setIsAuthReady(true);
+    });
   }, []);
+
+  if (!isAuthReady) {
+    return (
+      <div className="w-full h-full bg-[#18181b] flex items-center justify-center">
+        <p className="text-white/60 text-sm">Hydrating active profiles...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full h-full bg-transparent">
