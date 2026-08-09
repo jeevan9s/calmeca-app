@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/card";
 import { motion } from "framer-motion";
+import { fetchGoogleCalendarEvents } from "@/services/google";
 
 export default function DailySummaryCard() {
   const [classesCount, setClassesCount] = useState(0);

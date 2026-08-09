@@ -5,6 +5,7 @@ import { motion, easeInOut } from "framer-motion";
 import { ChevronRight } from "react-feather";
 import { getLoggedInUser, googleLogin, googleLogout } from "@/services/google";
 import { Button } from "@/components/button";
+import { useNavigate } from "react-router-dom";
 
 type AuthDialogProps = {
   isAuthDialogOpen: boolean;
@@ -24,18 +25,21 @@ export default function AuthDialog({
     picture: string;
   } | null>(null);
   const [loading, setLoading] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
+    if (!isAuthDialogOpen) return;
     const fetchUser = async () => {
       try {
         const currentUser = await getLoggedInUser();
         if (currentUser) setUser(currentUser);
       } catch (err) {
-        console.error("Failed to fetch logged-in user:", err);
+        console.error("failed to fetch logged-in user:", err);
       }
     };
     fetchUser();
-  }, []);
+  }, [isAuthDialogOpen]);
 
   useEffect(() => {
     const handleResize = () => setWindowWidth(window.innerWidth);
@@ -45,10 +49,16 @@ export default function AuthDialog({
 
   const handleLogin = async () => {
     setLoading(true);
+    setAuthError(null);
     try {
       await googleLogin();
+      const currentUser = await getLoggedInUser();
+      if (currentUser) setUser(currentUser);
     } catch (err) {
+      const message = err instanceof Error ? err.message : "Google login failed.";
       console.error("Login failed:", err);
+      setAuthError(message);
+    } finally {
       setLoading(false);
     }
   };
@@ -57,8 +67,10 @@ export default function AuthDialog({
     try {
       await googleLogout();
       setUser(null);
+      setIsAuthDialogOpen(false);
+      navigate("/dashboard");
     } catch (err) {
-      console.error("Logout failed:", err);
+      console.error("logout failed:", err);
     }
   };
 
@@ -74,12 +86,7 @@ export default function AuthDialog({
       className="fixed top-16 right-6 z-50 rounded-2xl bg-[#18181b] border border-neutral-800 shadow-xl flex flex-col p-4"
       style={{ width }}
     >
-      <div className="flex justify-between items-center w-full mb-1">
-        <img
-          src="../../public/taskbar.png"
-          alt="Logo"
-          className="h-4 w-4 transition-transform duration-200 hover:scale-110"
-        />
+      <div className="flex justify-end items-center w-full mb-1">
         <button
           onClick={() => setIsAuthDialogOpen(false)}
           className="w-6 h-6 rounded-full hover:bg-white/10 flex items-center justify-center transition cursor-pointer"
@@ -132,6 +139,9 @@ export default function AuthDialog({
                 </>
               )}
             </Button>
+            {authError ? (
+              <p className="mt-2 text-xs text-red-400 text-center">{authError}</p>
+            ) : null}
           </div>
         </>
       )}

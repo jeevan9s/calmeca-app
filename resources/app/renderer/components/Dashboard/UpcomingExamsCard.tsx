@@ -21,6 +21,7 @@ import { motion } from "framer-motion";
 import { ScrollArea } from "@/components/scroll-area";
 import { getTasks } from "@/services/core services/taskService";
 import { getCourseById, getAllCourses } from "@/services/core services/courseService";
+import { fetchGoogleCalendarEvents } from "@/services/google";
 
 type ExamItem = {
   id: string;

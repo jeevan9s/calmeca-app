@@ -41,13 +41,13 @@ export default function Sidebar({
     const fetchUser = async () => {
       try {
         const currentUser = await getLoggedInUser();
-        if (currentUser) setUser(currentUser);
+        setUser(currentUser ?? null);
       } catch (err) {
         console.error("Failed to fetch logged-in user:", err);
       }
     };
     fetchUser();
-  }, []);
+  }, [isVisible]);
 
   useEffect(() => {
     const fetchSidebarCourses = async () => {
@@ -109,14 +109,18 @@ export default function Sidebar({
 
       <div className="flex flex-col items-left mt-8 px-4 pb-4 border-b border-zinc-800">
         <div className="w-12 h-12 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center overflow-hidden mb-2">
-          <span className="text-sm font-semibold text-neutral-300">
-            {user?.picture}
-          </span>
+          {user?.picture ? (
+            <img src={user.picture} alt="profile" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+          ) : (
+            <span className="text-sm font-semibold text-neutral-300">
+              {user?.name?.[0]?.toUpperCase() ?? "?"}
+            </span>
+          )}
         </div>
-        <span className="font-dm font-medium text-sm text-white text-center truncate w-full">
+        <span className="font-dm font-medium text-sm text-white text-left truncate w-full">
           {user?.name}
         </span>
-        <span className="font-dm text-xs text-neutral-400 text-center truncate w-full">
+        <span className="font-dm text-xs text-neutral-400 text-left truncate w-full">
           {user?.email}
         </span>
       </div>
