@@ -109,11 +109,31 @@ export interface OfficeHour {
     byAppointment: boolean;
 }
 
+export type GCalEvent = {
+  id: string;
+  summary: string;
+  start: string;
+  end: string;
+  description?: string;
+  location?: string;
+  recurrence?: string;
+};
+
+export type ExamItem = {
+  id: string;
+  title: string;
+  deadline: Date;
+  courseName?: string;
+  type: string;
+  description?: string;
+  source: 'database' | 'calendar';
+  location?: string;
+};
+
 export class CalmecaDB extends Dexie {
     courses!: Table<Course, string>;
     tasks!: Table<Task, string>;
     calendarEvents!: Table<CalendarEvent, string>;
-    microsoftFiles!: Table<MicrosoftFile, string>;
     subtasks!: Table<SubTask, string>;
     // courseItems!: Table<Deadline, string>; // TODO: Define Deadline interface
 

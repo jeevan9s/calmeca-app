@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   Card,
   CardContent,
@@ -12,7 +12,6 @@ import { Button } from "@/components/button";
 import { ExternalLink } from "react-feather";
 import { motion } from "framer-motion";
 import { ScrollArea } from "@/components/scroll-area";
-import { CalendarEvent } from "@/services/db";
 import {
   Dialog,
   DialogContent,
@@ -21,6 +20,9 @@ import {
   DialogDescription,
   DialogTrigger,
 } from "@/components/dialog";
+import { fetchGoogleCalendarEvents } from "@/services/google";
+
+const CALENDAR_EVENTS_UPDATED_EVENT = "calmeca:calendar-events-updated";
 
 const formatEventDate = (start: string | Date) => {
   const startDate = start instanceof Date ? start : new Date(start);
@@ -43,35 +45,53 @@ const formatEventDate = (start: string | Date) => {
   }
 };
 
+const CLUB_KEYWORDS = ["meeting", "club", "team", "society", "association", "design", "avionics"];
+const CLUB_KEYWORDS_REGEX = new RegExp(CLUB_KEYWORDS.join("|"), "i");
+
 export default function ClubsCard() {
-  const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const loadEvents = async () => {
-      try {
-        const fetched = await fetchGoogleCalendarEvents("designTeams");
-        if (!fetched || fetched.length === 0) {
-          setEvents([]);
-          return;
-        }
-
-        if (fetched ) {
-
-        }
-
-        const upcoming = fetched
-          .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime())
-          .slice(0, 2);
-        setEvents(upcoming);
-      } catch {
-        setEvents([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadEvents();
+  const loadEvents = useCallback(async () => {
+    try {
+      const all = await fetchGoogleCalendarEvents();
+      const now = new Date();
+      const upcoming = all
+        .filter((ev) => {
+          if (!ev.start) return false;
+          if (new Date(ev.end) < now) return false;
+          return CLUB_KEYWORDS_REGEX.test(ev.summary ?? "");
+        })
+        .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime())
+        .slice(0, 3);
+      setEvents(upcoming);
+    } catch {
+      setEvents([]);
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    const handleCalendarEventsUpdated = () => {
+      void loadEvents();
+    };
+
+    loadEvents();
+    const interval = setInterval(loadEvents, 60_000);
+    window.addEventListener(
+      CALENDAR_EVENTS_UPDATED_EVENT,
+      handleCalendarEventsUpdated,
+    );
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener(
+        CALENDAR_EVENTS_UPDATED_EVENT,
+        handleCalendarEventsUpdated,
+      );
+    };
+  }, [loadEvents]);
 
   const isToday = (date: string | Date) => {
     const d = date instanceof Date ? date : new Date(date);
@@ -103,7 +123,7 @@ export default function ClubsCard() {
                         initial={{ opacity: 0, y: 5 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.3 }}
-                        className="flex flex-col text-sm text-white/80 font-dm border-b border-zinc-700/50 pb-1 -mt-1 p-1 rounded-lg hover:bg-zinc-800/30 cursor-pointer"
+                        className="flex flex-col text-sm text-white/80 font-dm border-b border-zinc-700/50 pb-1 -mt-1 p-1 rounded-xl hover:bg-zinc-800/30 cursor-pointer"
                       >
                         <span className="font-semibold">{e.summary}</span>
                         <span className="text-xs text-neutral-400">

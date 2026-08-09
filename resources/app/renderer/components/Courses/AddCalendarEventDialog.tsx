@@ -5,19 +5,26 @@ import { Dialog, Transition } from "@headlessui/react";
 import { Input } from "@/components/input";
 import { Label } from "@/components/label";
 import { EventDateTimeField } from "../DateField";
+import { GCalEvent } from "@/services/db";
+import {
+  addGoogleCalendarEvent,
+  updateGoogleCalendarEvent,
+} from "@/services/google";
 
-import { addCalendarEvent } from "@/lib/helpers/calendarHelpers";
+const CALENDAR_EVENTS_UPDATED_EVENT = "calmeca:calendar-events-updated";
 
 interface AddCalendarEventDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onEventAdded: () => void;
+  eventToEdit?: GCalEvent | null;
 }
 
 export default function AddCalendarEventDialog({
   isOpen,
   onClose,
   onEventAdded,
+  eventToEdit,
 }: AddCalendarEventDialogProps) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -27,6 +34,8 @@ export default function AddCalendarEventDialog({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [activePicker, setActivePicker] = useState<string | null>(null);
+
+  const isEditing = Boolean(eventToEdit?.id);
 
   useEffect(() => {
     if (!allDay) return;
@@ -44,6 +53,24 @@ export default function AddCalendarEventDialog({
     setActivePicker(null);
   };
 
+  useEffect(() => {
+    if (!isOpen) return;
+
+    if (eventToEdit) {
+      const start = eventToEdit.start ? new Date(eventToEdit.start) : new Date();
+      const end = eventToEdit.end ? new Date(eventToEdit.end) : start;
+      setTitle(eventToEdit.summary || "");
+      setDescription(eventToEdit.description || "");
+      setStartDate(start);
+      setEndDate(end);
+      setAllDay(!eventToEdit.start.includes("T"));
+      setActivePicker(null);
+      return;
+    }
+
+    resetForm();
+  }, [isOpen, eventToEdit]);
+
   const handleSubmit = async (e?: FormEvent) => {
     if (e) e.preventDefault();
     if (!title.trim() || !startDate || !endDate || isSubmitting) return;
@@ -51,20 +78,51 @@ export default function AddCalendarEventDialog({
     setIsSubmitting(true);
 
     try {
-      await addCalendarEvent(
-        title.trim(),
-        startDate,
-        endDate,
-        description.trim() || "deadline",
-        allDay,
-        "none",
-      );
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+
+      if (allDay) {
+        start.setHours(0, 0, 0, 0);
+        end.setHours(23, 59, 59, 999);
+      }
+
+      const payload: Partial<GCalEvent> = {
+        summary: title.trim(),
+        start: start.toISOString(),
+        end: end.toISOString(),
+        description: description.trim() || undefined,
+      };
+
+      const saved = eventToEdit?.id
+        ? await updateGoogleCalendarEvent(eventToEdit.id, payload)
+        : await addGoogleCalendarEvent({
+            id: "",
+            summary: payload.summary || "",
+            start: payload.start || "",
+            end: payload.end || "",
+            description: payload.description,
+          });
+
+      if (!saved) {
+        throw new Error(
+          eventToEdit?.id
+            ? "Google Calendar event update failed"
+            : "Google Calendar event creation failed",
+        );
+      }
+
+      window.dispatchEvent(new Event(CALENDAR_EVENTS_UPDATED_EVENT));
 
       resetForm();
       onEventAdded();
       onClose();
     } catch (err) {
-      console.error("Error creating calendar event:", err);
+      console.error(
+        eventToEdit?.id
+          ? "Error updating calendar event:"
+          : "Error creating calendar event:",
+        err,
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -107,7 +165,7 @@ return (
               <Dialog.Panel className="w-full max-w-md transform rounded-2xl bg-zinc-900 border border-zinc-800 p-6 text-left shadow-2xl transition-all my-auto flex flex-col justify-between">
                 <div>
                   <Dialog.Title className="text-xl text-white font-dm font-semibold mb-6">
-                    add calendar event
+                    {isEditing ? "edit calendar event" : "add calendar event"}
                   </Dialog.Title>
 
                   <form onSubmit={handleSubmit} className="space-y-6">
@@ -137,19 +195,9 @@ return (
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-2.5">
-                        <Label className="block text-sm text-white/80 font-dm font-medium mb-2">
-                          {allDay ? (
-                            <>
-                              start date <span className="text-red-400">*</span>
-                            </>
-                          ) : (
-                            <>
-                              start date & time <span className="text-red-400">*</span>
-                            </>
-                          )}
-                        </Label>
                         <EventDateTimeField
                           id="start"
+                          label={allDay ? "start date" : "start date & time"}
                           selected={startDate}
                           onChange={(date) => {
                             setStartDate(date);
@@ -164,17 +212,9 @@ return (
                       </div>
 
                       <div className="space-y-2.5">
-                        <Label className="block text-sm text-white/80 font-dm font-medium mb-2">
-                          {allDay ? (
-                            <>end date</>
-                          ) : (
-                            <>
-                              end date & time <span className="text-red-400">*</span>
-                            </>
-                          )}
-                        </Label>
                         <EventDateTimeField
                           id="end"
+                          label={allDay ? "end date" : "end date & time"}
                           selected={endDate}
                           onChange={setEndDate}
                           allDay={allDay}
@@ -222,7 +262,13 @@ return (
                     disabled={isButtonDisabled}
                     className="px-6 py-2 bg-zinc-300 hover:bg-zinc-400 active:bg-zinc-500 text-zinc-900 hover:font-semibold cursor-pointer disabled:bg-zinc-700 disabled:cursor-not-allowed disabled:text-white/50 rounded-xl font-dm text-sm transition-all duration-200 hover:scale-105 active:scale-95 hover:shadow-lg disabled:hover:scale-100 disabled:hover:shadow-none"
                   >
-                    {isSubmitting ? "creating..." : "create event"}
+                    {isSubmitting
+                      ? isEditing
+                        ? "saving..."
+                        : "creating..."
+                      : isEditing
+                        ? "save changes"
+                        : "create event"}
                   </button>
                 </div>
               </Dialog.Panel>

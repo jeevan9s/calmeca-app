@@ -1,3 +1,4 @@
+import { GCalEvent } from "./db";
 import { getGoogleAuthConfig } from "./googleConfig";
 
 const {
@@ -351,6 +352,7 @@ export async function initGoogleAuth(): Promise<boolean> {
   return !!cachedAccessToken;
 }
 
+// debug
 function describeGoogleAuthError(
   data: Record<string, unknown> | undefined,
   status: number,
@@ -501,15 +503,73 @@ export async function fetchGoogleCalendarEvents(
     );
   }
 
+  // console.log(events);
   return events;
 }
 
 export async function addGoogleCalendarEvent(
-  summary: string,
-  start: string,
-  end: string,
-  allDay = false,
-  recurrence = "none",
-) {}
+  event: GCalEvent,
+): Promise<any | null> {
+  const data = await apiRequest(`/calendars/primary/events`, {
+    method: "POST",
+    body: JSON.stringify({
+      summary: event.summary,
+      description: event.description,
+      location: event.location,
+      start: { dateTime: event.start },
+      end: { dateTime: event.end },
+    }),
+  });
 
-export async function deleteGoogleCalendarEvent(eventId: string) {}
+  if (!data) return null;
+
+  return {
+    id: data.id,
+    summary: data.summary || "",
+    start: data.start?.dateTime || data.start?.date || "",
+    end: data.end?.dateTime || data.end?.date || "",
+    description: data.description,
+    location: data.location,
+  };
+}
+
+export async function updateGoogleCalendarEvent(
+  eventId: string,
+  event: Partial<GCalEvent>,
+): Promise<any | null> {
+  const body: Record<string, any> = {};
+  if (event.summary !== undefined) body.summary = event.summary;
+  if (event.description !== undefined) body.description = event.description;
+  if (event.location !== undefined) body.location = event.location;
+  if (event.start !== undefined) body.start = { dateTime: event.start };
+  if (event.end !== undefined) body.end = { dateTime: event.end };
+
+  const data = await apiRequest(
+    `/calendars/primary/events/${encodeURIComponent(eventId)}`,
+    {
+      method: "PATCH",
+      body: JSON.stringify(body),
+    },
+  );
+
+  if (!data) return null;
+
+  return {
+    id: data.id,
+    summary: data.summary || "",
+    start: data.start?.dateTime || data.start?.date || "",
+    end: data.end?.dateTime || data.end?.date || "",
+    description: data.description,
+    location: data.location,
+  };
+}
+
+export async function deleteGoogleCalendarEvent(
+  eventId: string,
+): Promise<boolean> {
+  const result = await apiRequest(
+    `/calendars/primary/events/${encodeURIComponent(eventId)}`,
+    { method: "DELETE" },
+  );
+  return result !== null;
+}

@@ -116,7 +116,7 @@ export default function AuthDialog({
           <div className="flex w-full justify-start mt-auto">
             <button
               onClick={handleLogout}
-              className="px-5 py-2 bg-red-500/90 hover:bg-red-600 text-white rounded-xl text-sm font-semibold transition-colors cursor-pointer"
+              className="px-5 py-2  transition-all duration-300 hover:scale-105 bg-zinc-800 hover:bg-red-800 text-white rounded-xl text-sm cursor-pointer"
             >
               log out
             </button>

@@ -134,7 +134,7 @@ export default function Sidebar({
           dashboard
         </button>
         <button
-          onClick={() => navigate("/courses")}
+          onClick={() => navigate("/courseoverview")}
           className="flex items-center gap-3 px-3 py-2 rounded-xl text-neutral-300 hover:text-white hover:bg-zinc-800/60 transition-colors text-sm font-dm cursor-pointer"
         >
           <Folder size={16} />

@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Card,
   CardContent,
@@ -8,7 +9,8 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/card";
-import { Task, CalendarEvent } from "@/services/db";
+import { Button } from "@/components/button";
+import { CalendarEvent } from "@/services/db";
 import {
   Dialog,
   DialogContent,
@@ -22,17 +24,11 @@ import { ScrollArea } from "@/components/scroll-area";
 import { getTasks } from "@/services/core services/taskService";
 import { getCourseById, getAllCourses } from "@/services/core services/courseService";
 import { fetchGoogleCalendarEvents } from "@/services/google";
+import { ExamItem, GCalEvent } from "@/services/db";
+import { Edit2, ExternalLink } from "react-feather";
+import AddCalendarEventDialog from "@/renderer/components/Courses/AddCalendarEventDialog";
 
-type ExamItem = {
-  id: string;
-  title: string;
-  deadline: Date;
-  courseName?: string;
-  type: string;
-  description?: string;
-  source: 'database' | 'calendar';
-  location?: string;
-};
+const CALENDAR_EVENTS_UPDATED_EVENT = "calmeca:calendar-events-updated";
 
 const formatEventDate = (date: Date) => {
   const today = new Date();
@@ -55,106 +51,143 @@ const formatEventDate = (date: Date) => {
 };
 
 export default function UpcomingExamsCard() {
+  const navigate = useNavigate();
   const [exams, setExams] = useState<ExamItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [calendarEventsById, setCalendarEventsById] = useState<Record<string, GCalEvent>>({});
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [eventToEdit, setEventToEdit] = useState<GCalEvent | null>(null);
 
-  useEffect(() => {
-    const loadExams = async () => {
+  const loadExams = useCallback(async () => {
+    try {
+      const now = new Date();
+      const [allTasks, allCourses] = await Promise.all([
+        getTasks(),
+        getAllCourses()
+      ]);
+
+      const examTasks = allTasks.filter((task) => {
+        const type = String(task.type || "").toLowerCase();
+        const isExamType = type.includes("exam") || type.includes("quiz") || type.includes("test");
+        if (!isExamType || !task.deadline || task.completed) return false;
+        return new Date(task.deadline) >= now;
+      });
+
+      const databaseExams = await Promise.all(
+        examTasks.map(async (exam): Promise<ExamItem> => {
+          try {
+            const course = await getCourseById(exam.courseId);
+            return {
+              id: exam.id,
+              title: exam.title,
+              deadline: new Date(exam.deadline!),
+              courseName: course?.title || course?.code || 'Unknown Course',
+              type: exam.type,
+              description: exam.summary,
+              source: 'database'
+            };
+          } catch {
+            return {
+              id: exam.id,
+              title: exam.title,
+              deadline: new Date(exam.deadline!),
+              courseName: 'Unknown Course',
+              type: exam.type,
+              description: exam.summary,
+              source: 'database'
+            };
+          }
+        })
+      );
+
+      let calendarExams: ExamItem[] = [];
       try {
-        const now = new Date();
-        const [allTasks, allCourses] = await Promise.all([
-          getTasks(),
-          getAllCourses()
-        ]);
+        const calendarEvents: CalendarEvent[] = await fetchGoogleCalendarEvents();
 
-        const examTasks = allTasks.filter(task => 
-          (task.type === 'exam' || task.type === 'quiz') && 
-          task.deadline >= now && 
-          !task.completed
-        );
+        if (calendarEvents && calendarEvents.length > 0) {
+          const keywordRegex = /(exam|midterm|quiz|test|final)/i;
+          const examEvents = calendarEvents.filter(event =>
+            keywordRegex.test(event.summary || '') &&
+            new Date(event.start) >= now
+          );
 
-        const databaseExams = await Promise.all(
-          examTasks.map(async (exam): Promise<ExamItem> => {
-            try {
-              const course = await getCourseById(exam.courseId);
-              return {
-                id: exam.id,
-                title: exam.title,
-                deadline: exam.deadline,
-                courseName: course?.title || course?.code || 'Unknown Course',
-                type: exam.type,
-                description: exam.description,
-                source: 'database'
-              };
-            } catch {
-              return {
-                id: exam.id,
-                title: exam.title,
-                deadline: exam.deadline,
-                courseName: 'Unknown Course',
-                type: exam.type,
-                description: exam.description,
-                source: 'database'
-              };
-            }
-          })
-        );
+          const eventsById: Record<string, GCalEvent> = {};
+          examEvents.forEach((event) => {
+            eventsById[event.id] = {
+              id: event.id,
+              summary: event.summary || "",
+              start: new Date(event.start).toISOString(),
+              end: new Date(event.end).toISOString(),
+              description: event.description,
+              location: event.location,
+            };
+          });
+          setCalendarEventsById(eventsById);
 
-        let calendarExams: ExamItem[] = [];
-        try {
-          const calendarEvents: CalendarEvent[] = await fetchGoogleCalendarEvents();
-          
-          if (calendarEvents && calendarEvents.length > 0) {
-            const keywordRegex = /(exam|midterm|quiz|test|final)/i;
-            const examEvents = calendarEvents.filter(event => 
-              keywordRegex.test(event.summary || '') && 
-              new Date(event.start) >= now
+          calendarExams = examEvents.map((event): ExamItem => {
+            const matchedCourse = allCourses.find(course =>
+              event.summary?.toLowerCase().includes(course.title?.toLowerCase() || '') ||
+              event.summary?.toLowerCase().includes(course.code?.toLowerCase() || '')
             );
 
-            calendarExams = examEvents.map((event): ExamItem => {
-              const matchedCourse = allCourses.find(course => 
-                event.summary?.toLowerCase().includes(course.title?.toLowerCase() || '') ||
-                event.summary?.toLowerCase().includes(course.code?.toLowerCase() || '')
-              );
-
-              return {
-                id: event.id,
-                title: event.summary || 'Untitled Exam',
-                deadline: new Date(event.start),
-                courseName: matchedCourse?.title || matchedCourse?.code || '',
-                type: 'exam',
-                description: event.description,
-                location: event.location,
-                source: 'calendar'
-              };
-            });
-          }
-        } catch (error) {
-          console.error('Failed to fetch Google Calendar events:', error);
+            return {
+              id: event.id,
+              title: event.summary || 'Untitled Exam',
+              deadline: new Date(event.start),
+              courseName: matchedCourse?.title || matchedCourse?.code || '',
+              type: 'exam',
+              description: event.description,
+              location: event.location,
+              source: 'calendar'
+            };
+          });
         }
-
-        const combinedExams = [...databaseExams, ...calendarExams];
-        
-        const uniqueExams = combinedExams.filter((exam, index, arr) => {
-          return !arr.slice(0, index).some(otherExam => 
-            exam.title.toLowerCase() === otherExam.title.toLowerCase() &&
-            Math.abs(exam.deadline.getTime() - otherExam.deadline.getTime()) < 60 * 60 * 1000 
-          );
-        });
-
-        uniqueExams.sort((a, b) => a.deadline.getTime() - b.deadline.getTime());
-
-        setExams(uniqueExams);
       } catch (error) {
-        console.error('Error loading exams:', error);
-        setExams([]);
-      } finally {
-        setLoading(false);
+        console.error('Failed to fetch Google Calendar events:', error);
       }
-    };
-    
-    loadExams();
+
+      const combinedExams = [...databaseExams, ...calendarExams];
+
+      const uniqueExams = combinedExams.filter((exam, index, arr) => {
+        return !arr.slice(0, index).some(otherExam =>
+          exam.title.toLowerCase() === otherExam.title.toLowerCase() &&
+          Math.abs(exam.deadline.getTime() - otherExam.deadline.getTime()) < 60 * 60 * 1000
+        );
+      });
+
+      uniqueExams.sort((a, b) => a.deadline.getTime() - b.deadline.getTime());
+
+      setExams(uniqueExams);
+    } catch (error) {
+      console.error('Error loading exams:', error);
+      setExams([]);
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    const handleCalendarEventsUpdated = () => {
+      void loadExams();
+    };
+
+    loadExams();
+    const interval = setInterval(() => {
+      void loadExams();
+    }, 60_000);
+    window.addEventListener(
+      CALENDAR_EVENTS_UPDATED_EVENT,
+      handleCalendarEventsUpdated,
+    );
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener(
+        CALENDAR_EVENTS_UPDATED_EVENT,
+        handleCalendarEventsUpdated,
+      );
+    };
+  }, [loadExams]);
 
   const isToday = (date: Date) => {
     const today = new Date();
@@ -164,10 +197,11 @@ export default function UpcomingExamsCard() {
   };
 
   return (
+    <>
     <motion.div whileHover={{ scale: 1.01, y: -2 }} transition={{ duration: 0.2 }} className="rounded-lg flex-1">
       <Card className="h-44 sm:h-48 bg-zinc-400/10 w-full rounded-xl">
         <CardHeader>
-          <CardTitle className="font-dm">midterms & exams</CardTitle>
+          <CardTitle className="font-dm">exams</CardTitle>
           <CardDescription className="text-white/50 font-dm">upcoming exams</CardDescription>
         </CardHeader>
 
@@ -201,23 +235,23 @@ export default function UpcomingExamsCard() {
                         <DialogTitle className="text-lg font-bold font-dm">{exam.title}</DialogTitle>
                         <DialogDescription className="text-neutral-400 text-sm font-dm">
                           <div className="space-y-1">
-                            <p><span className="font-semibold">Course:</span> {exam.courseName}</p>
-                            <p><span className="font-semibold">Type:</span> {exam.type}</p>
-                            <p><span className="font-semibold">Date:</span> {exam.deadline.toLocaleDateString("en-US", {
+                            <p><span className="font-semibold">course:</span> {exam.courseName}</p>
+                            <p><span className="font-semibold">type:</span> {exam.type}</p>
+                            <p><span className="font-semibold">date:</span> {exam.deadline.toLocaleDateString("en-US", {
                               weekday: "long",
                               month: "long",
                               day: "numeric",
                               year: "numeric",
                             })}</p>
-                            <p><span className="font-semibold">Time:</span> {exam.deadline.toLocaleTimeString([], {
+                            <p><span className="font-semibold">time:</span> {exam.deadline.toLocaleTimeString([], {
                               hour: "numeric",
                               minute: "2-digit",
                             })}</p>
                             {exam.location && (
-                              <p><span className="font-semibold">Location:</span> {exam.location}</p>
+                              <p><span className="font-semibold">location:</span> {exam.location}</p>
                             )}
                             {exam.description && (
-                              <p className="mt-2"><span className="font-semibold">Description:</span> {exam.description}</p>
+                              <p className="mt-2"><span className="font-semibold">description:</span> {exam.description}</p>
                             )}
                             <div className="mt-2 pt-2 border-t border-zinc-700">
                               <span className="text-xs text-neutral-500">
@@ -227,6 +261,36 @@ export default function UpcomingExamsCard() {
                           </div>
                         </DialogDescription>
                       </DialogHeader>
+
+                      <div className="mt-4 flex justify-end gap-2">
+                        {exam.source === "calendar" ? (
+                          <Button
+                            className="font-dm font-light text-white flex items-center gap-1 cursor-pointer rounded-xl border-none bg-zinc-800 hover:bg-zinc-700"
+                            onClick={() => {
+                              const found = calendarEventsById[exam.id];
+                              if (!found) return;
+                              setEventToEdit(found);
+                              setIsEditOpen(true);
+                            }}
+                          >
+                            edit event <Edit2 size={14} />
+                          </Button>
+                        ) : (
+                          <Button
+                            className="font-dm font-light text-white flex items-center gap-1 cursor-pointer rounded-xl border-none bg-zinc-800 hover:bg-zinc-700"
+                            onClick={() => navigate(`/tasks/${exam.id}`)}
+                          >
+                            edit task <Edit2 size={14} />
+                          </Button>
+                        )}
+
+                        <Button
+                          className="font-dm font-light text-white flex items-center gap-1 cursor-pointer rounded-xl border-none bg-zinc-800 hover:bg-zinc-700"
+                          onClick={() => window.open("https://calendar.google.com", "_blank")}
+                        >
+                          open calendar <ExternalLink size={14} />
+                        </Button>
+                      </div>
                     </DialogContent>
                   </Dialog>
                 ))
@@ -236,5 +300,18 @@ export default function UpcomingExamsCard() {
         </CardContent>
       </Card>
     </motion.div>
+
+      <AddCalendarEventDialog
+        isOpen={isEditOpen}
+        eventToEdit={eventToEdit}
+        onClose={() => {
+          setIsEditOpen(false);
+          setEventToEdit(null);
+        }}
+        onEventAdded={() => {
+          void loadExams();
+        }}
+      />
+    </>
   );
 }
