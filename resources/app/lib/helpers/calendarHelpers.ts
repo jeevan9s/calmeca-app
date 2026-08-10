@@ -1,4 +1,5 @@
 import { addGoogleCalendarEvent, deleteGoogleCalendarEvent } from "@/services/google";
+import { GCalEvent } from "@/services/db";
 
 export async function addCalendarEvent(
   summary: string,
@@ -8,11 +9,28 @@ export async function addCalendarEvent(
   allDay: boolean = false,
   recurrence: string = "none"
 ) {
-  const startStr = typeof start === "string" ? start : start.toISOString();
-  const endStr = typeof end === "string" ? end : end.toISOString();
-  return addGoogleCalendarEvent(summary, startStr, endStr, allDay, recurrence);
+  const startDate = typeof start === "string" ? new Date(start) : new Date(start);
+  const endDate = typeof end === "string" ? new Date(end) : new Date(end);
+
+  if (allDay) {
+    startDate.setHours(0, 0, 0, 0);
+    endDate.setHours(23, 59, 59, 999);
+  }
+
+  const event: GCalEvent = {
+    id: "",
+    summary,
+    start: startDate.toISOString(),
+    end: endDate.toISOString(),
+    // Recurrence is not currently persisted to Google from this helper.
+    recurrence,
+  };
+
+  return addGoogleCalendarEvent(event);
 }
 
 export async function deleteGoogleCalendarEventID(eventId: string) {
   return deleteGoogleCalendarEvent(eventId);
 }
+
+export { deleteGoogleCalendarEvent };

@@ -15,8 +15,11 @@ import {
 import { EventDateTimeField } from "../DateField";
 import { createTask, updateTask } from "@/services/core services/taskService";
 import { addCalendarEvent } from "@/lib/helpers/calendarHelpers";
+import { updateGoogleCalendarEvent } from "@/services/google";
 import { AnimatePresence, motion } from "framer-motion";
 import { Task, TaskType } from "@/services/db";
+
+const CALENDAR_EVENTS_UPDATED_EVENT = "calmeca:calendar-events-updated";
 
 interface CourseItem {
   id: string;
@@ -141,6 +144,7 @@ export default function AddTaskDialog({
     setIsSubmitting(true);
 
     try {
+      let savedTaskId = taskToEdit?.id;
       const resolvedType =
         selectedType === "custom"
           ? (customType.trim() as TaskType) || "custom"
@@ -160,19 +164,36 @@ export default function AddTaskDialog({
       if (taskToEdit?.id) {
         await updateTask(taskToEdit.id, payloadData);
       } else {
-        await createTask(payloadData);
+        const createdTask = await createTask(payloadData);
+        savedTaskId = createdTask.id;
       }
 
       if (deadline) {
         try {
-          await addCalendarEvent(
-            title.trim(),
-            deadline,
-            deadline,
-            "deadline",
-            allDay,
-            recurrence,
-          );
+          if (taskToEdit?.googleCalendarEventId) {
+            await updateGoogleCalendarEvent(taskToEdit.googleCalendarEventId, {
+              summary: title.trim(),
+              start: deadline.toISOString(),
+              end: deadline.toISOString(),
+            });
+          } else {
+            const createdCalendarEvent = await addCalendarEvent(
+              title.trim(),
+              deadline,
+              deadline,
+              "deadline",
+              allDay,
+              recurrence,
+            );
+
+            if (createdCalendarEvent?.id && savedTaskId) {
+              await updateTask(savedTaskId, {
+                googleCalendarEventId: createdCalendarEvent.id,
+              });
+            }
+          }
+
+          window.dispatchEvent(new Event(CALENDAR_EVENTS_UPDATED_EVENT));
         } catch (calendarErr) {
           console.error("Calendar event error:", calendarErr);
         }

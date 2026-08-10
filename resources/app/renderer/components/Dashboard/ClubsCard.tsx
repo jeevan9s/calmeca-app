@@ -20,7 +20,7 @@ import {
   DialogDescription,
   DialogTrigger,
 } from "@/components/dialog";
-import { fetchGoogleCalendarEvents } from "@/services/google";
+import { fetchGoogleCalendarEvents } from "../../../../integrations/google/google";
 
 const CALENDAR_EVENTS_UPDATED_EVENT = "calmeca:calendar-events-updated";
 

@@ -23,7 +23,7 @@ import { motion } from "framer-motion";
 import { ScrollArea } from "@/components/scroll-area";
 import { getTasks } from "@/services/core services/taskService";
 import { getCourseById, getAllCourses } from "@/services/core services/courseService";
-import { fetchGoogleCalendarEvents } from "@/services/google";
+import { fetchGoogleCalendarEvents } from "../../../../integrations/google/google";
 import { ExamItem, GCalEvent } from "@/services/db";
 import { Edit2, ExternalLink } from "react-feather";
 import AddCalendarEventDialog from "@/renderer/components/Courses/AddCalendarEventDialog";

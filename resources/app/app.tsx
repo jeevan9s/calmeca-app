@@ -6,7 +6,7 @@ import CourseHomepageWrapper from "./renderer/components/Courses/CourseHomepageW
 import TaskHomepage from "./renderer/pages/tasks/[taskId]";
 import "./renderer/styles/App.css";
 import { useEffect, useState } from "react";
-import { initGoogleAuth } from "./services/google";
+import { initGoogleAuth } from "@/services/google";
 
 export default function App() {
   const [isAuthReady, setIsAuthReady] = useState(false);

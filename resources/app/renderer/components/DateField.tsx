@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, type ReactNode } from "react";
 import { format } from "date-fns";
 import { Label } from "@/components/label";
 import { Button } from "@/components/button";
@@ -19,8 +19,8 @@ const TIME_OPTIONS = Array.from({ length: 24 * 4 }, (_, i) => {
 });
 
 interface EventDateTimeFieldProps {
-  id: "start" | "end";
-  label: string;
+  id: string;
+  label: ReactNode;
   selected: Date | null;
   onChange: (date: Date) => void;
   allDay: boolean;
@@ -44,6 +44,7 @@ export function EventDateTimeField({
   const timeKey = `${id}-time`;
   const dateOpen = activePicker === dateKey;
   const timeOpen = activePicker === timeKey;
+  const labelText = typeof label === "string" ? label : "event";
 
   useEffect(() => {
     if (selected) setDraft(selected);
@@ -163,7 +164,7 @@ export function EventDateTimeField({
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
-                    aria-label={`${label} time`}
+                    aria-label={`${labelText} time`}
                     className="group cursor-pointer flex items-center justify-between gap-1.5 bg-zinc-800/50 hover:bg-zinc-800 transition-colors border border-zinc-700/50 rounded-xl text-white font-dm
                                h-12 px-4 w-full transition-colors duration-150 hover:bg-zinc-700 hover:text-white
                                 focus:outline-none"

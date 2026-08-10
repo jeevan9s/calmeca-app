@@ -1,0 +1,9 @@
+CALMECA EXTRACTION TOOL FLOW
+==========================================
+
+1. extract & parse RAW TEXT & PAGE COUNT from selected PDF via CourseDialog 
+- pdf-parse wrapper + helper function for cleaning 
+- ** this layer is BLIND; just return raw text output and a page count 
+- store output in a ParsedPDF shape
+
+

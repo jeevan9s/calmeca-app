@@ -130,6 +130,11 @@ export type ExamItem = {
   location?: string;
 };
 
+export interface ParsedPDF {
+    text: string; 
+    pageCount: number;
+}
+
 export class CalmecaDB extends Dexie {
     courses!: Table<Course, string>;
     tasks!: Table<Task, string>;

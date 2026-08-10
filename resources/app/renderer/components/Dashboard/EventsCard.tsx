@@ -21,7 +21,7 @@ import {
 import { Edit2, ExternalLink } from "react-feather";
 import { motion } from "framer-motion";
 import { ScrollArea } from "@/components/scroll-area";
-import { fetchGoogleCalendarEvents } from "@/services/google";
+import { fetchGoogleCalendarEvents } from "../../../../integrations/google/google";
 import { GCalEvent } from "@/services/db";
 import AddCalendarEventDialog from "@/renderer/components/Courses/AddCalendarEventDialog";
 

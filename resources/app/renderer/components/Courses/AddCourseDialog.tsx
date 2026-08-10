@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, Fragment } from "react";
 import { Dialog, Transition } from "@headlessui/react";
-import { Paperclip, Plus, Minus, Trash2 } from "react-feather";
+import { Plus, Minus, Trash2, Upload } from "react-feather";
 import {
   Tooltip,
   TooltipTrigger,
@@ -20,6 +20,11 @@ import CourseFormFields from "./CourseFormFields";
 import { EventDateTimeField } from "../DateField";
 import ColorPickerField from "./ColourPickerField";
 import { addCalendarEvent } from "@/lib/helpers/calendarHelpers";
+import { PDFService } from "../../../../integrations/extract/parse";
+
+const parser = new PDFService();
+
+const CALENDAR_EVENTS_UPDATED_EVENT = "calmeca:calendar-events-updated";
 
 interface AddCourseDialogProps {
   isOpen: boolean;
@@ -70,7 +75,6 @@ export default function AddCourseDialog({
   const [credits, setCredits] = useState<number | null>(null);
   const [activePicker, setActivePicker] = useState<string | null>(null);
 
-  // New states required for CourseFormFields recurring and task options
   const [hasLabTime, setHasLabTime] = useState(false);
   const [labStartTime, setLabStartTime] = useState<Date | null>(null);
   const [labEndTime, setLabEndTime] = useState<Date | null>(null);
@@ -79,6 +83,7 @@ export default function AddCourseDialog({
   const [customDays, setCustomDays] = useState("");
   const [selectedTaskType, setSelectedTaskType] = useState<TaskType>("default");
   const [customTaskType, setCustomTaskType] = useState("");
+  const [pdfMessage, setPdfMessage] = useState("");
 
   const isEditing = !!existingCourse;
   const isLoadingData = useRef(false);
@@ -169,6 +174,7 @@ export default function AddCourseDialog({
       setCustomDays("");
       setSelectedTaskType("default");
       setCustomTaskType("");
+      setPdfMessage("");
       loadedCourseId.current = null;
     }
   }, [isOpen, existingCourse?.id]);
@@ -195,6 +201,7 @@ export default function AddCourseDialog({
         setCustomDays("");
         setSelectedTaskType("default");
         setCustomTaskType("");
+        setPdfMessage("");
         loadedCourseId.current = null;
         isLoadingData.current = false;
         setActivePicker(null);
@@ -249,20 +256,28 @@ export default function AddCourseDialog({
         course = { ...existingCourse, ...courseData, updatedOn: new Date() };
         onUpdateCourse?.(course);
       } else {
-        const newCourseData = {
-          ...courseData,
+        const newCourseData: Omit<
+          Course,
+          "id" | "createdOn" | "updatedOn" | "updatedFrom" | "archived"
+        > = {
           title: title || "",
           code: code || "",
           professor: professor || "",
+          profEmail,
+          description,
+          color,
+          type: selectedType,
+          icon: courseIcon || null,
+          midterms:
+            midterms
+              .filter((mt) => mt.start && mt.end)
+              .map((mt) => ({ start: mt.start!, end: mt.end! })) || [],
           endsOn: endDate || new Date(),
-          homepage: {
-            deadlines: [],
-            tasks: [],
-            resources: [],
-            notes: "",
-            announcements: [],
-          },
-          selectedType: selectedType!,
+          credits: credits ?? 0,
+          finalExamDate: finalExam?.start ?? undefined,
+          finalExamEndDate: finalExam?.end ?? undefined,
+          resources: [],
+          tasks: [],
         };
         course = await addCourse(newCourseData);
         onAddCourse?.(course);
@@ -322,6 +337,10 @@ export default function AddCourseDialog({
         ),
       );
 
+      if (events.length > 0) {
+        window.dispatchEvent(new Event(CALENDAR_EVENTS_UPDATED_EVENT));
+      }
+
       onClose();
     } catch (err) {
       console.error(err);
@@ -363,17 +382,53 @@ export default function AddCourseDialog({
                       <Dialog.Title className="text-xl text-white font-dm font-semibold">
                         {isEditing ? "edit course" : "add course"}
                       </Dialog.Title>
-                      <div className="flex gap-2 items-center">
-                        <p className="font-mp text-lg font-medium text-white">
-                          upload syllabi
-                        </p>
-                        <label className="flex h-8 w-8 items-center justify-center rounded-xl text-white duration-300 hover:bg-zinc-800 hover:scale-105 cursor-pointer transition-colors">
-                          <input
-                            type="file"
-                            accept=".pdf"
-                            className="hidden"
-                          />
+                      <div className="flex flex-col items-end gap-2">
+                        <label
+                          htmlFor="syllabus-upload"
+                          className="inline-flex items-center gap-2 rounded-xl border border-zinc-700 bg-zinc-800/60 px-3 py-2 text-sm font-dm text-white transition-all duration-300 hover:bg-zinc-700 hover:scale-105 hover:border-zinc-500 cursor-pointer"
+                        >
+                          <Upload size={14} />
+                          {isPdfLoading
+                            ? "parsing syllabus..."
+                            : "upload syllabus (.pdf)"}
                         </label>
+                        <input
+                          id="syllabus-upload"
+                          type="file"
+                          accept=".pdf,application/pdf"
+                          className="hidden"
+                          disabled={isPdfLoading}
+                          onChange={async (e) => {
+                            const inputEl = e.currentTarget; 
+                            const file = e.target.files?.[0] ?? null;
+                            if (!file) return;
+
+                            setPdfFile(file);
+                            setPdfMessage(`selected: ${file.name}`);
+                            setIsPdfLoading(true);
+
+                            try {
+                              const parsed = await parser.parse(file);
+                              setPdfMessage(
+                                `parsed ${parsed.pageCount} page${parsed.pageCount === 1 ? "" : "s"}: ${file.name}`,
+                              );
+                              console.log(parsed);
+                            } catch (parseError) {
+                              setPdfMessage(`failed to parse: ${file.name}`);
+                              console.error(
+                                "failed to parse selected PDF",
+                                parseError,
+                              );
+                            } finally {
+                              setIsPdfLoading(false);
+                              inputEl.value = ""; 
+                            }
+                          }}
+                        />
+                        <p className="max-w-xs text-right text-xs font-dm text-zinc-400">
+                          {pdfMessage ||
+                            "attach your syllabus to extract its content"}
+                        </p>
                       </div>
                     </div>
 
