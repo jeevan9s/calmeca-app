@@ -23,7 +23,7 @@
     "resources/app",
     "resources/js",
     "global.d.ts", 
-    "vite-env.d.ts"
+    "resources/integrations/vite-env.d.ts"
 , "resources/integrations/google/googleConfig.ts",
     "resources/integrations/google/google.ts"
   ]

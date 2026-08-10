@@ -6,4 +6,7 @@ CALMECA EXTRACTION TOOL FLOW
 - ** this layer is BLIND; just return raw text output and a page count 
 - store output in a ParsedPDF shape
 
-
+2. use openai to extract info from raw text
+- populate a new extracted-course shape
+- course info, which propagates to assessment dates. 
+- map to the course object

@@ -21,8 +21,10 @@ import { EventDateTimeField } from "../DateField";
 import ColorPickerField from "./ColourPickerField";
 import { addCalendarEvent } from "@/lib/helpers/calendarHelpers";
 import { PDFService } from "../../../../integrations/extract/parse";
+import { ExtractionService } from "../../../../integrations/extract/extract"
 
 const parser = new PDFService();
+const extractor = new ExtractionService();
 
 const CALENDAR_EVENTS_UPDATED_EVENT = "calmeca:calendar-events-updated";
 
@@ -413,6 +415,8 @@ export default function AddCourseDialog({
                                 `parsed ${parsed.pageCount} page${parsed.pageCount === 1 ? "" : "s"}: ${file.name}`,
                               );
                               console.log(parsed);
+                              const extracted = await extractor.extract(parsed.text); 
+                              console.log("extraxted:", extracted); 
                             } catch (parseError) {
                               setPdfMessage(`failed to parse: ${file.name}`);
                               console.error(
