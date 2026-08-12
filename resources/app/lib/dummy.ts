@@ -8,7 +8,6 @@ export const dummyCourses: Course[] = [
     color: "#3b82f6",
     credits: 4,
     createdOn: new Date(),
-    endsOn: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
     updatedOn: new Date(),
   },
   {
@@ -19,7 +18,6 @@ export const dummyCourses: Course[] = [
     color: "#10b981",
     credits: 3,
     createdOn: new Date(),
-    endsOn: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
     updatedOn: new Date(),
   },
   {
@@ -30,7 +28,6 @@ export const dummyCourses: Course[] = [
     color: "#8b5cf6",
     credits: 4,
     createdOn: new Date(),
-    endsOn: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
     updatedOn: new Date(),
   },
   {
@@ -41,7 +38,6 @@ export const dummyCourses: Course[] = [
     color: "#f59e0b",
     credits: 3,
     createdOn: new Date(),
-    endsOn: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
     updatedOn: new Date(),
   },
   {
@@ -52,7 +48,6 @@ export const dummyCourses: Course[] = [
     color: "#ef4444",
     credits: 4,
     createdOn: new Date(),
-    endsOn: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
     updatedOn: new Date(),
   },
   {
@@ -63,7 +58,6 @@ export const dummyCourses: Course[] = [
     color: "#ec4899",
     credits: 3,
     createdOn: new Date(),
-    endsOn: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
     updatedOn: new Date(),
   },
 ];

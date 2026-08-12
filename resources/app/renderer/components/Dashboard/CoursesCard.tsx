@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import MiniCourseCard from "../Courses/miniCourseCard";
 import { getAllCourses } from "@/services/core services/courseService";
 import { Link } from "react-router-dom";
+import { COURSES_UPDATED_EVENT } from "@/lib/events";
 
 export default function CoursesCard() {
   const [courses, setCourses] = useState<Course[]>([]);
@@ -27,6 +28,15 @@ export default function CoursesCard() {
     };
 
     loadCourses();
+
+    const handleCoursesUpdated = () => {
+      loadCourses();
+    };
+
+    window.addEventListener(COURSES_UPDATED_EVENT, handleCoursesUpdated);
+    return () => {
+      window.removeEventListener(COURSES_UPDATED_EVENT, handleCoursesUpdated);
+    };
   }, []);
 
   return (

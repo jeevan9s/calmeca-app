@@ -2,11 +2,12 @@
 
 import { useState, useRef, useEffect, useCallback, type MouseEvent } from "react";
 import { Course, courseTypeLabels } from "@/services/db";
-import { format, differenceInDays } from "date-fns";
+import { format } from "date-fns";
 import { Calendar, GraduationCap, Edit2, Trash2, Archive, MoreHorizontal, LucideTrash2 } from "lucide-react";
 import { DynamicIcon, IconName } from 'lucide-react/dynamic';
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from "framer-motion";
+import { getSemesterEndDate, normalizeCourseSemester } from "@/lib/helpers/semester";
 
 
 interface CourseCardProps {
@@ -56,6 +57,7 @@ export default function CourseCard({ course, onEdit, onDelete, onArchive }: Cour
   const confirmDelete = () => { onDelete(course.id); setShowDeleteDialog(false); };
   const handleArchive = () => { setShowArchiveDialog(true); setShowPopup(false); };
   const confirmArchive = () => { onArchive(course.id); setShowArchiveDialog(false); };
+  const semesterEnd = getSemesterEndDate(normalizeCourseSemester(course.semester));
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -73,16 +75,6 @@ export default function CourseCard({ course, onEdit, onDelete, onArchive }: Cour
       setPopupPosition({ top: rect.top, left: rect.right + 8 });
     }
   }, [showPopup]);
-
-  const getCourseProgress = () => {
-    const now = new Date();
-    const start = new Date(now.getFullYear(), 8, 3);
-    const end = course.endsOn;
-    if (!end) return 0;
-    const totalDays = differenceInDays(end, start);
-    const elapsedDays = differenceInDays(now, start);
-    return Math.min(Math.max((elapsedDays / totalDays) * 100, 0), 100);
-  };
 
   return (
     <>
@@ -127,22 +119,12 @@ export default function CourseCard({ course, onEdit, onDelete, onArchive }: Cour
                 <span className="text-gray-300 text-xs font-thin font-dm">{courseTypeLabels[course.type]}</span>
               </div>
             )}
+            <div className="flex items-center gap-1.5 mb-2 text-gray-400 text-xs font-dm font-thin">
+              <Calendar size={11} />
+              <span>ends {format(semesterEnd, "MMM d")}</span>
+            </div>
             {course.professor && <p className="text-gray-300 text-xs font-thin font-dm mb-2">Professor {course.professor}</p>}
             {course.description && <p className="text-gray-500 text-xs font-dm">{course.description}</p>}
-            <div className="space-y-1 mb-2 mt-4">
-              <div className="flex items-center gap-2 text-gray-500 text-xs font-dm">
-                <Calendar size={10} />
-                {course.endsOn && !isNaN(new Date(course.endsOn).getTime())
-                  ? <span>ends {format(new Date(course.endsOn), "MMM dd")}</span>
-                  : <span>ends N/A</span>}
-              </div>
-            </div>
-            <div className="mt-1">
-              <div className="bg-zinc-700 h-1 rounded-full w-full">
-                <div className="bg-white h-1 rounded-full" style={{ width: `${getCourseProgress()}%` }} />
-              </div>
-              <p className="text-[10px] text-gray-400 mt-1 font-dm">{getCourseProgress().toFixed(0)}%</p>
-            </div>
           </div>
         </div>
       </motion.div>

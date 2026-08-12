@@ -31,6 +31,7 @@ import { toast } from "sonner";
 import { dummyCourses } from "@/lib/dummy";
 import { useNavigate } from "react-router-dom";
 import FloatingActionButton from "@/renderer/components/FloatingActionButton";
+import { COURSES_UPDATED_EVENT } from "@/lib/events";
 
 export default function CourseOverviewPage() {
   const [courses, setCourses] = useState<Course[]>([]);
@@ -51,7 +52,6 @@ export default function CourseOverviewPage() {
     start: Date | null;
     end: Date | null;
   } | null>(null);
-  const [endDate, setEndDate] = useState<Date | null>(null);
 
   useEffect(() => {
     const loadCourses = async () => {
@@ -117,7 +117,6 @@ export default function CourseOverviewPage() {
           }
         : null,
     );
-    setEndDate(course.endsOn ? new Date(course.endsOn) : null);
     setIsDialogOpen(true);
   };
 
@@ -132,6 +131,7 @@ export default function CourseOverviewPage() {
     try {
       await deleteCourse(course.id);
       setCourses((prev) => prev.filter((c) => c.id !== course.id));
+      window.dispatchEvent(new Event(COURSES_UPDATED_EVENT));
       toast.success(`${course.title} was deleted`);
     } catch {
       toast.error("Error deleting course");
@@ -143,14 +143,12 @@ export default function CourseOverviewPage() {
     setEditingCourse(null);
     setMidterms([]);
     setFinalExam(null);
-    setEndDate(null);
   };
 
   const handleAddCourseClick = () => {
     setEditingCourse(null);
     setMidterms([{ start: null, end: null }]);
     setFinalExam(null);
-    setEndDate(null);
     setIsDialogOpen(true);
   };
 
@@ -406,8 +404,6 @@ export default function CourseOverviewPage() {
           setMidterms={setMidterms}
           finalExam={finalExam}
           setFinalExam={setFinalExam}
-          endDate={endDate}
-          setEndDate={setEndDate}
         />
 
         {pendingDelete && (

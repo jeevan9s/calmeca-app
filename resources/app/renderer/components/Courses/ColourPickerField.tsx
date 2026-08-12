@@ -22,7 +22,7 @@ export default function ColorPickerField({ color, setColor, label }: ColorPicker
 
   return (
     <div className="w-full">
-      <label className="block text-sm text-gray-400 mb-1 font-mp">{label}</label>
+      <label className="block text-sm text-white mb-1 font-dm">{label}</label>
 
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>

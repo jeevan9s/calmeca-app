@@ -31,7 +31,6 @@ export default function QuickActionDialog({
     start: Date | null;
     end: Date | null;
   } | null>(null);
-  const [endDate, setEndDate] = useState<Date | null>(null);
 
   useEffect(() => {
     if (!open) {
@@ -193,8 +192,6 @@ export default function QuickActionDialog({
           setMidterms={setMidterms}
           finalExam={finalExam}
           setFinalExam={setFinalExam}
-          endDate={endDate}
-          setEndDate={setEndDate}
         />
       )}
 

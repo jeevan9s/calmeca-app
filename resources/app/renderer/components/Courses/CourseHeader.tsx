@@ -5,7 +5,11 @@ import { Course } from "@/services/db";
 import { Edit2 } from "lucide-react";
 import { DynamicIcon, IconName } from 'lucide-react/dynamic';
 import AddCourseDialog from "./AddCourseDialog";
-import { format, differenceInDays, differenceInCalendarDays } from "date-fns";
+import { differenceInCalendarDays, differenceInDays, format } from "date-fns";
+import {
+  getSemesterEndDate,
+  normalizeCourseSemester,
+} from "@/lib/helpers/semester";
 
 interface CourseHeaderProps {
   course: Course;
@@ -16,7 +20,6 @@ export default function CourseHeader({ course, onUpdateCourse }: CourseHeaderPro
 
   const [midterms, setMidterms] = useState<{ start: Date | null; end: Date | null }[]>([]);
   const [finalExam, setFinalExam] = useState<{ start: Date | null; end: Date | null } | null>(null);
-  const [endDate, setEndDate] = useState<Date | null>(null);
 
   useEffect(() => {
     setMidterms(
@@ -30,19 +33,7 @@ export default function CourseHeader({ course, onUpdateCourse }: CourseHeaderPro
         ? { start: new Date(course.finalExamDate), end: new Date(course.finalExamDate) }
         : null
     );
-    setEndDate(course.endsOn ? new Date(course.endsOn) : null);
   }, [course.id]);
-
-  const getCourseProgress = (): number | null => {
-    if (!course.endsOn) return null;
-    const now = new Date();
-    const start = new Date(now.getFullYear(), 8, 3);
-    const end = new Date(course.endsOn);
-    const totalDays = differenceInDays(end, start);
-    if (!totalDays) return null;
-    const elapsedDays = differenceInDays(now, start);
-    return Math.min(Math.max((elapsedDays / totalDays) * 100, 0), 100);
-  };
 
   const iconName =
     typeof course.icon === "string"
@@ -68,7 +59,18 @@ export default function CourseHeader({ course, onUpdateCourse }: CourseHeaderPro
     return { daysUntilMidterm, daysUntilFinal };
   };
 
+  const getCourseProgress = (): number | null => {
+    const now = new Date();
+    const start = new Date(now.getFullYear(), 8, 3);
+    const end = getSemesterEndDate(normalizeCourseSemester(course.semester), now);
+    const totalDays = differenceInDays(end, start);
+    if (!totalDays) return null;
+    const elapsedDays = differenceInDays(now, start);
+    return Math.min(Math.max((elapsedDays / totalDays) * 100, 0), 100);
+  };
+
   const progress = getCourseProgress();
+  const semesterEnd = getSemesterEndDate(normalizeCourseSemester(course.semester));
   const { daysUntilMidterm, daysUntilFinal } = getNextExamInfo();
 
   const handleOpenEdit = () => setIsEditOpen(true);
@@ -108,14 +110,6 @@ export default function CourseHeader({ course, onUpdateCourse }: CourseHeaderPro
           {course.description && (
             <p className="text-sm text-gray-400 flex items-start gap-2">
               <span className="flex-1">{course.description}</span>
-              <button
-                onClick={handleOpenEdit}
-                className="p-1 rounded hover:bg-zinc-700 transition-all flex-shrink-0 cursor-pointer"
-                title="Edit course"
-                aria-label="Edit course details"
-              >
-                <Edit2 size={15} color="white" />
-              </button>
             </p>
           )}
         </div>
@@ -142,7 +136,7 @@ export default function CourseHeader({ course, onUpdateCourse }: CourseHeaderPro
             <span>
               ends on{" "}
               <span className="font-semibold">
-                {course.endsOn ? format(new Date(course.endsOn), "MMM d, yyyy") : "—"}
+                {format(semesterEnd, "MMM d, yyyy")}
               </span>
             </span>
           </div>
@@ -166,7 +160,7 @@ export default function CourseHeader({ course, onUpdateCourse }: CourseHeaderPro
 
             <button
               onClick={handleOpenEdit}
-              className="p-1 rounded hover:bg-zinc-700 transition-all"
+              className="p-1 rounded-lg hover:bg-zinc-700 transition-all cursor-pointer"
               title="edit course important dates"
               aria-label="edit course dates"
             >
@@ -188,8 +182,6 @@ export default function CourseHeader({ course, onUpdateCourse }: CourseHeaderPro
         setMidterms={setMidterms}
         finalExam={finalExam}
         setFinalExam={setFinalExam}
-        endDate={endDate}
-        setEndDate={setEndDate}
       />
     </div>
   );

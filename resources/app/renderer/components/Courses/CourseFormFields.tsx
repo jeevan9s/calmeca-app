@@ -61,6 +61,20 @@ const taskTypeLabels: Record<string, string> = {
   custom: "custom",
 };
 
+const repeatOnOptions = [
+  { value: "Mon", label: "Monday" },
+  { value: "Tue", label: "Tuesday" },
+  { value: "Wed", label: "Wednesday" },
+  { value: "Thu", label: "Thursday" },
+  { value: "Fri", label: "Friday" },
+  { value: "Sat", label: "Saturday" },
+  { value: "Sun", label: "Sunday" },
+  { value: "Mon, Wed", label: "Mon, Wed" },
+  { value: "Tue, Thu", label: "Tue, Thu" },
+  { value: "Mon, Wed, Fri", label: "Mon, Wed, Fri" },
+  { value: "custom", label: "Custom" },
+];
+
 export default function CourseFormFields({
   title,
   setTitle,
@@ -136,7 +150,7 @@ export default function CourseFormFields({
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="text-sm text-white font-dm font-thin mb-1 block">professor  <span className="text-red-400">*</span></label>
+          <label className="text-sm text-white font-dm font-thin mb-1 block">professor</label>
           <input
             type="text"
             placeholder="e.g. Dr.Doe"
@@ -287,6 +301,45 @@ export default function CourseFormFields({
                   >
                     custom
                   </SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select
+                value={
+                  repeatOnOptions.some((option) => option.value === customDays)
+                    ? customDays
+                    : customDays.trim().length > 0 || recurrence === "custom"
+                      ? "custom"
+                      : undefined
+                }
+                onValueChange={(value) => {
+                  if (value === "custom") {
+                    setRecurrence("custom");
+                    setCustomDays("");
+                    return;
+                  }
+                  setCustomDays(value);
+                  if (recurrence === "custom") {
+                    setRecurrence("weekly");
+                  }
+                }}
+              >
+                <SelectTrigger
+                  className="w-full sm:w-44 border-none bg-zinc-800 rounded-xl font-dm text-xs text-white hover:bg-zinc-700 focus:ring-1 focus:ring-zinc-600 h-9 px-3"
+                  aria-label="Select repeat days"
+                >
+                  <SelectValue placeholder="repeat on" />
+                </SelectTrigger>
+                <SelectContent className="border-none rounded-xl mt-2 bg-zinc-900 text-white border-zinc-700 shadow-xl">
+                  {repeatOnOptions.map((option) => (
+                    <SelectItem
+                      key={option.value}
+                      value={option.value}
+                      className="focus:bg-zinc-800 focus:text-white data-[highlighted]:bg-zinc-800 data-[highlighted]:text-white cursor-pointer rounded-xl text-xs font-dm"
+                    >
+                      {option.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
 

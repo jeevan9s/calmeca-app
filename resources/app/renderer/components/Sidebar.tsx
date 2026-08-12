@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { getAllCourses } from "@/services/core services/courseService";
 import { Course } from "@/services/db";
 import "@/renderer/styles/sb.css";
+import { COURSES_UPDATED_EVENT } from "@/lib/events";
 import {
   getLoggedInUser,
   googleLogin,
@@ -56,7 +57,17 @@ export default function Sidebar({
         setCourses(allCourses);
       } catch {}
     };
+
+    const handleCoursesUpdated = () => {
+      fetchSidebarCourses();
+    };
+
     fetchSidebarCourses();
+
+    window.addEventListener(COURSES_UPDATED_EVENT, handleCoursesUpdated);
+    return () => {
+      window.removeEventListener(COURSES_UPDATED_EVENT, handleCoursesUpdated);
+    };
   }, []);
 
   useEffect(() => {

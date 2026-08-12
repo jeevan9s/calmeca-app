@@ -104,7 +104,7 @@ export function EventDateTimeField({
                          h-12 px-4 w-full transition-colors duration-150 hover:bg-zinc-700 hover:text-white
                           focus:outline-none"
             >
-              <span className={hasDate ? "text-gray-500 text-sm" : "text-gray-500 text-sm"}>
+              <span className={hasDate ? "text-white text-sm" : "text-gray-500 text-sm"}>
                 {hasDate ? format(draft, DATE_FORMAT) : "select date"}
               </span>
               <ChevronDownIcon

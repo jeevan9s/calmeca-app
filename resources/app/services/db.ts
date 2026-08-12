@@ -1,5 +1,6 @@
 import Dexie, { Table } from 'dexie';
 import { ReactNode } from 'react';
+import { CourseSemester, DEFAULT_COURSE_SEMESTER, normalizeCourseSemester } from '@/lib/helpers/semester';
 
 
 export interface Resource {
@@ -13,16 +14,16 @@ export interface Course {
     id: string;
     title: string;
     code: string;
-    professor: string;
+    professor?: string;
     courseEmail?: string;
     profEmail?: string;
     description?: string;
     color?: string;
     type?: CourseType;
     icon?: ReactNode;
+    semester?: CourseSemester;
     midterms?: { start: Date; end: Date }[];
     createdOn: Date;
-    endsOn: Date;
     midtermDate?: Date;
     credits?: number;
     finalExamDate?: Date;
@@ -65,14 +66,15 @@ export interface Task {
     summary?:string;
     allDay?:boolean;
     recurring?: boolean; 
-    reccurence: string; 
+    reccurrence: string; 
     courseId: string;
     title: string;
     type: TaskType;
     deadline?: Date;
     completed: boolean;
-    color: string;
+    color?: string;
     googleCalendarEventId?: string;
+    notes?: string; 
 }
 
 export interface SubTask {
@@ -151,6 +153,38 @@ export class CalmecaDB extends Dexie {
             subtasks: 'id, title, taskId, courseId, deadline, completed, color',
             // courseItems: 'id, courseId, title, type, dueDate, startDate, endDate, recurrence, nextOccurrence, completed'
         });
+
+        this.version(5)
+            .stores({
+                courses: 'id, title, type, color, archived, updatedOn, updatedFrom, professor, courseEmail, profEmail, code, midtermDate, finalExamDate',
+                tasks: 'id, title, courseId, type, deadline, completed, color, notes',
+                calendarEvents: 'id, title, start, end, type, source, sourceId, color',
+                subtasks: 'id, title, taskId, courseId, deadline, completed, color',
+            })
+            .upgrade(async (tx) => {
+                await tx
+                    .table('courses')
+                    .toCollection()
+                    .modify((course: { endsOn?: Date }) => {
+                        delete course.endsOn;
+                    });
+            });
+
+        this.version(6)
+            .stores({
+                courses: 'id, title, type, color, archived, updatedOn, updatedFrom, professor, courseEmail, profEmail, code, midtermDate, finalExamDate, semester',
+                tasks: 'id, title, courseId, type, deadline, completed, color, notes',
+                calendarEvents: 'id, title, start, end, type, source, sourceId, color',
+                subtasks: 'id, title, taskId, courseId, deadline, completed, color',
+            })
+            .upgrade(async (tx) => {
+                await tx
+                    .table('courses')
+                    .toCollection()
+                    .modify((course: { semester?: CourseSemester }) => {
+                        course.semester = normalizeCourseSemester(course.semester ?? DEFAULT_COURSE_SEMESTER);
+                    });
+            });
     }
 }
 

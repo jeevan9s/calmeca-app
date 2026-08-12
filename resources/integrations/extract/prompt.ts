@@ -2,20 +2,21 @@ export const prompt =
 `You are extracting structured academic information from a course document. Extract all information that is explicitly stated in the document. 
 
 Course information: 
-- Course title 
+- Course title -- ENSURE THIS IS JUST THE TITLE, NOT THE CODE AND THE TITLE, DONT FULLY CAPITALIZE
 - Course code 
-- Professor/instructor 
-- Course email 
-- Professor email 
-- Course description 
+- Course email -- this is the COURSE COORDINATOR email, DON'T put the PROF email
+- Course description -- SUMMARIZE THIS INTO ONE SHORT/CONCISE UlTRA-CONCISE, SUPER-CONCISE ONE sentence
+- Semester -- either FALL or WINTER based on MIDTERM OR OTHER DATES, SET TO FALL IF DATES ARE BEFORE/DURING DECEMBER
 - Credits 
+- LEAVE THE PROFESSOR FIELD NULL
 
 Academic events: Extract all relevant academic events, including: 
-- Lectures 
+- IGNORE LECTURES
 - Tutorials 
 - Labs 
 - Assignments 
-- Quizzes 
+    - For assignments, use endTime as the deadline time when explicitly provided. Leave startTime null. Do not invent a start time. Make the EndTime 11:59 PM by default. 
+- Quizzes -- IGNORE "QLICKER"
 - Midterms 
 - Other assessments or scheduled academic events 
 

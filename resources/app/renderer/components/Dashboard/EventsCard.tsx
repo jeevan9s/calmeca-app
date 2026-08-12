@@ -79,7 +79,7 @@ export default function EventsCard() {
   return (
     <>
       <motion.div className="rounded-xl" whileHover={{ scale: 1.01, y: -2 }} transition={{ duration: 0.2 }}>
-        <Card className="bg-[#0f0f10ff] h-80 sm:h-96 flex flex-col rounded-xl">
+        <Card className="bg-[#0f0f10ff] h-80 sm:h-96 flex flex-col rounded-xl font-dm">
         <CardHeader>
           <CardTitle className="font-dm">today's events</CardTitle>
           <CardDescription className="font-dm text-white/50">
