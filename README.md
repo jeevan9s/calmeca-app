@@ -20,3 +20,12 @@ This drove me to create a tool to streamline this process, and eventually, scale
 
 Now it's August, and I'm documenting the codebase. 
 
+## Features 
+- 
+
+
+## Frameworks & Technologies
+
+## Architecture
+
+## Installation & Usage
