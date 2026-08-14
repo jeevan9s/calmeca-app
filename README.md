@@ -350,23 +350,7 @@ This keeps the interface consistent across dashboards, course cards, calendar ev
 ## Installation & Usage
 
 ### For Use
-
-After building and packaging the app, the generated desktop executable can be used directly on Windows or macOS without a dev server.
-
-1. Build the app bundle:
-   ```bash
-   npm run build
-   ```
-2. Package it for your target platform using Neutralino or your release workflow:
-   ```bash
-   neu build
-   ```
-3. Run the generated executable from the build output folder:
-   - Windows: `calmeca-app.exe`
-   - macOS: the packaged `.app` bundle or exported app binary
-4. Sign in with Google, grant calendar access, and begin adding or extracting your course data.
-
-This release workflow is intended for distributing the app as a standalone desktop executable after development and validation are complete.
+- on the way
 
 ### For Dev
 1. Clone the repository and install dependencies:
@@ -382,7 +366,8 @@ This release workflow is intended for distributing the app as a standalone deskt
    ```
 3. Start the development app:
    ```bash
-   npm run dev
+   neu run
    ```
 
-The app is designed to run locally for academic planning workflows, with Google authentication, calendar syncing, and syllabus extraction enabled through the configured environment variables.
+--- 
+Jeevan Sanchez, 2026
