@@ -91,7 +91,6 @@ export const updateTask = async (id: string, updates: Partial<Task>): Promise<vo
 
   await updateCourseFromChild('task', updatedTask.courseId);
 
-  // Update calendar event if title or deadline changed
   await updateEvent(updatedTask.id, {
     title: updatedTask.title,
     start: updatedTask.deadline,

@@ -75,6 +75,7 @@ export interface Task {
     color?: string;
     googleCalendarEventId?: string;
     notes?: string; 
+    subtasks?: SubTask[]; 
 }
 
 export interface SubTask {

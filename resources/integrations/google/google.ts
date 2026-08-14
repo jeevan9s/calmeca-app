@@ -305,14 +305,14 @@ export async function googleLogin() {
     const code = await waitForCallbackCode(state);
     if (!code) {
       throw new Error(
-        "Timed out waiting for the Google callback. Make sure the local callback server is running on port 8085.",
+        "timed out waiting for the Google callback.",
       );
     }
 
     const success = await handleOauthCallback(code, state);
     if (!success) {
       throw new Error(
-        "Google authentication failed. The token exchange did not complete.",
+        "Google authentication failed",
       );
     }
     return;

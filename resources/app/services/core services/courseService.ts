@@ -3,8 +3,6 @@ import { db } from "../db";
 import { Course } from "../db";
 import { generateId, getCourseColor } from "../utilityServicies";
 
-// implementin CRUD, some archive stuff, return functions 
-
 export async function addCourse(
   course: Omit<Course, "id" | "createdOn" | "updatedOn" | "updatedFrom" | "archived">
 ): Promise<Course> {
@@ -22,8 +20,6 @@ export async function addCourse(
   await db.courses.add(newCourse);
   return newCourse;
 }
-
-
 
 export const deleteCourse = async (id: string) => {
     return  db.courses.delete(id)
