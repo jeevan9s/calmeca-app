@@ -16,3 +16,7 @@ Calmeca is an organizational tool targeted towards academics: optimizing course 
 
 After my first two semesters of university, I learned that syllabus week is a critical time for locking down course dates and organizational principles that retain throughout semester. The process of manually adding course dates into my calendar from the syllabus was notably tedious. 
 
+This drove me to create a tool to streamline this process, and eventually, scale it up to a **general** academic productivity app. 
+
+Now it's August, and I'm documenting the codebase. 
+
