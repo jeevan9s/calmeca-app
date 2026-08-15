@@ -147,7 +147,7 @@ This design pattern propagates throughout all of the app's features to form the 
 
 The purpose of this layer is to provide a platform for external services like Google and OpenAI. It abstracts servicing for workflows like authentication, calendar updates (add, delete, edit), and entity extraction.
 
-#### Google Oauth 2.o\0
+#### Google Oauth 2.0
 
 The end-to-end authentication flow is natively implemented in the app, including the PCKE flow, token exchange, and session management.
 
