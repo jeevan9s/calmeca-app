@@ -12,6 +12,8 @@ import { Button } from "@/components/button";
 import { Edit2 } from "react-feather";
 import AddTaskDialog from "@/renderer/components/Courses/addTaskDialog";
 
+const CALENDAR_EVENTS_UPDATED_EVENT = "calmeca:calendar-events-updated";
+
 export default function DeadlinesCard() {
   const navigate = useNavigate();
   const [deadlines, setDeadlines] = useState<Array<{ task: Task; course: Course | undefined }>>([]);
@@ -19,44 +21,50 @@ export default function DeadlinesCard() {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [taskToEdit, setTaskToEdit] = useState<Task | null>(null);
 
-  useEffect(() => {
-    const load = async () => {
-      setLoading(true);
-      const [tasks, courses] = await Promise.all([
-        getTasks({ completed: false }),
-        getAllCourses(),
-      ]);
-      
-      const now = new Date();
-      const futureTasks = tasks.filter(task => task.deadline && new Date(task.deadline) > now);
-      
-      const soonestByCourse: Array<{ task: Task; course: Course | undefined }> = [];
-      const grouped: Record<string, Task[]> = {};
-      
-      for (const t of futureTasks) {
-        if (!grouped[t.courseId]) grouped[t.courseId] = [];
-        grouped[t.courseId].push(t);
-      }
-      
-      for (const courseId in grouped) {
-        const soonest = grouped[courseId].sort((a, b) => {
-          const aTime = a.deadline ? new Date(a.deadline).getTime() : Infinity;
-          const bTime = b.deadline ? new Date(b.deadline).getTime() : Infinity;
-          return aTime - bTime;
-        })[0];
-        const course = courses.find(c => c.id === courseId);
-        soonestByCourse.push({ task: soonest, course });
-      }
-      
-      soonestByCourse.sort((a, b) => {
-        const aTime = a.task.deadline ? new Date(a.task.deadline).getTime() : Infinity;
-        const bTime = b.task.deadline ? new Date(b.task.deadline).getTime() : Infinity;
+  const loadDeadlines = async () => {
+    setLoading(true);
+    const [tasks, courses] = await Promise.all([
+      getTasks({ completed: false }),
+      getAllCourses(),
+    ]);
+
+    const now = new Date();
+    const futureTasks = tasks.filter(task => task.deadline && new Date(task.deadline) > now);
+
+    const soonestByCourse: Array<{ task: Task; course: Course | undefined }> = [];
+    const grouped: Record<string, Task[]> = {};
+
+    for (const t of futureTasks) {
+      if (!grouped[t.courseId]) grouped[t.courseId] = [];
+      grouped[t.courseId].push(t);
+    }
+
+    for (const courseId in grouped) {
+      const soonest = grouped[courseId].sort((a, b) => {
+        const aTime = a.deadline ? new Date(a.deadline).getTime() : Infinity;
+        const bTime = b.deadline ? new Date(b.deadline).getTime() : Infinity;
         return aTime - bTime;
-      });
-      setDeadlines(soonestByCourse);
-      setLoading(false);
-    };
-    load();
+      })[0];
+      const course = courses.find(c => c.id === courseId);
+      soonestByCourse.push({ task: soonest, course });
+    }
+
+    soonestByCourse.sort((a, b) => {
+      const aTime = a.task.deadline ? new Date(a.task.deadline).getTime() : Infinity;
+      const bTime = b.task.deadline ? new Date(b.task.deadline).getTime() : Infinity;
+      return aTime - bTime;
+    });
+    setDeadlines(soonestByCourse);
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    loadDeadlines();
+
+    // task creation from other dialogs (e.g. the dashboard quick action) only notifies via this event
+    const handleUpdate = () => void loadDeadlines();
+    window.addEventListener(CALENDAR_EVENTS_UPDATED_EVENT, handleUpdate);
+    return () => window.removeEventListener(CALENDAR_EVENTS_UPDATED_EVENT, handleUpdate);
   }, []);
 
   return (
@@ -129,43 +137,7 @@ export default function DeadlinesCard() {
         onTaskAdded={async () => {
           setIsEditOpen(false);
           setTaskToEdit(null);
-          await (async () => {
-            setLoading(true);
-            const [tasks, courses] = await Promise.all([
-              getTasks({ completed: false }),
-              getAllCourses(),
-            ]);
-
-            const now = new Date();
-            const futureTasks = tasks.filter(task => task.deadline && new Date(task.deadline) > now);
-
-            const soonestByCourse: Array<{ task: Task; course: Course | undefined }> = [];
-            const grouped: Record<string, Task[]> = {};
-
-            for (const t of futureTasks) {
-              if (!grouped[t.courseId]) grouped[t.courseId] = [];
-              grouped[t.courseId].push(t);
-            }
-
-            for (const courseId in grouped) {
-              const soonest = grouped[courseId].sort((a, b) => {
-                const aTime = a.deadline ? new Date(a.deadline).getTime() : Infinity;
-                const bTime = b.deadline ? new Date(b.deadline).getTime() : Infinity;
-                return aTime - bTime;
-              })[0];
-              const course = courses.find(c => c.id === courseId);
-              soonestByCourse.push({ task: soonest, course });
-            }
-
-            soonestByCourse.sort((a, b) => {
-              const aTime = a.task.deadline ? new Date(a.task.deadline).getTime() : Infinity;
-              const bTime = b.task.deadline ? new Date(b.task.deadline).getTime() : Infinity;
-              return aTime - bTime;
-            });
-
-            setDeadlines(soonestByCourse);
-            setLoading(false);
-          })();
+          await loadDeadlines();
         }}
         taskToEdit={taskToEdit ?? undefined}
       />

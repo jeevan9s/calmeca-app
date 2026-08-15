@@ -55,7 +55,7 @@ export default function QuickActionDialog({
   };
 
   const handleNavigateToCourses = () => {
-    navigate("/courses");
+    navigate("/courseoverview");
     handleClose();
   };
 

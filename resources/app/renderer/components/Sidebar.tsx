@@ -169,7 +169,8 @@ export default function Sidebar({
               className="flex items-center gap-2 px-3 py-2 rounded-xl text-neutral-400 hover:text-white hover:bg-zinc-800/40 transition-colors text-xs font-dm text-left truncate cursor-pointer"
             >
               <span
-                className={`w-1.5 h-1.5 rounded-full shrink-0 ${{ blue: "bg-blue-500", red: "bg-red-500", green: "bg-green-500" }[course.color ?? "bg-gray-500"] || "bg-gray-500"}`}
+                className="w-1.5 h-1.5 rounded-full shrink-0"
+                style={{ backgroundColor: course.color || "#6b7280" }}
               />
               <span className="truncate">{course.title}</span>
             </button>

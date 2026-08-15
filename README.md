@@ -13,6 +13,9 @@ academic productivity app built with NeutralinoJS inteigrating gcalendar and syl
 
 I built Calmeca because I wanted a tool for organization and course scheduling.
 
+![UI](app.gif)
+
+
 ## Overview
 
 Calmeca is an organizational tool targeted towards academics: optimizing course scheduling for exam dates, recurring assignments, and course-specific tasks. It leverages the OpenAI platform for an entity-extraction pipeline for processing course syllabi and extracting key dates and information.
