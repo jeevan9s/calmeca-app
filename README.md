@@ -9,6 +9,20 @@ academic productivity app built with NeutralinoJS inteigrating gcalendar and syl
 
 <details>
   <summary><strong>Table of Contents</strong></summary>
+
+- [Overview](#overview)
+- [Features](#features)
+- [Frameworks & Technologies](#frameworks--technologies)
+- [Architecture](#architecture)
+  - [Internal Database](#internal-database)
+  - [Integrations](#integrations)
+    - [Google Oauth 2.0](#google-oauth-20)
+    - [Google Calendar API](#google-calendar-api)
+    - [Extraction (OpenAI)](#extraction-openai)
+  - [Frontend](#frontend)
+- [Installation & Usage](#installation--usage)
+  - [For Use](#for-use)
+  - [For Dev](#for-dev)
 </details>
 
 I built Calmeca because I wanted a tool for organization and course scheduling.
